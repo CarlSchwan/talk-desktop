@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtWebKit 3.0
 import Sailfish.Silica 1.0
 import "../lib/NcAuth.js" as Nc
+//import sfos.nextcloud.login.flow.demo 1.0
 
 Page {
     id: loginPage
@@ -36,7 +37,14 @@ Page {
                     console.log("onclick")
                     //webView.url = Nc.getLoginFlowUrl(instance.text);
                     //webView.header.
-                    Nc.triggerLoginFlow(instance.text, webView);
+                    //Nc.triggerLoginFlow(instance.text, webView);
+                    var flowUrl = Nc.getLoginFlowUrl(instance.text);
+                    console.log("going after " + flowUrl);
+                    //var r = auth.startLoginFlow(flowUrl);
+                    webView.url = flowUrl;
+                    //console.log("got request " + r);
+                    //webView.load(r);
+                    //console.log("login flow kicked");
                     webView.visible = true;
                     // TODO: so far we get Access Forbidden, Invalid Request!
                 }
@@ -44,14 +52,33 @@ Page {
         }
     }
 
-    SilicaWebView {
-        id: webView
-        visible: false
+    //NcAuth {
+        //id: auth
+
+        //onContentChanged: {
+            //webView.loadHtml(auth.content, "https://o.schiwon.me/");
+        //}
+    //}
+
+    //NcAuthNAM {
+    //    id: nam;
+    //}
+
+    WebView {
+        id: webView;
+        //signal viewReady(var view);
+
+        visible: false; //auth.webVisible;
+
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
             bottom: parent.bottom
+        }
+
+        Component.onCompleted: {
+            //nam.replacePagesQNAM(webView);
         }
 
         onLoadingChanged: {
@@ -66,4 +93,6 @@ Page {
             }
         }
     }
+
+
 }

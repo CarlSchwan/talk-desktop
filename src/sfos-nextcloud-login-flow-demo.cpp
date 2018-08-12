@@ -3,6 +3,8 @@
 #endif
 
 #include <sailfishapp.h>
+#include "ncauth.h"
+#include "ncauthnamf.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,5 +18,28 @@ int main(int argc, char *argv[])
     //
     // To display the view, call "show()" (will show fullscreen on device).
 
-    return SailfishApp::main(argc, argv);
+    QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+
+    //QQmlApplicationEngine e;
+
+    //e.setNetworkAccessManagerFactory(new QmlNetworkAccessManagerFactory);
+
+    QScopedPointer<QQuickView> v(SailfishApp::createView());
+
+    //qmlRegisterType<NcAuth>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuth");
+    //qmlRegisterType<NcAuthNetworkAccessManager>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuthNAM");
+
+    //QQmlEngine *e = v->engine();
+    //QmlNetworkAccessManagerFactory *qnamFactory = new QmlNetworkAccessManagerFactory;
+    //e->setNetworkAccessManagerFactory(new QmlNetworkAccessManagerFactory);
+
+    NcAuthNAMF namf;
+    v->engine()->setNetworkAccessManagerFactory(&namf);
+
+    //e.setNetworkAccessManagerFactory(&namf);
+    //v->rootContext()->setContextProperty("networkManager", v->engine()->networkAccessManager());
+
+    v->setSource(SailfishApp::pathTo("qml/sfos-nextcloud-login-flow-demo.qml"));
+    v->show();
+    return app->exec();
 }

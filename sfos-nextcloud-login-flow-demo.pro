@@ -14,7 +14,10 @@ TARGET = sfos-nextcloud-login-flow-demo
 
 CONFIG += sailfishapp
 
-SOURCES += src/sfos-nextcloud-login-flow-demo.cpp
+SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
+    src/ncauth.cpp \
+    src/ncauthnetworkaccessmanager.cpp \
+    src/ncauthnamf.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/sfos-nextcloud-login-flow-demo.qml \
@@ -39,3 +42,8 @@ CONFIG += sailfishapp_i18n
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
 TRANSLATIONS += translations/sfos-nextcloud-login-flow-demo-de.ts
+
+HEADERS += \
+    src/ncauth.h \
+    src/ncauthnetworkaccessmanager.h \
+    src/ncauthnamf.h

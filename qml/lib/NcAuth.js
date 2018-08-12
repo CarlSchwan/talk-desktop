@@ -19,6 +19,7 @@ var getLoginFlowUrl = function(host) {
 var triggerLoginFlow = function(host, webView) {
     var url = getLoginFlowUrl(host);
 
+    // not defined :(
     fetch(url, {
         headers: { "OCS-APIREQUEST": "true" },
     })
