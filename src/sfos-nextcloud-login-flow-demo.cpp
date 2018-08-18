@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     QScopedPointer<QQuickView> v(SailfishApp::createView());
 
-    //qmlRegisterType<NcAuth>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuth");
+    qmlRegisterType<NcAuth>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuth");
     //qmlRegisterType<NcAuthNetworkAccessManager>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuthNAM");
 
     //QQmlEngine *e = v->engine();

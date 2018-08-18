@@ -15,17 +15,17 @@ QNetworkRequest NcAuth::startLoginFlow(const QString url)
     //qDebug() << "requesting at " << webView;
     //webView.load(m_request);
 
-    //m_reply = m_qnam.get(m_request);
-    //connect(m_reply, SIGNAL(finished()), this, SLOT(receivedLoginFlowPage()));
+    m_reply = m_qnam.get(m_request);
+    connect(m_reply, SIGNAL(finished()), this, SLOT(receivedLoginFlowPage()));
 
     return m_request;
 }
 
 void NcAuth::receivedLoginFlowPage()
 {
-    //setContent(m_reply->readAll());
-    //setWebVisibility(true);
-    //qDebug() << "content " << m_body;
+    setContent(m_reply->readAll());
+    setWebVisibility(true);
+    qDebug() << "content " << m_body;
 }
 
 QString NcAuth::url() {

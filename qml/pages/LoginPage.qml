@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtWebKit 3.0
 import Sailfish.Silica 1.0
 import "../lib/NcAuth.js" as Nc
-//import sfos.nextcloud.login.flow.demo 1.0
+import sfos.nextcloud.login.flow.demo 1.0
 
 Page {
     id: loginPage
@@ -34,41 +34,40 @@ Page {
                 width: parent.width
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
-                    console.log("onclick")
                     //webView.url = Nc.getLoginFlowUrl(instance.text);
                     //webView.header.
                     //Nc.triggerLoginFlow(instance.text, webView);
                     var flowUrl = Nc.getLoginFlowUrl(instance.text);
                     console.log("going after " + flowUrl);
-                    //var r = auth.startLoginFlow(flowUrl);
-                    webView.url = flowUrl;
+                    var r = auth.startLoginFlow(flowUrl);
+                    //webView.url = flowUrl;
                     //console.log("got request " + r);
                     //webView.load(r);
                     //console.log("login flow kicked");
-                    webView.visible = true;
+                    //webView.visible = true;
                     // TODO: so far we get Access Forbidden, Invalid Request!
                 }
             }
         }
     }
 
-    //NcAuth {
-        //id: auth
+    NcAuth {
+        id: auth
 
-        //onContentChanged: {
-            //webView.loadHtml(auth.content, "https://o.schiwon.me/");
-        //}
-    //}
+        onContentChanged: {
+            webView.loadHtml(auth.content, auth.url());
+        }
+    }
 
     //NcAuthNAM {
     //    id: nam;
     //}
 
-    WebView {
+    SilicaWebView {
         id: webView;
         //signal viewReady(var view);
 
-        visible: false; //auth.webVisible;
+        visible: auth.webVisible;
 
         anchors {
             top: parent.top
@@ -83,7 +82,6 @@ Page {
 
         onLoadingChanged: {
             console.log(url);
-            console.log(data);
         }
 
         PullDownMenu {
