@@ -17,7 +17,9 @@ CONFIG += sailfishapp
 SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
     src/ncauth.cpp \
     src/ncauthnetworkaccessmanager.cpp \
-    src/ncauthnamf.cpp
+    src/ncauthnamf.cpp \
+    src/accountmodel.cpp \
+    src/nextcloudaccount.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/sfos-nextcloud-login-flow-demo.qml \
@@ -29,7 +31,8 @@ DISTFILES += qml/lib/API.js \
     translations/*.ts \
     sfos-nextcloud-login-flow-demo.desktop \
     qml/pages/LoginPage.qml \
-    qml/lib/NcAuth.js
+    qml/lib/NcAuth.js \
+    qml/pages/Accounts.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
@@ -46,4 +49,6 @@ TRANSLATIONS += translations/sfos-nextcloud-login-flow-demo-de.ts
 HEADERS += \
     src/ncauth.h \
     src/ncauthnetworkaccessmanager.h \
-    src/ncauthnamf.h
+    src/ncauthnamf.h \
+    src/accountmodel.h \
+    src/nextcloudaccount.h

@@ -5,6 +5,7 @@
 #include <sailfishapp.h>
 #include "ncauth.h"
 #include "ncauthnamf.h"
+#include "accountmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +28,7 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> v(SailfishApp::createView());
 
     qmlRegisterType<NcAuth>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuth");
+    qmlRegisterType<AccountModel>("sfos.nextcloud.login.flow.demo", 1, 0, "AccountModel");
     //qmlRegisterType<NcAuthNetworkAccessManager>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuthNAM");
 
     //QQmlEngine *e = v->engine();

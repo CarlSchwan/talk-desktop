@@ -17,7 +17,7 @@ ApplicationWindow
                 pageStack.push(Qt.resolvedUrl("./pages/MainPage.qml"), {})
             } else {
                 console.log("let's login to an account")
-                pageStack.push(Qt.resolvedUrl("./pages/LoginPage.qml"), {})
+                pageStack.push(Qt.resolvedUrl("./pages/Accounts.qml"), {})
             }
 
         });
