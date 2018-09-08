@@ -11,7 +11,7 @@ class AccountModel : public QAbstractListModel
 public:
     enum AccountRoles {
         NameRole = Qt::UserRole + 1,
-        IdRole = Qt::UserRole + 2,
+        AccountRole = Qt::UserRole + 2,
     };
 
     explicit AccountModel(QObject *parent = nullptr);

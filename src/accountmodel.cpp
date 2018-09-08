@@ -24,12 +24,16 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
     {
         return QVariant("Add account");
     }
+    else if (role == AccountRole && index.row() == accounts.count())
+    {
+        return QVariant(-1);
+    }
 
     if (role == NameRole)
     {
         return QVariant(accounts[index.row()].name());
     }
-    else if (role == IdRole && index.row() < accounts.count())
+    else if (role == AccountRole && index.row() < accounts.count())
     {
         return QVariant(accounts[index.row()].id());
     }
@@ -52,5 +56,6 @@ void AccountModel::loadAccounts()
 QHash<int, QByteArray> AccountModel::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
+    roles[AccountRole] = "account";
     return roles;
 }

@@ -40,6 +40,11 @@ Page {
                     Label {
                         text: name
                     }
+                    onClicked: {
+                        if(account === -1) {
+                            pageStack.push(Qt.resolvedUrl("./LoginPage.qml"), {})
+                        }
+                    }
                 }
 
                 model: AccountModel {
