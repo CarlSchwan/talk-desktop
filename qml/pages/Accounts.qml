@@ -6,51 +6,33 @@ Page {
     id: accounts
     allowedOrientations: Orientation.All
 
-    Component {
-        id: accountItemDelegate
-        //property bool isAddAccount
-        Item {
-            Text {
-                text: name
-            }
-        }
-    }
-
     SilicaFlickable {
         anchors.fill: parent
-        //contentHeight: column.height + Theme.paddingLarge
 
         VerticalScrollDecorator {}
 
-        //Column {
-          //  id: column
-            //width: parent.width
-            //anchors.fill: parent
+        SilicaListView {
+            id: accountList
+            anchors.fill: parent
 
-            SilicaListView {
-                id: accountList
-                anchors.fill: parent
-                //delegate: accountItemDelegate
+            header: PageHeader {
+                title: qsTr("Accounts")
+            }
 
-                header: PageHeader {
-                    title: qsTr("Accounts")
+            delegate: BackgroundItem {
+                Label {
+                    text: name
                 }
-
-                delegate: BackgroundItem {
-                    Label {
-                        text: name
+                onClicked: {
+                    if(account === -1) {
+                        pageStack.push(Qt.resolvedUrl("./LoginPage.qml"), {})
                     }
-                    onClicked: {
-                        if(account === -1) {
-                            pageStack.push(Qt.resolvedUrl("./LoginPage.qml"), {})
-                        }
-                    }
-                }
-
-                model: AccountModel {
-                    id: accountModel
                 }
             }
-        //}
+
+            model: AccountModel {
+                id: accountModel
+            }
+        }
     }
 }

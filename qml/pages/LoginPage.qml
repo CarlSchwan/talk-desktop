@@ -35,7 +35,6 @@ Page {
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
                     //webView.url = Nc.getLoginFlowUrl(instance.text);
-                    //webView.header.
                     //Nc.triggerLoginFlow(instance.text, webView);
                     var flowUrl = Nc.getLoginFlowUrl(instance.text);
                     console.log("going after " + flowUrl);
@@ -45,7 +44,6 @@ Page {
                     //webView.load(r);
                     //console.log("login flow kicked");
                     //webView.visible = true;
-                    // TODO: so far we get Access Forbidden, Invalid Request!
                 }
             }
         }
