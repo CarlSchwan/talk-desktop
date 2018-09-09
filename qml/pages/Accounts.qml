@@ -25,7 +25,7 @@ Page {
                 }
                 onClicked: {
                     if(account === -1) {
-                        pageStack.push(Qt.resolvedUrl("./LoginPage.qml"), {})
+                        pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {})
                     }
                 }
             }

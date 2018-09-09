@@ -16,6 +16,25 @@
     </message>
 </context>
 <context>
+    <name>LegacyAddAccount</name>
+    <message>
+        <source>Add account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter a Nextcloud host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter login name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter app password</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LoginPage</name>
     <message>
         <source>Login</source>
