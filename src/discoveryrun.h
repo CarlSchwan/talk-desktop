@@ -15,6 +15,7 @@ public:
         Available = 0,
         OtherError = 1,
         HostNotFound = 2,
+        Redirect = 3,
     };
 
 public slots:

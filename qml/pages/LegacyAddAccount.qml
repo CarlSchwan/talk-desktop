@@ -11,7 +11,22 @@ Page {
     SilicaFlickable {
         anchors.fill: parent
 
-        Discovery { id: discovery; }
+        Discovery {
+            id: discovery;
+            onDiscoverySuccessful: function(ncServer) {
+                instance.text = ncServer
+                busy.running = false
+            }
+            onDiscoveryFailed: {
+                busy.running = false
+            }
+        }
+
+        BusyIndicator {
+            id: busy
+            running: false;
+            // FIXME: that'S not what I want. I wont glowing upper edge.
+        }
 
         Column {
             id: column
@@ -28,8 +43,8 @@ Page {
                 width: parent.width
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
+                    busy.running = true;
                     discovery.discoverInstance(instance.text);
-                    //legacyAddAccount.lgcyHostEntered(instance.text);
                     loginName.forceActiveFocus();
                 }
             }
