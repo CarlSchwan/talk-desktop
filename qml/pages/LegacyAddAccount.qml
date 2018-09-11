@@ -16,9 +16,14 @@ Page {
             onDiscoverySuccessful: function(ncServer) {
                 instance.text = ncServer
                 busy.running = false
+                loginName.enabled = true
+                token.enabled = true
+                loginName.forceActiveFocus()
             }
             onDiscoveryFailed: {
                 busy.running = false
+                loginName.enabled = false;
+                token.enabled = false
             }
         }
 
@@ -45,7 +50,6 @@ Page {
                 EnterKey.onClicked: {
                     busy.running = true;
                     discovery.discoverInstance(instance.text);
-                    loginName.forceActiveFocus();
                 }
             }
 
@@ -56,6 +60,7 @@ Page {
                 placeholderText: label
                 text: ""
                 width: parent.width
+                enabled: false
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
                     token.forceActiveFocus()
@@ -69,6 +74,7 @@ Page {
                 placeholderText: label
                 text: ""
                 width: parent.width
+                enabled: false
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
 
