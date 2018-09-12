@@ -22,8 +22,16 @@ Page {
             }
             onDiscoveryFailed: {
                 busy.running = false
-                loginName.enabled = false;
+                loginName.enabled = false
                 token.enabled = false
+            }
+            onCredentialsChecked: function(isVerified) {
+                busy.running = false
+                if(isVerified) {
+                    PageStack.navigateBack(PageStackAction.Animated, PageStack.Left)
+                } else {
+                    loginName.forceActiveFocus()
+                }
             }
         }
 
@@ -77,7 +85,8 @@ Page {
                 enabled: false
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
-
+                    busy.running = true;
+                    discovery.verifyCredentials(instance.text, loginName.text, token.text)
                 }
             }
         }

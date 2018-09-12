@@ -16,12 +16,25 @@ void Discovery::discoverInstance(QString url)
 
 void Discovery::discoveryFinished(int result, QUrl host, QString originalUrl) {
     if(result == DiscoveryRun::DiscoveryResult::Available) {
-        emit discoverySuccessful(host.scheme() + "://" + host.host(), originalUrl);
+        emit discoverySuccessful(host.toString(), originalUrl);
         return;
     }
     QString msg = "Invalid host";
     if(result == DiscoveryRun::DiscoveryResult::HostNotFound) {
         msg = "Host not found";
     }
-    emit discoveryFailed(msg, host.scheme() + "://" + host.host(), originalUrl);
+    emit discoveryFailed(msg, host.toString(), originalUrl);
+}
+
+void Discovery::verifyCredentials(QString host, QString loginName, QString token)
+{
+    DiscoveryRun *runner = new DiscoveryRun(host, loginName, token, this);
+    connect(runner, &DiscoveryRun::verifyCredentialsFinished, this,
+            &Discovery::verifyCredentialsFinished);
+    runner->verifyCredentials();
+}
+
+void Discovery::verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token)
+{
+    emit credentialsChecked(isVerified);
 }

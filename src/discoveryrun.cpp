@@ -1,9 +1,19 @@
 #include "discoveryrun.h"
 #include <QNetworkRequest>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
 
 DiscoveryRun::DiscoveryRun(QString url, QObject *parent) : QObject(parent)
 {
     originalUrl = url;
+}
+
+DiscoveryRun::DiscoveryRun(QString url, QString loginName, QString token, QObject *parent) : QObject(parent)
+{
+    originalUrl = url;
+    m_loginName = loginName;
+    m_token = token;
 }
 
 void DiscoveryRun::checkAvailability()
@@ -39,6 +49,7 @@ void DiscoveryRun::checkAvailability()
 
 void DiscoveryRun::availabilityCheckFinished(QNetworkReply *reply)
 {
+    disconnect(&nam, &QNetworkAccessManager::finished, this, &DiscoveryRun::availabilityCheckFinished);
     qDebug() << "check finished " << reply->error();
     qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -58,6 +69,63 @@ void DiscoveryRun::availabilityCheckFinished(QNetworkReply *reply)
             result = DiscoveryResult::OtherError;
             break;
     }
-    emit nextcloudDiscoveryFinished(result, reply->url(), originalUrl);
 
+    QString requestUrl(reply->url().toString());
+    requestUrl.chop(QString("status.php").length());
+    emit nextcloudDiscoveryFinished(result, QUrl(requestUrl), originalUrl);
+}
+
+void DiscoveryRun::verifyCredentials()
+{
+    connect(this, &DiscoveryRun::nextcloudDiscoveryFinished,
+            this, &DiscoveryRun::testCredentials);
+    checkAvailability();
+}
+
+void DiscoveryRun::testCredentials(int result, QUrl host, QString originalHost)
+{
+    if(result != DiscoveryResult::Available) {
+        emit verifyCredentialsFinished(false, host.toString(), originalUrl, m_loginName, m_token);
+    }
+    host.setPath(host.path() + "ocs/v2.php/cloud/user");
+    host.setQuery("format=json");
+    QNetworkRequest request(host);
+    QString concatanated = m_loginName + ":" + m_token;
+    QByteArray data = concatanated.toLocal8Bit().toBase64();
+    QString authValue = "Basic " + data;
+    request.setRawHeader("Authorization", authValue.toLocal8Bit());
+    request.setRawHeader("OCS-APIRequest", "true");
+    connect(&nam, &QNetworkAccessManager::finished, this, &DiscoveryRun::credentialsCheckFinished);
+    nam.get(request);
+}
+
+void DiscoveryRun::credentialsCheckFinished(QNetworkReply *reply)
+{
+    disconnect(&nam, &QNetworkAccessManager::finished, this, &DiscoveryRun::credentialsCheckFinished);
+
+    qDebug() << "check finished " << reply->error();
+    qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    if(reply->error() != QNetworkReply::NoError
+            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
+    {
+        qDebug() << "network issue or unauthed";
+        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token);
+        return;
+    }
+
+    QJsonDocument apiResult = QJsonDocument::fromJson(reply->readAll());
+    QJsonObject q = apiResult.object();
+    QJsonObject root = q.find("ocs").value().toObject();
+    QJsonObject meta = root.find("meta").value().toObject();
+    QJsonValue statuscode = meta.find("statuscode").value();
+    if(statuscode.toInt() != 200) {
+        qDebug() << "unexpected OCS code " << statuscode.toInt();
+        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token);
+        return;
+    }
+
+    QString userId = root.find("data").value().toObject().find("id").value().toString();
+    qDebug() << "found user ID: " << userId;
+    emit verifyCredentialsFinished(true, nc_server.toString(), originalUrl, m_loginName, m_token);
 }
