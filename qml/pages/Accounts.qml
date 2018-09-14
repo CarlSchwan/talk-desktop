@@ -6,6 +6,12 @@ Page {
     id: accounts
     allowedOrientations: Orientation.All
 
+    onStatusChanged: {
+        if(status === PageStatus.Activating) {
+            accountModel.loadAccounts()
+        }
+    }
+
     SilicaFlickable {
         anchors.fill: parent
 

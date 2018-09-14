@@ -28,7 +28,7 @@ public slots:
 signals:
     void protocolUnsupported(QString originalHost);
     void nextcloudDiscoveryFinished(int result, QUrl host, QString originalHost);
-    void verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token);
+    void verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token, QString userId);
 
 private slots:
     void testCredentials(int result, QUrl host, QString originalHost);

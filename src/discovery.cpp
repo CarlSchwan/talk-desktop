@@ -34,7 +34,12 @@ void Discovery::verifyCredentials(QString host, QString loginName, QString token
     runner->verifyCredentials();
 }
 
-void Discovery::verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token)
+void Discovery::verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token, QString userId)
 {
-    emit credentialsChecked(isVerified);
+    Q_UNUSED(originalUrl);
+    if(!isVerified) {
+        emit credentialsVerificationFailed();
+        return;
+    }
+    emit credentialsVerificationSuccessful(host, loginName, token, userId);
 }

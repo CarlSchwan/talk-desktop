@@ -25,6 +25,7 @@ public:
     );
     NextcloudAccount(const NextcloudAccount& account);
     static NextcloudAccount fromSettings(const QSettings &settings);
+    void toSettings(QSettings &settings) const;
 
 private:
     int m_id;

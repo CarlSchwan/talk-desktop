@@ -41,6 +41,16 @@ NextcloudAccount NextcloudAccount::fromSettings(const QSettings &settings)
     );
 }
 
+void NextcloudAccount::toSettings(QSettings &settings) const
+{
+    settings.setValue("id", m_id);
+    settings.setValue("name", m_name);
+    settings.setValue("host", m_host.url());
+    settings.setValue("login_name", m_login_name);
+    settings.setValue("password", m_password);
+    settings.setValue("user_id", m_user_id);
+}
+
 int NextcloudAccount::id() const { return m_id; }
 void NextcloudAccount::setId(const int id) { m_id = id; m_dirty = true; }
 

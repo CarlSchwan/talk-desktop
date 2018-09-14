@@ -40,9 +40,10 @@ void DiscoveryRun::checkAvailability()
     {
         sep = "";
     }
-    nc_server.setPath(nc_server.path() + sep + "status.php");
-    qDebug() << "Looking for Nc at " << nc_server.url();
-    QNetworkRequest request(nc_server);
+    QUrl requestUrl(nc_server.toString());
+    requestUrl.setPath(requestUrl.path() + sep + "status.php");
+    qDebug() << "Looking for Nc at " << requestUrl.url();
+    QNetworkRequest request(requestUrl);
     connect(&nam, &QNetworkAccessManager::finished, this, &DiscoveryRun::availabilityCheckFinished);
     nam.get(request);
 }
@@ -70,9 +71,7 @@ void DiscoveryRun::availabilityCheckFinished(QNetworkReply *reply)
             break;
     }
 
-    QString requestUrl(reply->url().toString());
-    requestUrl.chop(QString("status.php").length());
-    emit nextcloudDiscoveryFinished(result, QUrl(requestUrl), originalUrl);
+    emit nextcloudDiscoveryFinished(result, nc_server, originalUrl);
 }
 
 void DiscoveryRun::verifyCredentials()
@@ -84,10 +83,12 @@ void DiscoveryRun::verifyCredentials()
 
 void DiscoveryRun::testCredentials(int result, QUrl host, QString originalHost)
 {
+    Q_UNUSED(originalHost);
     if(result != DiscoveryResult::Available) {
-        emit verifyCredentialsFinished(false, host.toString(), originalUrl, m_loginName, m_token);
+        emit verifyCredentialsFinished(false, host.toString(), originalUrl, m_loginName, m_token, "");
     }
-    host.setPath(host.path() + "ocs/v2.php/cloud/user");
+    // TODO we can just use nc_server instead of host and originalHost
+    host.setPath(host.path() + "/ocs/v2.php/cloud/user");
     host.setQuery("format=json");
     QNetworkRequest request(host);
     QString concatanated = m_loginName + ":" + m_token;
@@ -110,7 +111,7 @@ void DiscoveryRun::credentialsCheckFinished(QNetworkReply *reply)
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
     {
         qDebug() << "network issue or unauthed";
-        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token);
+        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token, "");
         return;
     }
 
@@ -121,11 +122,11 @@ void DiscoveryRun::credentialsCheckFinished(QNetworkReply *reply)
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
         qDebug() << "unexpected OCS code " << statuscode.toInt();
-        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token);
+        emit verifyCredentialsFinished(false, nc_server.toString(), originalUrl, m_loginName, m_token, "");
         return;
     }
 
     QString userId = root.find("data").value().toObject().find("id").value().toString();
     qDebug() << "found user ID: " << userId;
-    emit verifyCredentialsFinished(true, nc_server.toString(), originalUrl, m_loginName, m_token);
+    emit verifyCredentialsFinished(true, nc_server.toString(), originalUrl, m_loginName, m_token, userId);
 }

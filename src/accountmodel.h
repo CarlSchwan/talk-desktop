@@ -22,12 +22,15 @@ public:
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QHash<int, QByteArray> roleNames() const;
 
+public slots:
+    void addAccount(QString url, QString loginName, QString token, QString userId);
+    void loadAccounts();
+
 private:
     bool is_initialized = false;
+    int max_id = 0;
     QVector<NextcloudAccount> accounts;
 
-private slots:
-    void loadAccounts();
 };
 
 #endif // ACCOUNTMODEL_H

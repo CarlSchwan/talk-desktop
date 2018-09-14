@@ -17,13 +17,14 @@ public slots:
     void discoverInstance(QString url);
     void discoveryFinished(int result, QUrl host, QString originalUrl);
     void verifyCredentials(QString host, QString loginName, QString token);
-    void verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token);
+    void verifyCredentialsFinished(bool isVerified, QString host, QString originalUrl, QString loginName, QString token, QString userId);
 
 signals:
     void protocolUnsupported(QString originalHost);
     void discoverySuccessful(QString host, QString originalHost);
     void discoveryFailed(QString message, QString host, QString originalHost);
-    void credentialsChecked(bool isVerified);
+    void credentialsVerificationSuccessful(QString host, QString loginName, QString token, QString userId);
+    void credentialsVerificationFailed();
 
 private:
     QNetworkAccessManager m_nam;

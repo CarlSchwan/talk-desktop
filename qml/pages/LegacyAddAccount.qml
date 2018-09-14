@@ -25,14 +25,18 @@ Page {
                 loginName.enabled = false
                 token.enabled = false
             }
-            onCredentialsChecked: function(isVerified) {
+            onCredentialsVerificationFailed: {
                 busy.running = false
-                if(isVerified) {
-                    PageStack.navigateBack(PageStackAction.Animated, PageStack.Left)
-                } else {
-                    loginName.forceActiveFocus()
-                }
+                loginName.forceActiveFocus()
             }
+            onCredentialsVerificationSuccessful: function(host, loginName, token, userId) {
+                accountService.addAccount(host, loginName, token, userId)
+                pageStack.pop()
+            }
+        }
+
+        AccountModel {
+            id: accountService;
         }
 
         BusyIndicator {
@@ -75,7 +79,7 @@ Page {
                 }
             }
 
-            TextField {
+            PasswordField {
                 id: token
                 focus: true
                 label: qsTr("Enter app password")
