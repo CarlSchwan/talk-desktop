@@ -12,33 +12,34 @@ Page {
         }
     }
 
-    SilicaFlickable {
+    SilicaListView {
+        id: accountList
         anchors.fill: parent
 
-        VerticalScrollDecorator {}
+        header: PageHeader {
+            title: qsTr("Accounts")
+        }
 
-        SilicaListView {
-            id: accountList
-            anchors.fill: parent
-
-            header: PageHeader {
-                title: qsTr("Accounts")
-            }
-
-            delegate: BackgroundItem {
-                Label {
-                    text: name
-                }
-                onClicked: {
-                    if(account === -1) {
-                        pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {})
-                    }
+        delegate: BackgroundItem {
+            Label {
+                text: name
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    margins: Theme.paddingLarge
                 }
             }
-
-            model: AccountModel {
-                id: accountModel
+            onClicked: {
+                if(account === -1) {
+                    pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {})
+                }
             }
         }
+
+        model: AccountModel {
+            id: accountModel
+        }
+
+        VerticalScrollDecorator {}
     }
 }
