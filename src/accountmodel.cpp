@@ -38,19 +38,17 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 
 void AccountModel::loadAccounts()
 {
-    QSettings accountSettings("Nextcloud", "Accounts");
-    QStringList accountGroups = accountSettings.childGroups();
     beginResetModel();
     accounts.clear();
+    accounts = readAccounts();
 
-    foreach(const QString &group, accountGroups) {
-        accountSettings.beginGroup(group);
-        accounts.append(NextcloudAccount::fromSettings(accountSettings));
-        if(accountSettings.value("id").toInt() > max_id) {
-            max_id = accountSettings.value("id").toInt();
+    max_id = 0;
+    foreach (NextcloudAccount account, accounts) {
+        if(account.id() > max_id) {
+            max_id = account.id();
         }
-        accountSettings.endGroup();
     }
+
     qDebug() << "loading accs done, max id is" << max_id;
     endResetModel();
 }

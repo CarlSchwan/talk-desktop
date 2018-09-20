@@ -3,8 +3,9 @@
 
 #include <QAbstractListModel>
 #include "nextcloudaccount.h"
+#include "accountreader.h"
 
-class AccountModel : public QAbstractListModel
+class AccountModel : public QAbstractListModel, AccountReader
 {
     Q_OBJECT
 

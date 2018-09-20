@@ -21,7 +21,8 @@ SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
     src/accountmodel.cpp \
     src/nextcloudaccount.cpp \
     src/discovery.cpp \
-    src/discoveryrun.cpp
+    src/discoveryrun.cpp \
+    src/accountreader.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/sfos-nextcloud-login-flow-demo.qml \
@@ -56,4 +57,5 @@ HEADERS += \
     src/accountmodel.h \
     src/nextcloudaccount.h \
     src/discovery.h \
-    src/discoveryrun.h
+    src/discoveryrun.h \
+    src/accountreader.h
