@@ -7,6 +7,7 @@
 #include "ncauthnamf.h"
 #include "accountmodel.h"
 #include "discovery.h"
+#include "roomservice.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<NcAuth>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuth");
     qmlRegisterType<AccountModel>("sfos.nextcloud.login.flow.demo", 1, 0, "AccountModel");
     qmlRegisterType<Discovery>("sfos.nextcloud.login.flow.demo", 1, 0, "Discovery");
+    qmlRegisterType<RoomService>("sfos.nextcloud.login.flow.demo", 1, 0, "RoomService");
     //qmlRegisterType<NcAuthNetworkAccessManager>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuthNAM");
 
     //QQmlEngine *e = v->engine();
