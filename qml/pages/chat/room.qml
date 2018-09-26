@@ -3,21 +3,22 @@ import Sailfish.Silica 1.0
 import sfos.nextcloud.login.flow.demo 1.0
 
 Page {
-    id: rooms
+    id: room
     allowedOrientations: Orientation.All
+
+    property Chat room;
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
-            roomService.loadRooms()
         }
     }
 
     SilicaListView {
-        id: roomList
+        id: chat
         anchors.fill: parent
 
         header: PageHeader {
-            title: qsTr("Rooms")
+            id: header
         }
 
         delegate: BackgroundItem {
@@ -29,13 +30,11 @@ Page {
                     margins: Theme.paddingLarge
                 }
             }
-            onClicked: pageStack.push(Qt.resolvedUrl("./room.qml"), {"room": roomList.indexAt(index)})
         }
 
-        model:  RoomService {
-            id: roomService
-        }
+        model: room
 
         VerticalScrollDecorator {}
     }
+
 }

@@ -24,7 +24,8 @@ SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
     src/discoveryrun.cpp \
     src/roomservice.cpp \
     src/room.cpp \
-    src/accountreader.cpp
+    src/accountreader.cpp \
+    src/chat.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/sfos-nextcloud-login-flow-demo.qml \
@@ -39,7 +40,8 @@ DISTFILES += qml/lib/API.js \
     qml/lib/NcAuth.js \
     qml/pages/Accounts.qml \
     qml/pages/LegacyAddAccount.qml \
-    qml/pages/chat/rooms.qml
+    qml/pages/chat/rooms.qml \
+    qml/pages/chat/room.qml
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
@@ -63,4 +65,5 @@ HEADERS += \
     src/discoveryrun.h \
     src/roomservice.h \
     src/room.h \
-    src/accountreader.h
+    src/accountreader.h \
+    src/chat.h
