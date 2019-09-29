@@ -12,7 +12,8 @@ ApplicationWindow
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
     Component.onCompleted: {
-        if(accounts.rowCount() === 0) {
+        accounts.loadAccounts();
+        if(accounts.rowCount() === 1) {
             console.log("let's login to an account")
             pageStack.push(Qt.resolvedUrl("./pages/Accounts.qml"), {})
         } else {
