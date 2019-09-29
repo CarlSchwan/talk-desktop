@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<AccountModel>("sfos.nextcloud.login.flow.demo", 1, 0, "AccountModel");
     qmlRegisterType<Discovery>("sfos.nextcloud.login.flow.demo", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("sfos.nextcloud.login.flow.demo", 1, 0, "RoomService");
-    qmlRegisterType<Chat>("sfos.nextcloud.login.flow.demo", 1, 0, "Chat");
+    //qmlRegisterType<Chat>("sfos.nextcloud.login.flow.demo", 1, 0, "Chat");
     //qmlRegisterType<NcAuthNetworkAccessManager>("sfos.nextcloud.login.flow.demo", 1, 0, "NcAuthNAM");
 
     //QQmlEngine *e = v->engine();
