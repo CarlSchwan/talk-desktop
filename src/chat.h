@@ -1,11 +1,13 @@
 #ifndef CHAT_H
 #define CHAT_H
 
+#include <QAbstractListModel>
 
 class Chat : public QAbstractListModel
 {
+    Q_OBJECT
 public:
-    Chat();
+    explicit Chat(QObject *parent = nullptr);
 };
 
 #endif // CHAT_H

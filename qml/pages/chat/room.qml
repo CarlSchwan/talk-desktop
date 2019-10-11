@@ -6,10 +6,17 @@ Page {
     id: room
     allowedOrientations: Orientation.All
 
-    property Chat room;
+    property string token;
+    property string roomName;
+    property int accountId;
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
+            roomService.startPolling(token, accountId)
+        } else if(status === PageStatus.Deactivating) {
+            roomService.stopPolling()
+        } else if(status === PageStatus.Inactive) {
+            messages.clear();
         }
     }
 
@@ -19,11 +26,12 @@ Page {
 
         header: PageHeader {
             id: header
+            title: roomName
         }
 
         delegate: BackgroundItem {
             Label {
-                text: name
+                text: message
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -32,9 +40,23 @@ Page {
             }
         }
 
-        model: room
+        model: ListModel {
+            id: messages
+        }
 
         VerticalScrollDecorator {}
+    }
+
+    RoomService {
+        id: roomService
+    }
+
+    Connections {
+        target: roomService
+        onNewMessage: {
+            console.log(message)
+            messages.append({'message': message})
+        }
     }
 
 }

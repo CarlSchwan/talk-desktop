@@ -25,12 +25,25 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
     {
         return QVariant(m_rooms[index.row()].name());
     }
+
+    if (role == TokenRole)
+    {
+        return QVariant(m_rooms[index.row()].token());
+    }
+
+    if (role == AccountRole)
+    {
+        return QVariant(m_rooms[index.row()].account().id());
+    }
+
     return QVariant();
 }
 
 QHash<int, QByteArray> RoomService::roleNames() const {
     QHash<int, QByteArray> roles;
     roles[NameRole] = "name";
+    roles[TokenRole] = "token";
+    roles[AccountRole] = "accountId";
     return roles;
 }
 
@@ -117,4 +130,31 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         endResetModel();
         disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
+}
+
+Room RoomService::getRoom(QString token, int accountId) {
+    QVector<Room>::iterator i;
+    for(i = m_rooms.begin(); i != m_rooms.end(); i++) {
+        if(i->token() == token && i->account().id() == accountId) {
+            return *i;
+        }
+    }
+    QException e;
+    e.raise();
+}
+
+void RoomService::startPolling(QString token, int accountId) {
+    activeToken = token;
+    activeAccountId = accountId;
+    connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollRoom()));
+    m_pollTimer.start(2000);
+}
+
+void RoomService::stopPolling() {
+    m_pollTimer.stop();
+    disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollRoom()));
+}
+
+void RoomService::pollRoom() {
+    emit newMessage("ping");
 }

@@ -1,6 +1,7 @@
 #include "chat.h"
 
-Chat::Chat()
+Chat::Chat(QObject *parent)
+    : QAbstractListModel(parent)
 {
 
 }

@@ -30,7 +30,15 @@ Page {
                     margins: Theme.paddingLarge
                 }
             }
-            onClicked: pageStack.push(Qt.resolvedUrl("./room.qml"), {"room": roomList.indexAt(index)})
+            onClicked: {
+                pageStack.push(Qt.resolvedUrl("./room.qml"),
+                               {
+                                   "token": token,
+                                   "roomName": name,
+                                   "accountId": accountId
+                               }
+                );
+            }
         }
 
         model:  RoomService {
