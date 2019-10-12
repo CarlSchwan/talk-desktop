@@ -220,7 +220,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    qDebug() << "JSON" << payload;
+    //qDebug() << "JSON" << payload;
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
@@ -232,8 +232,24 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     foreach(const QJsonValue& value, data) {
         QJsonObject messageData = value.toObject();
         qDebug() << "read msg" << messageData.value("message").toString();
-        emit newMessage(messageData.value("message").toString());
         lastKnownMessageId = messageData.value("id").toInt();
+        QString systemMessage = messageData.value("systemMessage").toString();
+        if(systemMessage == "call_left"
+           || systemMessage == "call_started"
+           || systemMessage == "conversation_created"
+        ) {
+            // some system message we simply ignore:
+            // - created because maybe it is not so important
+            // - calls because they are not supported
+            continue;
+        }
+        QString message = messageData.value("message").toString();
+        QJsonObject actorData = messageData.value("messageParameters").toObject().value("actor").toObject();
+
+        message.replace("{actor}", actorData.value("name").toString());
+        // TODO: try to send the whole json object and do the magic on QML side
+        // TODO: try with mentions
+        emit newMessage(message);
     }
 
     pollRoom();
