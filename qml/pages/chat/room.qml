@@ -30,7 +30,7 @@ Page {
         }
 
         delegate: BackgroundItem {
-            Label {
+            LinkedLabel {
                 text: message
                 anchors {
                     left: parent.left
