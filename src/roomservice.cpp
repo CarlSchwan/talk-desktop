@@ -146,15 +146,94 @@ Room RoomService::getRoom(QString token, int accountId) {
 void RoomService::startPolling(QString token, int accountId) {
     activeToken = token;
     activeAccountId = accountId;
-    connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollRoom()));
-    m_pollTimer.start(2000);
+    lastKnownMessageId = 0;
+    isPolling = true;
+    pollRoom();
 }
 
 void RoomService::stopPolling() {
-    m_pollTimer.stop();
-    disconnect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(pollRoom()));
+    isPolling = false;
+}
+
+NextcloudAccount RoomService::getAccountById(const int id) {
+    QVector<NextcloudAccount>::iterator i;
+    for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
+        if(i->id() == id) {
+            return *i;
+        }
+    }
 }
 
 void RoomService::pollRoom() {
-    emit newMessage("ping");
+    if(!isPolling) {
+        return;
+    }
+    connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
+    NextcloudAccount account = getAccountById(activeAccountId);
+    QUrl endpoint = QUrl(account.host());
+    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
+    endpoint.setQuery("format=json&lookIntoFuture=1&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId));
+    qDebug() << "Last known message id " << lastKnownMessageId;
+
+    QNetworkRequest request(endpoint);
+
+    QString concatanated = account.loginName() + ":" + account.password();
+    QByteArray data = concatanated.toLocal8Bit().toBase64();
+    QString authValue = "Basic " + data;
+
+    request.setRawHeader("Authorization", authValue.toLocal8Bit());
+    request.setRawHeader("OCS-APIRequest", "true");
+
+    m_nam.get(request);
+}
+
+void RoomService::roomPolled(QNetworkReply *reply) {
+    qDebug() << "polling for new messages finished " << reply->error();
+    qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
+
+    if(!isPolling) {
+        return;
+    }
+
+    if(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 304) {
+        qDebug() << "no new messages";
+        pollRoom();
+        return;
+    }
+
+    if(reply->error() == QNetworkReply::ContentNotFoundError) {
+        qDebug() << "Some server error?! check logs!";
+        return;
+    }
+
+    if(reply->error() != QNetworkReply::NoError
+            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
+    {
+        qDebug() << "network issue or unauthed";
+        return;
+    }
+
+    QByteArray payload = reply->readAll();
+    QJsonDocument apiResult = QJsonDocument::fromJson(payload);
+    QJsonObject q = apiResult.object();
+    QJsonObject root = q.find("ocs").value().toObject();
+    qDebug() << "JSON" << payload;
+    QJsonObject meta = root.find("meta").value().toObject();
+    QJsonValue statuscode = meta.find("statuscode").value();
+    if(statuscode.toInt() != 200) {
+        qDebug() << "unexpected OCS code " << statuscode.toInt();
+        return;
+    }
+
+    QJsonArray data = root.find("data").value().toArray();
+    foreach(const QJsonValue& value, data) {
+        QJsonObject messageData = value.toObject();
+        qDebug() << "read msg" << messageData.value("message").toString();
+        emit newMessage(messageData.value("message").toString());
+        lastKnownMessageId = messageData.value("id").toInt();
+    }
+
+    pollRoom();
 }

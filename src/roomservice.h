@@ -38,6 +38,8 @@ signals:
 
 private slots:
     void pollRoom();
+    NextcloudAccount getAccountById(const int id);
+    void roomPolled(QNetworkReply *reply);
 
 private:
     QVector<NextcloudAccount> m_accounts;
@@ -47,6 +49,8 @@ private:
     QTimer m_pollTimer;
     QString activeToken;
     int activeAccountId;
+    bool isPolling = false;
+    int lastKnownMessageId = 0;
 };
 
 #endif // ROOMSERVICE_H
