@@ -110,6 +110,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     }
 
     QJsonArray data = root.find("data").value().toArray();
+    m_rooms.clear();
     foreach(const QJsonValue& value, data) {
         QJsonObject room = value.toObject();
         qDebug() << "read room" << room.value("name").toString();
