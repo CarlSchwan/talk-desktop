@@ -20,9 +20,15 @@ Page {
         }
     }
 
+
     SilicaListView {
         id: chat
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        //anchors.bottomMargin:  20
+        width: parent.width
+        boundsBehavior: Flickable.DragOverBounds
+
 
         header: PageHeader {
             id: header
@@ -30,13 +36,16 @@ Page {
         }
 
         delegate: BackgroundItem {
-            LinkedLabel {
+            Label {
                 text: message
+                textFormat: Text.RichText;
                 anchors {
                     left: parent.left
                     right: parent.right
                     margins: Theme.paddingLarge
                 }
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
         }
 
@@ -44,8 +53,12 @@ Page {
             id: messages
         }
 
-        VerticalScrollDecorator {}
+        VerticalScrollDecorator {
+            flickable: chat
+        }
     }
+
+
 
     RoomService {
         id: roomService
