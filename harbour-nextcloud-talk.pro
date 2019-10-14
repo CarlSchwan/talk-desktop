@@ -10,11 +10,11 @@
 #   - translation filenames have to be changed
 
 # The name of your application
-TARGET = sfos-nextcloud-login-flow-demo
+TARGET = harbour-nextcloud-talk
 
 CONFIG += sailfishapp
 
-SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
+SOURCES += src/harbour-nextcloud-talk.cpp \
     src/ncauth.cpp \
     src/ncauthnetworkaccessmanager.cpp \
     src/ncauthnamf.cpp \
@@ -28,14 +28,14 @@ SOURCES += src/sfos-nextcloud-login-flow-demo.cpp \
     src/chat.cpp
 
 DISTFILES += qml/lib/API.js \
-    qml/sfos-nextcloud-login-flow-demo.qml \
+    qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
-    rpm/sfos-nextcloud-login-flow-demo.changes.in \
-    rpm/sfos-nextcloud-login-flow-demo.changes.run.in \
-    rpm/sfos-nextcloud-login-flow-demo.spec \
-    rpm/sfos-nextcloud-login-flow-demo.yaml \
+    rpm/harbour-nextcloud-talk.changes.in \
+    rpm/harbour-nextcloud-talk.changes.run.in \
+    rpm/harbour-nextcloud-talk.spec \
+    rpm/harbour-nextcloud-talk.yaml \
     translations/*.ts \
-    sfos-nextcloud-login-flow-demo.desktop \
+    harbour-nextcloud-talk.desktop \
     qml/pages/LoginPage.qml \
     qml/lib/NcAuth.js \
     qml/pages/Accounts.qml \
@@ -53,7 +53,7 @@ CONFIG += sailfishapp_i18n
 # planning to localize your app, remember to comment out the
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
-TRANSLATIONS += translations/sfos-nextcloud-login-flow-demo-de.ts
+TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
     src/ncauth.h \

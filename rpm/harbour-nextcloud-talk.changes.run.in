@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Rename this file as sfos-nextcloud-login-flow-demo.changes.run to let mb2 automatically
+# Rename this file as harbour-nextcloud-talk.changes.run to let mb2 automatically
 # generate changelog from well formatted Git commit messages and tag
 # annotations.
 

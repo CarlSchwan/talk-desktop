@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-    // SailfishApp::main() will display "qml/sfos-nextcloud-login-flow-demo.qml", if you need more
+    // SailfishApp::main() will display "qml/harbour-nextcloud-talk.qml", if you need more
     // control over initialization, you can use:
     //
     //   - SailfishApp::application(int, char *[]) to get the QGuiApplication *
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     //e.setNetworkAccessManagerFactory(&namf);
     //v->rootContext()->setContextProperty("networkManager", v->engine()->networkAccessManager());
 
-    v->setSource(SailfishApp::pathTo("qml/sfos-nextcloud-login-flow-demo.qml"));
+    v->setSource(SailfishApp::pathTo("qml/harbour-nextcloud-talk.qml"));
     v->show();
     return app->exec();
 }
