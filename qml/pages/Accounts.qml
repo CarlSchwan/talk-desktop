@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import sfos.nextcloud.login.flow.demo 1.0
+import harbour.nextcloud.talk 1.0
 
 Page {
     id: accounts
