@@ -20,12 +20,16 @@ Page {
         }
     }
 
+    function prepareMessage(message) {
+        message.message = message.message.replace('{actor}', message.actorDisplayName);
+        return message
+    }
+
 
     SilicaListView {
         id: chat
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        //anchors.bottomMargin:  20
         width: parent.width
         boundsBehavior: Flickable.DragOverBounds
 
@@ -36,16 +40,36 @@ Page {
         }
 
         delegate: BackgroundItem {
-            Label {
-                text: message
-                textFormat: Text.RichText;
+            Column {
                 anchors {
                     left: parent.left
                     right: parent.right
                     margins: Theme.paddingLarge
                 }
-                font.pixelSize: Theme.fontSizeSmall
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                height: author.height + messageText.height;
+
+                Label {
+                    id: author
+                    text: actorDisplayName
+                    textFormat: Text.PlainText;
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                    font.pixelSize: Theme.fontSizeTiny
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
+                Label {
+                    id: messageText
+                    text: message
+                    textFormat: Text.RichText;
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                    font.pixelSize: Theme.fontSizeSmall
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
             }
         }
 
@@ -68,7 +92,8 @@ Page {
         target: roomService
         onNewMessage: {
             console.log(message)
-            messages.append({'message': message})
+            message = JSON.parse(message);
+            messages.append(prepareMessage(message));
         }
     }
 
