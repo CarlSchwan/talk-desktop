@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QException>
 #include <QNetworkAccessManager>
+#include <QJsonDocument>
 #include <QTimer>
 #include "accountreader.h"
 #include "nextcloudaccount.h"

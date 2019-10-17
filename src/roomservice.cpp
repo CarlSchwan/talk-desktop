@@ -231,7 +231,6 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
         QJsonObject messageData = value.toObject();
-        qDebug() << "read msg" << messageData.value("message").toString();
         lastKnownMessageId = messageData.value("id").toInt();
         QString systemMessage = messageData.value("systemMessage").toString();
         if(systemMessage == "call_left"
@@ -243,13 +242,12 @@ void RoomService::roomPolled(QNetworkReply *reply) {
             // - calls because they are not supported
             continue;
         }
-        QString message = messageData.value("message").toString();
-        QJsonObject actorData = messageData.value("messageParameters").toObject().value("actor").toObject();
 
-        message.replace("{actor}", actorData.value("name").toString());
-        // TODO: try to send the whole json object and do the magic on QML side
         // TODO: try with mentions
-        emit newMessage(message);
+        QJsonDocument doc = QJsonDocument::fromVariant(value.toVariant());
+        QString strJson(doc.toJson(QJsonDocument::Compact));
+        qDebug() << strJson;
+        emit newMessage(strJson);
     }
 
     pollRoom();
