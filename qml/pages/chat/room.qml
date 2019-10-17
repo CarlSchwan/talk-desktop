@@ -106,6 +106,7 @@ Page {
                 // FIXME: only clear text after it was send
                 sendMessage.text = ""
             }
+            onClicked: chat.scrollToBottom()
         }
     }
 
@@ -118,6 +119,7 @@ Page {
         onNewMessage: {
             message = JSON.parse(message);
             messages.append(prepareMessage(message));
+            chat.scrollToBottom()
         }
     }
 
