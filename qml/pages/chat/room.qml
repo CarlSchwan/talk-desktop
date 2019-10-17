@@ -25,19 +25,23 @@ Page {
         return message
     }
 
-
     SilicaListView {
         id: chat
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        anchors.bottom: sendMessagePart.top
         width: parent.width
+        height: parent.height - sendMessage.height
+        contentHeight: height
         boundsBehavior: Flickable.DragOverBounds
-
+        quickScroll: true
+        quickScrollAnimating: true
+        clip: true
 
         header: PageHeader {
             id: header
             title: roomName
         }
+        headerPositioning: ListView.PullBackHeader
 
         delegate: BackgroundItem {
             Column {
@@ -46,7 +50,9 @@ Page {
                     right: parent.right
                     margins: Theme.paddingLarge
                 }
-                height: author.height + messageText.height;
+                //height: author.height + messageText.height;
+                //height: author.contentHeight + messageText.contentHeight
+                //height: childrenRect.height
 
                 Label {
                     id: author
@@ -62,7 +68,8 @@ Page {
                 Label {
                     id: messageText
                     text: message
-                    textFormat: Text.RichText;
+                    textFormat: Text.RichText
+                    height: contentHeight
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -77,12 +84,30 @@ Page {
             id: messages
         }
 
+
         VerticalScrollDecorator {
             flickable: chat
         }
     }
 
-
+    Row {
+        id: sendMessagePart
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        width: parent.width
+        TextField {
+            width: parent.width
+            id: sendMessage
+            placeholderText: "Write something excellent"
+            EnterKey.enabled: text.length > 0
+            EnterKey.onClicked: {
+                roomService.sendMessage(sendMessage.text);
+                // FIXME: only clear text after it was send
+                sendMessage.text = ""
+            }
+        }
+    }
 
     RoomService {
         id: roomService
@@ -91,7 +116,6 @@ Page {
     Connections {
         target: roomService
         onNewMessage: {
-            console.log(message)
             message = JSON.parse(message);
             messages.append(prepareMessage(message));
         }

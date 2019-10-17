@@ -33,6 +33,7 @@ public slots:
     Room getRoom(QString token, int accountId);
     void startPolling(QString token, int accountId);
     void stopPolling();
+    void sendMessage(QString messageText);
 
 signals:
     void newMessage(QString message);
@@ -46,6 +47,7 @@ private:
     QVector<NextcloudAccount> m_accounts;
     QVector<Room> m_rooms;
     QNetworkAccessManager m_nam;
+    QNetworkAccessManager namPosting;
     int m_pendingRequests = 0;
     QTimer m_pollTimer;
     QString activeToken;

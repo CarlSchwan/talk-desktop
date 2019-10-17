@@ -246,9 +246,30 @@ void RoomService::roomPolled(QNetworkReply *reply) {
         // TODO: try with mentions
         QJsonDocument doc = QJsonDocument::fromVariant(value.toVariant());
         QString strJson(doc.toJson(QJsonDocument::Compact));
-        qDebug() << strJson;
+        //qDebug() << strJson;
         emit newMessage(strJson);
     }
 
     pollRoom();
+}
+
+void RoomService::sendMessage(QString messageText) {
+    NextcloudAccount account = getAccountById(activeAccountId);
+    QUrl endpoint = QUrl(account.host());
+    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
+
+    QNetworkRequest request(endpoint);
+
+    QString concatanated = account.loginName() + ":" + account.password();
+    QByteArray data = concatanated.toLocal8Bit().toBase64();
+    QString authValue = "Basic " + data;
+
+    request.setRawHeader("Authorization", authValue.toLocal8Bit());
+    request.setRawHeader("OCS-APIRequest", "true");
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QByteArray payload = QString("message=" + messageText).toUtf8();
+    qDebug() << "send message payload " << payload;
+
+    namPosting.post(request, payload);
 }
