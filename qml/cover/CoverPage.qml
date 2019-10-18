@@ -2,21 +2,17 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Label {
-        id: label
-        anchors.centerIn: parent
-        text: qsTr("My Cover")
-    }
 
-    CoverActionList {
-        id: coverAction
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-next"
+    Image {
+        anchors {
+            bottom : parent.bottom
+            left: parent.left
+            right: parent.right
+            top: parent.top
         }
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
-        }
+        horizontalAlignment: Image.AlignHCenter
+        verticalAlignment: Image.AlignVCenter
+        fillMode: Image.PreserveAspectFit
+        source: "../images/cover.svg"
     }
 }
