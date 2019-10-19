@@ -22,12 +22,24 @@ Page {
         }
 
         delegate: BackgroundItem {
-            Label {
-                text: name
+            Row {
                 anchors {
                     left: parent.left
                     right: parent.right
-                    margins: Theme.paddingLarge
+                    margins: Theme.paddingMedium
+                }
+                spacing: width - (roomName.width + unreadCounter.width)
+                Label {
+                    id: roomName
+                    text: name
+                }
+
+                Label {
+                    id: unreadCounter
+                    text: unreadMessages === 0 ? ""
+                            : unreadMessages > 99 ? ">99"
+                            : unreadMessages
+                    color: unreadMention ? Theme.highlightColor : Theme.primaryColor
                 }
             }
             onClicked: {

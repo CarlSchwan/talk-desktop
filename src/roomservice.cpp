@@ -113,7 +113,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    qDebug() << "JSON" << payload;
+    //qDebug() << "JSON" << payload;
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
