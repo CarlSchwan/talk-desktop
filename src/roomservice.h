@@ -18,6 +18,8 @@ public:
         NameRole = Qt::UserRole + 1,
         TokenRole = Qt::UserRole + 2,
         AccountRole = Qt::UserRole + 3,
+        UnreadRole = Qt::UserRole + 4,
+        MentionedRole = Qt::UserRole + 5,
     };
 
     explicit RoomService(QObject *parent = nullptr);

@@ -28,6 +28,7 @@ private:
     bool m_unread_mention;
     bool m_hasPassword;
     bool m_isFavorite;
+    int m_lastActivity;
 
 public slots:
     const NextcloudAccount &account() const;
@@ -38,6 +39,7 @@ public slots:
     bool unreadMention() const;
     bool hasPassword() const;
     bool isFavorite() const;
+    int lastActivity() const;
 
     Room& setName(const QString name);
     Room& setToken(const QString token);
@@ -47,6 +49,7 @@ public slots:
     Room& setUnreadMention(const bool unreadMention);
     Room& setHasPassword(const bool hasPassword);
     Room& setFavorite(const bool isFavorite);
+    Room& setLastActivity(const int lastActivity);
 };
 
 #endif // ROOM_H

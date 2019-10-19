@@ -92,3 +92,13 @@ Room& Room::setFavorite(const bool isFavorite)
     m_isFavorite = isFavorite;
     return *this;
 }
+
+int Room::lastActivity() const {
+    return m_lastActivity;
+}
+
+Room& Room::setLastActivity(const int lastActivity)
+{
+    m_lastActivity = lastActivity;
+    return *this;
+}

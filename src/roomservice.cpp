@@ -36,6 +36,16 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         return QVariant(m_rooms[index.row()].account().id());
     }
 
+    if (role == UnreadRole)
+    {
+        return QVariant(m_rooms[index.row()].unreadMessages());
+    }
+
+    if (role == MentionedRole)
+    {
+        return QVariant(m_rooms[index.row()].unreadMention());
+    }
+
     return QVariant();
 }
 
@@ -44,6 +54,8 @@ QHash<int, QByteArray> RoomService::roleNames() const {
     roles[NameRole] = "name";
     roles[TokenRole] = "token";
     roles[AccountRole] = "accountId";
+    roles[UnreadRole] = "unreadMessages";
+    roles[MentionedRole] = "unreadMention";
     return roles;
 }
 
@@ -101,7 +113,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    //qDebug() << "JSON" << payload;
+    qDebug() << "JSON" << payload;
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
@@ -117,15 +129,20 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         Room model;
         model
                 .setAccount(currentAccount)
-                .setName(room.value("name").toString())
+                .setName(room.value("displayName").toString())
                 .setFavorite(room.value("isFavorite").toBool())
                 .setHasPassword(room.value("hasPassword").toBool())
                 .setToken(room.value("token").toString())
                 .setType((Room::RoomType)room.value("type").toInt())
                 .setUnreadMention(room.value("unreadMention").toBool())
-                .setUnreadMessages(room.value("unreadMessages").toInt());
+                .setUnreadMessages(room.value("unreadMessages").toInt())
+                .setLastActivity(room.value("lastActivity").toInt());
         m_rooms.append(model);
     }
+
+    std::sort(m_rooms.begin(), m_rooms.end(), [](const Room& a, const Room b) {
+        return a.lastActivity() > b.lastActivity();
+    });
 
     if(m_pendingRequests == 0) {
         endResetModel();
