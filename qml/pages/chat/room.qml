@@ -44,15 +44,9 @@ Page {
         headerPositioning: ListView.PullBackHeader
 
         delegate: BackgroundItem {
+            height: author.contentHeight + messageText.contentHeight + Theme.paddingMedium
             Column {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    margins: Theme.paddingLarge
-                }
-                //height: author.height + messageText.height;
-                //height: author.contentHeight + messageText.contentHeight
-                //height: childrenRect.height
+                width: parent.width
 
                 Label {
                     id: author
@@ -78,6 +72,7 @@ Page {
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
+
         }
 
         model: ListModel {
