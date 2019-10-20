@@ -27,7 +27,7 @@ Page {
         anchors.fill: parent
 
         header: PageHeader {
-            title: qsTr("Rooms")
+            title: qsTr("Conversations")
         }
 
         delegate: BackgroundItem {

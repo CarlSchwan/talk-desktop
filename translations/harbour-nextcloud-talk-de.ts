@@ -41,11 +41,11 @@
 <context>
     <name>rooms</name>
     <message>
-        <source>Rooms</source>
+        <source>Accounts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Accounts</source>
+        <source>Conversations</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
