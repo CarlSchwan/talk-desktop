@@ -44,5 +44,9 @@
         <source>Rooms</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

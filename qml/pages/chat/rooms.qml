@@ -13,7 +13,16 @@ Page {
         }
     }
 
+
+
     SilicaListView {
+        PullDownMenu {
+             MenuItem {
+                 text: qsTr("Accounts")
+                 onClicked: pageStack.push(Qt.resolvedUrl("../Accounts.qml"), {})
+             }
+         }
+
         id: roomList
         anchors.fill: parent
 
