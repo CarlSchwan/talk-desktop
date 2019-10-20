@@ -62,6 +62,7 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 void RoomService::loadRooms() {
     m_pendingRequests = m_accounts.length();
     beginResetModel();
+    m_rooms.clear();
     if(m_pendingRequests > 0) {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
@@ -122,7 +123,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     }
 
     QJsonArray data = root.find("data").value().toArray();
-    m_rooms.clear();
     foreach(const QJsonValue& value, data) {
         QJsonObject room = value.toObject();
         qDebug() << "read room" << room.value("name").toString();
