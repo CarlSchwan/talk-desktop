@@ -21,7 +21,8 @@ Page {
     }
 
     function prepareMessage(message) {
-        message.message = message.message.replace('{actor}', message.actorDisplayName);
+        message.message = message.message.replace('{actor}', message.actorDisplayName)
+        message.timeString = new Date(message.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         return message
     }
 
@@ -50,7 +51,7 @@ Page {
 
                 Label {
                     id: author
-                    text: actorDisplayName
+                    text: timeString + " · " + actorDisplayName
                     textFormat: Text.PlainText;
                     anchors {
                         left: parent.left
@@ -112,8 +113,9 @@ Page {
     Connections {
         target: roomService
         onNewMessage: {
-            message = JSON.parse(message);
-            messages.append(prepareMessage(message));
+            console.log(message)
+            message = JSON.parse(message)
+            messages.append(prepareMessage(message))
             chat.scrollToBottom()
         }
     }
