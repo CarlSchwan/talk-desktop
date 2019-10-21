@@ -285,7 +285,7 @@ void RoomService::sendMessage(QString messageText) {
     request.setRawHeader("OCS-APIRequest", "true");
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
-    QByteArray payload = QString("message=" + messageText).toUtf8();
+    QByteArray payload = QString("message=" + QUrl::toPercentEncoding(messageText)).toUtf8();
     qDebug() << "send message payload " << payload;
 
     namPosting.post(request, payload);
