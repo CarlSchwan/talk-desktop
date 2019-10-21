@@ -18,6 +18,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 * Multi-account support
 * List of all conversations, sorted by activity. It contains an unread counter, which is highlighted when an unread mention is present.
 	- There is no polling right now. Enter a conversation and leave it for a refresh.
+	- A busy indicator shows whether conversations are being (re)loaded
 * Chat with any conversation
 	- loading of the whole history
 	- automatically sets the read marker

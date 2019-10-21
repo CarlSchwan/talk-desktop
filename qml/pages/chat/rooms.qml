@@ -23,6 +23,11 @@ Page {
              }
          }
 
+        BusyIndicator {
+            id: roomSync
+            running: false
+        }
+
         id: roomList
         anchors.fill: parent
 
@@ -64,6 +69,8 @@ Page {
 
         model:  RoomService {
             id: roomService
+            onModelAboutToBeReset: roomSync.running = true
+            onModelReset: roomSync.running = false
         }
 
         VerticalScrollDecorator {}
