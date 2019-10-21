@@ -23,6 +23,12 @@ Page {
     function prepareMessage(message) {
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
+        Object.keys(message.messageParameters).forEach(function(key) {
+            if(key.substring(0, 12) === 'mention-user') {
+                message.message = message.message.replace('{' + key + '}', message.messageParameters[key].name)
+            }
+        })
+
         return message
     }
 
@@ -113,7 +119,6 @@ Page {
     Connections {
         target: roomService
         onNewMessage: {
-            console.log(message)
             message = JSON.parse(message)
             messages.append(prepareMessage(message))
             chat.scrollToBottom()
