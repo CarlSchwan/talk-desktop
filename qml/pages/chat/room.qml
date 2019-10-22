@@ -22,7 +22,7 @@ Page {
 
     function prepareMessage(message) {
         message.message = message.message.replace('{actor}', message.actorDisplayName)
-        message.timeString = new Date(message.timestamp).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
+        message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 12) === 'mention-user') {
                 message.message = message.message.replace('{' + key + '}', message.messageParameters[key].name)
