@@ -28,8 +28,33 @@ Page {
                 message.message = message.message.replace('{' + key + '}', message.messageParameters[key].name)
             }
         })
+        message.message = formatLinksRich(message.message)
 
         return message
+    }
+
+    function formatLinksRich(content) {
+        const urlRegex = /(\s|^)(https?:\/\/)?((?:[-A-Z0-9+_]+\.)+[-A-Z]+(?:\/[-A-Z0-9+&@#%?=~_|!:,.;()]*)*)(\s|$)/ig
+
+        return content.replace(urlRegex, __linkReplacer)
+    }
+
+    function __linkReplacer(_, leadingSpace, protocol, url, trailingSpace) {
+        var linkText = url
+        if (!protocol) {
+            protocol = 'https://'
+        } else if (protocol === 'http://') {
+            linkText = protocol + url
+        }
+
+        return leadingSpace
+                + '<a target="_blank" rel="noopener noreferrer" href="'
+                + protocol
+                + url
+                + '">'
+                + linkText
+                + '</a>'
+                + trailingSpace
     }
 
     SilicaListView {

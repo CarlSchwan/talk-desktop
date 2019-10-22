@@ -24,6 +24,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 	- automatically sets the read marker
 	- display of each messages author and text
 	- sets displaynames of mentions, actors
+	- recognize and format links
 	- constant long-polling of the currently open conversation
 * Online only, nothing but the accounts are stored on the device
 	
