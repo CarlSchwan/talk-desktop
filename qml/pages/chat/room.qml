@@ -24,7 +24,7 @@ Page {
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         Object.keys(message.messageParameters).forEach(function(key) {
-            if(key.substring(0, 12) === 'mention-user') {
+            if(key.substring(0, 8) === 'mention-') {
                 message.message = message.message.replace('{' + key + '}', message.messageParameters[key].name)
             }
         })
