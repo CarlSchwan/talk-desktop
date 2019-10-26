@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include "accountreader.h"
+#include "db.h"
 #include "nextcloudaccount.h"
 #include "room.h"
 
@@ -55,7 +56,8 @@ private:
     QString activeToken;
     int activeAccountId;
     bool isPolling = false;
-    int lastKnownMessageId = 0;
+    Db m_db;
+    int m_lookIntoFuture = 0;
 };
 
 #endif // ROOMSERVICE_H

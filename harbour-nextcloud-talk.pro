@@ -13,8 +13,10 @@
 TARGET = harbour-nextcloud-talk
 
 CONFIG += sailfishapp
+QT += sql
 
 SOURCES += src/harbour-nextcloud-talk.cpp \
+    src/db.cpp \
     src/ncauth.cpp \
     src/ncauthnetworkaccessmanager.cpp \
     src/ncauthnamf.cpp \
@@ -56,6 +58,7 @@ CONFIG += sailfishapp_i18n
 TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
+    src/db.h \
     src/ncauth.h \
     src/ncauthnetworkaccessmanager.h \
     src/ncauthnamf.h \

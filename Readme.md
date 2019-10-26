@@ -20,13 +20,16 @@ This is a complete list of features. What is not mentioned, does not work as of 
 	- There is no polling right now. Enter a conversation and leave it for a refresh.
 	- A busy indicator shows whether conversations are being (re)loaded
 * Chat with any conversation
-	- loading of the whole history
+	- loading most recent history
+	- constant long-polling of the currently open conversation
 	- automatically sets the read marker
 	- display of each messages author and text
 	- sets displaynames of mentions, actors
 	- recognize and format links
-	- constant long-polling of the currently open conversation
-* Online only, nothing but the accounts are stored on the device
+	- stores the last seen message id per conversation
+* Online only, nothing is stored on the device except:
+	- account data (host, login, token, user ID plus generated account id and name)
+	- last seen message id per conversation
 	
 ## Please note
 

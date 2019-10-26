@@ -164,8 +164,8 @@ Room RoomService::getRoom(QString token, int accountId) {
 void RoomService::startPolling(QString token, int accountId) {
     activeToken = token;
     activeAccountId = accountId;
-    lastKnownMessageId = 0;
     isPolling = true;
+    m_lookIntoFuture = 0;
     pollRoom();
 }
 
@@ -188,10 +188,15 @@ void RoomService::pollRoom() {
     }
     connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
     NextcloudAccount account = getAccountById(activeAccountId);
+    int lastKnownMessageId = m_db.lastKnownMessageId(activeAccountId, activeToken);
+    QString includeLastKnown = m_lookIntoFuture == 0 ? "1" : "0";
     QUrl endpoint = QUrl(account.host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
-    endpoint.setQuery("format=json&lookIntoFuture=1&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId));
+    endpoint.setQuery("format=json&lookIntoFuture=" + QString::number(m_lookIntoFuture) +
+                      "&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId) +
+                      "&includeLastKnown=" + includeLastKnown);
     qDebug() << "Last known message id " << lastKnownMessageId;
+    qDebug() << "Query was" << endpoint.query();
 
     QNetworkRequest request(endpoint);
 
@@ -246,9 +251,29 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     }
 
     QJsonArray data = root.find("data").value().toArray();
-    foreach(const QJsonValue& value, data) {
+    int start, end, step;
+    if(m_lookIntoFuture == 0) {
+        start = data.size() - 1;
+        end = -1;
+        step = -1;
+        // this happens just once to get some history
+        m_lookIntoFuture = 1;
+    } else {
+        start = 0;
+        end = data.size();
+        step = 1;
+    }
+
+    for(auto i = start; i != end; i += step) {
+        QJsonValue value = data.at(i);
         QJsonObject messageData = value.toObject();
-        lastKnownMessageId = messageData.value("id").toInt();
+        int msgId = messageData.value("id").toInt();
+        if(msgId > m_db.lastKnownMessageId(activeAccountId, activeToken)) {
+            qDebug() << "new msgid" << msgId << "old was" << m_db.lastKnownMessageId(activeAccountId, activeToken);
+            // do not lower value when we fetched history
+            m_db.setLastKnownMessageId(activeAccountId, activeToken, msgId);
+        }
+
         QString systemMessage = messageData.value("systemMessage").toString();
         if(systemMessage == "call_left"
            || systemMessage == "call_started"
@@ -260,7 +285,6 @@ void RoomService::roomPolled(QNetworkReply *reply) {
             continue;
         }
 
-        // TODO: try with mentions
         QJsonDocument doc = QJsonDocument::fromVariant(value.toVariant());
         QString strJson(doc.toJson(QJsonDocument::Compact));
         //qDebug() << strJson;
