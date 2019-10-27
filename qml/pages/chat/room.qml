@@ -38,6 +38,9 @@ Page {
                 var useClass = ''
                 if(message.messageParameters[key].id === room.accountUserId) {
                     useClass = 'highlight'
+                } else if(message.messageParameters[key].id === room.token
+                          && message.messageParameters[key].type === 'call') {
+                    useClass = 'highlight'
                 }
 
                 insertSnippet = insertSnippet.replace('{CLASS}', useClass)
