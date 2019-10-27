@@ -9,6 +9,10 @@ Page {
     property string token;
     property string roomName;
     property int accountId;
+    readonly property string messageStyleSheet :
+        "<style>" +
+            "a:link { color: " + Theme.highlightColor + "; }" +
+        "</style>";
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -48,7 +52,7 @@ Page {
         }
 
         return leadingSpace
-                + '<a target="_blank" rel="noopener noreferrer" href="'
+                + '<a rel="noopener noreferrer" href="'
                 + protocol
                 + url
                 + '">'
@@ -93,7 +97,7 @@ Page {
                 }
                 Label {
                     id: messageText
-                    text: message
+                    text: room.messageStyleSheet + message
                     textFormat: Text.RichText
                     height: contentHeight
                     anchors {
@@ -102,6 +106,7 @@ Page {
                     }
                     font.pixelSize: Theme.fontSizeSmall
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    onLinkActivated: Qt.openUrlExternally(link)
                 }
             }
 
