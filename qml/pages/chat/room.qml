@@ -9,10 +9,12 @@ Page {
     property string token;
     property string roomName;
     property int accountId;
-    readonly property string messageStyleSheet :
+    readonly property string messageStyleSheet:
         "<style>" +
             "a:link { color: " + Theme.highlightColor + "; }" +
         "</style>";
+    readonly property string messageMention:
+        "<strong>{MENTION}</strong>";
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -25,11 +27,13 @@ Page {
     }
 
     function prepareMessage(message) {
+
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
-                message.message = message.message.replace('{' + key + '}', message.messageParameters[key].name)
+                var insertSnippet = room.messageMention.replace('{MENTION}', message.messageParameters[key].name)
+                message.message = message.message.replace('{' + key + '}', insertSnippet)
             }
         })
         message.message = formatLinksRich(message.message)
