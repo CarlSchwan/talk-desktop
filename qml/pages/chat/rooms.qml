@@ -17,16 +17,12 @@ Page {
 
     SilicaListView {
         PullDownMenu {
+            id: pulley
              MenuItem {
                  text: qsTr("Accounts")
                  onClicked: pageStack.push(Qt.resolvedUrl("../Accounts.qml"), {})
              }
          }
-
-        BusyIndicator {
-            id: roomSync
-            running: false
-        }
 
         id: roomList
         anchors.fill: parent
@@ -70,8 +66,8 @@ Page {
 
         model:  RoomService {
             id: roomService
-            onModelAboutToBeReset: roomSync.running = true
-            onModelReset: roomSync.running = false
+            onModelAboutToBeReset: pulley.busy = true
+            onModelReset: pulley.busy = false
         }
 
         VerticalScrollDecorator {}
