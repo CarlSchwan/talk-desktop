@@ -21,6 +21,7 @@ public:
         AccountRole = Qt::UserRole + 3,
         UnreadRole = Qt::UserRole + 4,
         MentionedRole = Qt::UserRole + 5,
+        UserIdRole = Qt::UserRole + 6,
     };
 
     explicit RoomService(QObject *parent = nullptr);

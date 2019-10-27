@@ -9,12 +9,14 @@ Page {
     property string token;
     property string roomName;
     property int accountId;
+    property string accountUserId;
     readonly property string messageStyleSheet:
         "<style>" +
             "a:link { color: " + Theme.highlightColor + "; }" +
+            ".highlight { color: " + Theme.highlightColor + "; }" +
         "</style>";
     readonly property string messageMention:
-        "<strong>{MENTION}</strong>";
+        "<strong class='{CLASS}'>{MENTION}</strong>";
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -33,6 +35,12 @@ Page {
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
                 var insertSnippet = room.messageMention.replace('{MENTION}', message.messageParameters[key].name)
+                var useClass = ''
+                if(message.messageParameters[key].id === room.accountUserId) {
+                    useClass = 'highlight'
+                }
+
+                insertSnippet = insertSnippet.replace('{CLASS}', useClass)
                 message.message = message.message.replace('{' + key + '}', insertSnippet)
             }
         })

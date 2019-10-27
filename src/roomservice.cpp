@@ -36,6 +36,11 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         return QVariant(m_rooms[index.row()].account().id());
     }
 
+    if (role == UserIdRole)
+    {
+        return QVariant(m_rooms[index.row()].account().userId());
+    }
+
     if (role == UnreadRole)
     {
         return QVariant(m_rooms[index.row()].unreadMessages());
@@ -54,6 +59,7 @@ QHash<int, QByteArray> RoomService::roleNames() const {
     roles[NameRole] = "name";
     roles[TokenRole] = "token";
     roles[AccountRole] = "accountId";
+    roles[UserIdRole] = "accountUserId";
     roles[UnreadRole] = "unreadMessages";
     roles[MentionedRole] = "unreadMention";
     return roles;

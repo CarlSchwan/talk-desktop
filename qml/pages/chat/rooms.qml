@@ -61,7 +61,8 @@ Page {
                                {
                                    "token": token,
                                    "roomName": name,
-                                   "accountId": accountId
+                                   "accountId": accountId,
+                                   "accountUserId": accountUserId,
                                }
                 );
             }
