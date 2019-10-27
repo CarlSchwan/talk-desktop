@@ -94,8 +94,14 @@ Page {
 
     SilicaListView {
         id: chat
-        anchors.top: parent.top
-        anchors.bottom: sendMessagePart.top
+        anchors {
+            top: parent.top
+            bottom: sendMessagePart.top
+            left: parent.left
+            right: parent.right
+            leftMargin: Theme.horizontalPageMargin
+            rightMargin: Theme.horizontalPageMargin
+        }
         width: parent.width
         height: parent.height - sendMessage.height
         contentHeight: height
