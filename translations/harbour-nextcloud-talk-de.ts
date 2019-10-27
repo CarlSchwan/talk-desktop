@@ -39,6 +39,13 @@
     </message>
 </context>
 <context>
+    <name>room</name>
+    <message>
+        <source>shared</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>rooms</name>
     <message>
         <source>Accounts</source>

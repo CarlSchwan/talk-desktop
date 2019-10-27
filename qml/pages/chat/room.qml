@@ -34,20 +34,19 @@ Page {
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
-                var insertSnippet = room.messageMention.replace('{MENTION}', message.messageParameters[key].name)
-                var useClass = ''
-                if(message.messageParameters[key].id === room.accountUserId) {
-                    useClass = 'highlight'
-                } else if(message.messageParameters[key].id === room.token
-                          && message.messageParameters[key].type === 'call') {
-                    useClass = 'highlight'
-                }
-
-                insertSnippet = insertSnippet.replace('{CLASS}', useClass)
+                var insertSnippet = createMentionSnippet(message.messageParameters[key]);
                 message.message = message.message.replace('{' + key + '}', insertSnippet)
             }
         })
-        message.message = formatLinksRich(message.message)
+        if(message.message === "{file}") {
+            var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
+
+            message.message = actorSnippet + " " + qsTr("shared") + " " +
+                    '<a rel="noopener noreferrer" href="' + message.messageParameters['file'].link + '">' +
+                    message.messageParameters['file'].name + '</a>';
+        } else {
+            message.message = formatLinksRich(message.message)
+        }
 
         return message
     }
@@ -56,6 +55,19 @@ Page {
         const urlRegex = /(\s|^)(https?:\/\/)?((?:[-A-Z0-9+_]+\.)+[-A-Z]+(?:\/[-A-Z0-9+&@#%?=~_|!:,.;()]*)*)(\s|$)/ig
 
         return content.replace(urlRegex, __linkReplacer)
+    }
+
+    function createMentionSnippet(messageParameters) {
+        var mentionSnippet = room.messageMention.replace('{MENTION}', messageParameters.name)
+        var useClass = ''
+        if(messageParameters.id === room.accountUserId) {
+            useClass = 'highlight'
+        } else if(messageParameters.id === room.token
+                  && messageParameters.type === 'call') {
+            useClass = 'highlight'
+        }
+
+        return mentionSnippet.replace('{CLASS}', useClass)
     }
 
     function __linkReplacer(_, leadingSpace, protocol, url, trailingSpace) {
