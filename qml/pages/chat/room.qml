@@ -29,9 +29,9 @@ Page {
     }
 
     function prepareMessage(message) {
-
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
+        message.message = escapeTags(message.message)
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
                 var insertSnippet = createMentionSnippet(message.messageParameters[key]);
@@ -49,6 +49,10 @@ Page {
         }
 
         return message
+    }
+
+    function escapeTags(text) {
+        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
     function formatLinksRich(content) {
