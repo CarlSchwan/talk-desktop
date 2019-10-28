@@ -31,6 +31,7 @@ Page {
     function prepareMessage(message) {
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
+        message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
@@ -118,12 +119,13 @@ Page {
 
         delegate: BackgroundItem {
             height: author.contentHeight + messageText.contentHeight + Theme.paddingMedium
+
             Column {
                 width: parent.width
 
                 Label {
                     id: author
-                    text: timeString + " · " + actorDisplayName
+                    text: timeString + " · " + actorDisplayName + " · " + dateString
                     textFormat: Text.PlainText;
                     anchors {
                         left: parent.left
@@ -152,7 +154,6 @@ Page {
         model: ListModel {
             id: messages
         }
-
 
         VerticalScrollDecorator {
             flickable: chat
