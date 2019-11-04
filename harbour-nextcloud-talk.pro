@@ -38,8 +38,6 @@ DISTFILES += qml/lib/API.js \
     rpm/harbour-nextcloud-talk.yaml \
     translations/*.ts \
     harbour-nextcloud-talk.desktop \
-    qml/pages/LoginPage.qml \
-    qml/lib/NcAuth.js \
     qml/pages/Accounts.qml \
     qml/pages/LegacyAddAccount.qml \
     qml/pages/chat/rooms.qml \
