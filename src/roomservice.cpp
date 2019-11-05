@@ -66,6 +66,9 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 }
 
 void RoomService::loadRooms() {
+    if(m_accounts.length() == 0) {
+        m_accounts = readAccounts();
+    }
     m_pendingRequests = m_accounts.length();
     beginResetModel();
     m_rooms.clear();

@@ -19,15 +19,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Verify Host</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Enter login name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Enter app password</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Verify Host</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

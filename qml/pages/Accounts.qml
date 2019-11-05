@@ -31,7 +31,9 @@ Page {
             }
             onClicked: {
                 if(account === -1) {
-                    pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {})
+                    pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {
+                        "onSuccessToRooms": accountList.count === 1
+                    })
                 }
             }
         }

@@ -8,10 +8,16 @@ Dialog {
     canAccept: false
 
     property var accData;
+    property bool onSuccessToRooms;
 
     signal lgcyHostEntered(string host)
 
-  onAccepted: {
+    onAccepted: {
+        if(legacyAddAccount.onSuccessToRooms) {
+            legacyAddAccount.acceptDestination = Qt.resolvedUrl("./chat/rooms.qml")
+            legacyAddAccount.acceptDestinationAction = PageStackAction.Replace
+        }
+
         accountService.addAccount(accData.host, accData.loginName, accData.token, accData.userId)
     }
 
