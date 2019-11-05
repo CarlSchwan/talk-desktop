@@ -26,15 +26,12 @@
         <source>Enter app password</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>LoginPage</name>
     <message>
-        <source>Login</source>
+        <source>Verify Host</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enter a Nextcloud host</source>
+        <source>Verify Credentials</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

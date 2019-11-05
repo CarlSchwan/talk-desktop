@@ -2,36 +2,54 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
 
-Page {
+Dialog {
     id: legacyAddAccount
     allowedOrientations: Orientation.All
+    canAccept: false
+
+    property var accData;
 
     signal lgcyHostEntered(string host)
 
+  onAccepted: {
+        accountService.addAccount(accData.host, accData.loginName, accData.token, accData.userId)
+    }
+
     SilicaFlickable {
         anchors.fill: parent
+
+        DialogHeader { }
 
         Discovery {
             id: discovery;
             onDiscoverySuccessful: function(ncServer) {
                 instance.text = ncServer
-                busy.running = false
+                busyHost.running = false
                 loginName.enabled = true
                 token.enabled = true
+                testHost.enabled = true
                 loginName.forceActiveFocus()
             }
             onDiscoveryFailed: {
-                busy.running = false
+                busyHost.running = false
                 loginName.enabled = false
                 token.enabled = false
+                testHost.enabled = true
             }
             onCredentialsVerificationFailed: {
-                busy.running = false
+                busyCreds.running = false
+                testHost.enabled = true
                 loginName.forceActiveFocus()
             }
             onCredentialsVerificationSuccessful: function(host, loginName, token, userId) {
-                accountService.addAccount(host, loginName, token, userId)
-                pageStack.pop()
+                busyCreds.running = false
+                legacyAddAccount.canAccept = true
+                legacyAddAccount.accData = {
+                    "host": host,
+                    "loginName": loginName,
+                    "token": token,
+                    "userId": userId,
+                }
             }
         }
 
@@ -39,15 +57,10 @@ Page {
             id: accountService;
         }
 
-        BusyIndicator {
-            id: busy
-            running: false;
-            // FIXME: that'S not what I want. I wont glowing upper edge.
-        }
-
         Column {
-            id: column
+            id: columnt
             width: parent.width
+            spacing: Theme.paddingSmall
 
             PageHeader { title: qsTr("Add account") }
 
@@ -60,8 +73,26 @@ Page {
                 width: parent.width
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
-                    busy.running = true;
+                    busyHost.running = true;
                     discovery.discoverInstance(instance.text);
+                    testHost.enabled = false
+                }
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                id: testHost
+                text: qsTr("Verify Host")
+                onClicked: {
+                    busyHost.running = true
+                    discovery.discoverInstance(instance.text);
+                    testHost.enabled = false
+                }
+
+                BusyIndicator {
+                    id: busyHost
+                    anchors.centerIn: testHost
+                    running: false;
                 }
             }
 
@@ -77,6 +108,9 @@ Page {
                 EnterKey.onClicked: {
                     token.forceActiveFocus()
                 }
+                onTextChanged: {
+                    legacyAddAccount.canAccept = false
+                }
             }
 
             PasswordField {
@@ -89,10 +123,30 @@ Page {
                 enabled: false
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
-                    busy.running = true;
+                    busyCreds   .running = true;
                     discovery.verifyCredentials(instance.text, loginName.text, token.text)
                 }
+                onTextChanged: {
+                    legacyAddAccount.canAccept = false
+                }
             }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                id: testCredentials
+                text: qsTr("Verify Credentials")
+                enabled: loginName.text && token.text && !busyCreds.running
+                onClicked: {
+                    busyCreds.running = true
+                    discovery.verifyCredentials(instance.text, loginName.text, token.text)
+                }
+
+                BusyIndicator {
+                    anchors.centerIn: testCredentials
+                    id: busyCreds
+                }
+            }
+
         }
     }
 }
