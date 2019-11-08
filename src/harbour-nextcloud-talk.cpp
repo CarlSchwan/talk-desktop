@@ -4,7 +4,6 @@
 #include "accountmodel.h"
 #include "discovery.h"
 #include "roomservice.h"
-#include "chat.h"
 
 int main(int argc, char *argv[])
 {

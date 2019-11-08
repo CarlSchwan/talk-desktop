@@ -23,8 +23,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/discoveryrun.cpp \
     src/roomservice.cpp \
     src/room.cpp \
-    src/accountreader.cpp \
-    src/chat.cpp
+    src/accountreader.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/harbour-nextcloud-talk.qml \
@@ -54,14 +53,10 @@ TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
     src/db.h \
-    src/ncauth.h \
-    src/ncauthnetworkaccessmanager.h \
-    src/ncauthnamf.h \
     src/accountmodel.h \
     src/nextcloudaccount.h \
     src/discovery.h \
     src/discoveryrun.h \
     src/roomservice.h \
     src/room.h \
-    src/accountreader.h \
-    src/chat.h
+    src/accountreader.h
