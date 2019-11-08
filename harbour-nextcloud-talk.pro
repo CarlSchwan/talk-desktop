@@ -17,9 +17,6 @@ QT += sql
 
 SOURCES += src/harbour-nextcloud-talk.cpp \
     src/db.cpp \
-    src/ncauth.cpp \
-    src/ncauthnetworkaccessmanager.cpp \
-    src/ncauthnamf.cpp \
     src/accountmodel.cpp \
     src/nextcloudaccount.cpp \
     src/discovery.cpp \
