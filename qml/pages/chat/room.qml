@@ -49,6 +49,8 @@ Page {
             message.message = formatLinksRich(message.message)
         }
 
+        delete message.messageParameters
+
         return message
     }
 
