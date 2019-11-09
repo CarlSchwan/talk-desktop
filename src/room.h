@@ -18,6 +18,7 @@ public:
         Public = 3,
     };
     Room();
+    bool operator ==(const Room &toCompare) const;
 
 private:
     const NextcloudAccount *m_account = nullptr;

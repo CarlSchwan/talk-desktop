@@ -1,4 +1,5 @@
 #include "roomservice.h"
+#include <QException>
 #include <QMetaMethod>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -79,7 +80,6 @@ void RoomService::loadRooms() {
     }
     m_pendingRequests = m_accounts.length();
     beginResetModel();
-    m_rooms.clear();
     if(m_pendingRequests > 0) {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
@@ -153,7 +153,13 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
                 .setUnreadMention(room.value("unreadMention").toBool())
                 .setUnreadMessages(room.value("unreadMessages").toInt())
                 .setLastActivity(room.value("lastActivity").toInt());
-        m_rooms.append(model);
+
+        try {
+            Room knownRoom = findRoomByTokenAndAccount(model.token(), model.account().id());
+            m_rooms.replace(m_rooms.indexOf(knownRoom), model);
+        } catch (QException& e) {
+            m_rooms.append(model);
+        }
     }
 
     std::sort(m_rooms.begin(), m_rooms.end(), [](const Room& a, const Room b) {
@@ -196,6 +202,18 @@ NextcloudAccount RoomService::getAccountById(const int id) {
             return *i;
         }
     }
+}
+
+Room RoomService::findRoomByTokenAndAccount(const QString token, const int accountId) {
+    QVector<Room>::iterator i;
+    for(i = m_rooms.begin(); i != m_rooms.end(); i++) {
+        if(i->token() == token && i->account().id() == accountId) {
+            return *i;
+        }
+    }
+    QException e;
+    throw e;
+    //return NULL;
 }
 
 void RoomService::pollRoom() {

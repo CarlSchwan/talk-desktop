@@ -102,3 +102,8 @@ Room& Room::setLastActivity(const int lastActivity)
     m_lastActivity = lastActivity;
     return *this;
 }
+
+bool Room::operator ==(const Room &toCompare) const {
+    return toCompare.account().id() == account().id()
+            && toCompare.token() == token();
+}

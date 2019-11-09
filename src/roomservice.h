@@ -46,6 +46,7 @@ private slots:
     void pollRoom();
     NextcloudAccount getAccountById(const int id);
     void roomPolled(QNetworkReply *reply);
+    Room findRoomByTokenAndAccount(const QString token, const int accountId);
 
 private:
     QVector<NextcloudAccount> m_accounts;
