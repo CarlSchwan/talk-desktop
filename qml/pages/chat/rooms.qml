@@ -6,14 +6,16 @@ Page {
     id: rooms
     allowedOrientations: Orientation.All
 
-    onStatusChanged: {
-        if(status === PageStatus.Activating) {
-            console.debug("Loading rooms")
+    Timer {
+        id: roomPolling
+        interval: rooms.visible ? 5000 : 30000;
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: {
             roomService.loadRooms()
         }
     }
-
-
 
     SilicaListView {
         PullDownMenu {
