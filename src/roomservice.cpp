@@ -180,7 +180,7 @@ Room RoomService::getRoom(QString token, int accountId) {
         }
     }
     QException e;
-    e.raise();
+    throw e;
 }
 
 void RoomService::startPolling(QString token, int accountId) {
@@ -202,6 +202,8 @@ NextcloudAccount RoomService::getAccountById(const int id) {
             return *i;
         }
     }
+    QException e;
+    throw e;
 }
 
 Room RoomService::findRoomByTokenAndAccount(const QString token, const int accountId) {
@@ -213,7 +215,6 @@ Room RoomService::findRoomByTokenAndAccount(const QString token, const int accou
     }
     QException e;
     throw e;
-    //return NULL;
 }
 
 void RoomService::pollRoom() {
