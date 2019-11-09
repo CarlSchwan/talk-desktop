@@ -1,4 +1,5 @@
 #include "roomservice.h"
+#include <QMetaMethod>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QJsonDocument>
@@ -66,6 +67,13 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 }
 
 void RoomService::loadRooms() {
+    if(
+        isSignalConnected(QMetaMethod::fromSignal(&QNetworkAccessManager::finished))
+        || m_nam.networkAccessible() == QNetworkAccessManager::NotAccessible
+    ) {
+        qDebug() << "previous room poll request still in progress, skipping";
+        return;
+    }
     if(m_accounts.length() == 0) {
         m_accounts = readAccounts();
     }
