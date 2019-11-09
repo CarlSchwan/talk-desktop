@@ -236,7 +236,13 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     }
 
     if(reply->error() == QNetworkReply::ContentNotFoundError) {
-        qDebug() << "Some server error?! check logs!";
+        qDebug() << "Some server error?! check logs! Polling stopped.";
+        return;
+    }
+
+    if(reply->error() == QNetworkReply::TimeoutError) {
+        qDebug() << "timeout…";
+        pollRoom();
         return;
     }
 
