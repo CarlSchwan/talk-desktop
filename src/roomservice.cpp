@@ -79,7 +79,6 @@ void RoomService::loadRooms() {
         m_accounts = readAccounts();
     }
     m_pendingRequests = m_accounts.length();
-    beginResetModel();
     if(m_pendingRequests > 0) {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
@@ -156,9 +155,14 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
 
         try {
             Room knownRoom = findRoomByTokenAndAccount(model.token(), model.account().id());
-            m_rooms.replace(m_rooms.indexOf(knownRoom), model);
+            int i = m_rooms.indexOf(knownRoom);
+            m_rooms.replace(i, model);
+            QModelIndex mi = index(i);
+            dataChanged(mi, mi);
         } catch (QException& e) {
+            beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
             m_rooms.append(model);
+            endInsertRows();
         }
     }
 
@@ -167,7 +171,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     });
 
     if(m_pendingRequests == 0) {
-        endResetModel();
         disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
 }
