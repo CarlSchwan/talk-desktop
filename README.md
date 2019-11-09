@@ -17,8 +17,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 * Legacy-type login with host, username and password. Please create an app password on Nextcloud and use it.
 * Multi-account support
 * List of all conversations, sorted by activity. It contains an unread counter, which is highlighted when an unread mention is present.
-	- There is no polling right now. Enter a conversation and leave it for a refresh.
-	- A busy indicator shows whether conversations are being (re)loaded
+	- Regular polling
 * Chat with any conversation
 	- loading most recent history
 	- constant long-polling of the currently open conversation
