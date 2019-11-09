@@ -1,18 +1,18 @@
 Name: harbour-nextcloud-talk
-Summary: SFOS Nextcloud Login Flow Demo
+Summary: Nextcloud Talk for Sailfish OS
 Version: 1.0.0
 Release: alpha.1
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
-Group: Qt/Qt
-URL: http://example.org/
-License: LICENSE
+Group: Applications/Communications
+URL: https://git.sr.ht/~blizzz/harbour-nextcloud-talk
+License: GPLv3+
 # This must be generated before uploading a package to a remote build service.
 # Usually this line does not need to be modified.
 Sources:
 - '%{name}-%{version}.tar.bz2'
 Description: |
-  Short description of my Sailfish OS Application
+  native Sailfish OS client for Nextcloud Talk
 Configure: none
 # The qtc5 builder inserts macros to allow QtCreator to have fine
 # control over qmake/make execution
