@@ -134,7 +134,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
         QJsonObject room = value.toObject();
-        qDebug() << "read room" << room.value("name").toString();
         Room model;
         model
                 .setAccount(currentAccount)
@@ -204,8 +203,6 @@ void RoomService::pollRoom() {
     endpoint.setQuery("format=json&lookIntoFuture=" + QString::number(m_lookIntoFuture) +
                       "&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId) +
                       "&includeLastKnown=" + includeLastKnown);
-    qDebug() << "Last known message id " << lastKnownMessageId;
-    qDebug() << "Query was" << endpoint.query();
 
     QNetworkRequest request(endpoint);
 
@@ -249,7 +246,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     if(reply->error() != QNetworkReply::NoError
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
     {
-        qDebug() << "network issue or unauthed";
+        qDebug() << "issue occured:" << reply->errorString() << "→ Polling stopped!";
         return;
     }
 
@@ -261,7 +258,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
-        qDebug() << "unexpected OCS code " << statuscode.toInt();
+        qDebug() << "unexpected OCS code " << statuscode.toInt() << "→ polling stopped";
         return;
     }
 
@@ -284,7 +281,6 @@ void RoomService::roomPolled(QNetworkReply *reply) {
         QJsonObject messageData = value.toObject();
         int msgId = messageData.value("id").toInt();
         if(msgId > m_db.lastKnownMessageId(activeAccountId, activeToken)) {
-            qDebug() << "new msgid" << msgId << "old was" << m_db.lastKnownMessageId(activeAccountId, activeToken);
             // do not lower value when we fetched history
             m_db.setLastKnownMessageId(activeAccountId, activeToken, msgId);
         }
@@ -325,7 +321,6 @@ void RoomService::sendMessage(QString messageText) {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QByteArray payload = QString("message=" + QUrl::toPercentEncoding(messageText)).toUtf8();
-    qDebug() << "send message payload " << payload;
 
     namPosting.post(request, payload);
 }

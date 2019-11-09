@@ -13,7 +13,6 @@ Db::Db()
         dataDir = dataDir.split("/harbour-nextcloud-talk/harbour-nextcloud-talk").at(0);
     }
     dataDir += "/harbour-nextcloud-talk";
-    qDebug() << "dirPath is " << dataDir;
     QString dbPath = dataDir + "/talk.db";
 
     if(!QDir(dataDir).exists()) {
@@ -53,7 +52,6 @@ int Db::lastKnownMessageId(int accountId, QString token) {
         return 0;
     }
     int id = query.value(0).toInt();
-    qDebug() << "ID in DB was '" << id << "'";
     return id;
 }
 
