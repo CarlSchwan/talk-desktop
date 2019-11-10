@@ -75,7 +75,6 @@ Dialog {
                 focus: true
                 label: qsTr("Enter a Nextcloud host")
                 placeholderText: label
-                text: "https://o.schiwon.me"
                 width: parent.width
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
                 EnterKey.onClicked: {
