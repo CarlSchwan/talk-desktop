@@ -175,8 +175,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
             Room knownRoom = findRoomByTokenAndAccount(model.token(), model.account().id());
             int i = m_rooms.indexOf(knownRoom);
             m_rooms.replace(i, model);
-            QModelIndex mi = index(i);
-            dataChanged(mi, mi);
         } catch (QException& e) {
             beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
             m_rooms.append(model);
@@ -187,10 +185,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     std::sort(m_rooms.begin(), m_rooms.end(), [](const Room& a, const Room b) {
         return a.lastActivity() > b.lastActivity();
     });
-
-    if(m_pendingRequests == 0) {
-        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
-    }
+    dataChanged(index(0), index(m_rooms.length() - 1));
 }
 
 Room RoomService::getRoom(QString token, int accountId) {
