@@ -100,9 +100,23 @@ void RoomService::loadRooms() {
 
 void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     m_pendingRequests--;
+    if(m_pendingRequests == 0) {
+        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
+    }
 
     qDebug() << "rooms loading finished " << reply->error();
     qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    switch (reply->error()) {
+        case QNetworkReply::NetworkSessionFailedError:
+            qDeleteAll(m_nam.findChildren<QNetworkReply *>());
+            disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
+            m_pendingRequests = 0;
+            return;
+            break;
+        default:
+            break;
+    }
 
     if(reply->error() != QNetworkReply::NoError
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
@@ -135,6 +149,10 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
         qDebug() << "unexpected OCS code " << statuscode.toInt();
+        if(statuscode.toInt() == 0) {
+            qDebug() << "payload was " << payload;
+            qDebug() << "url was" << reply->url();
+        }
         return;
     }
 
