@@ -38,7 +38,7 @@ Page {
             }
         }
 
-        model: AccountModel {
+        model: AccountService {
             id: accountModel
         }
 

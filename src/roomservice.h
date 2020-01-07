@@ -6,12 +6,12 @@
 #include <QNetworkAccessManager>
 #include <QJsonDocument>
 #include <QTimer>
-#include "accountreader.h"
 #include "db.h"
 #include "nextcloudaccount.h"
 #include "room.h"
+#include "services/accounts.h"
 
-class RoomService : public QAbstractListModel, AccountReader
+class RoomService : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -44,11 +44,11 @@ signals:
 
 private slots:
     void pollRoom();
-    NextcloudAccount getAccountById(const int id);
     void roomPolled(QNetworkReply *reply);
     Room findRoomByTokenAndAccount(const QString token, const int accountId);
 
 private:
+    Accounts &m_accountService = Accounts::getInstance();
     QVector<NextcloudAccount> m_accounts;
     QVector<Room> m_rooms;
     QNetworkAccessManager m_nam;

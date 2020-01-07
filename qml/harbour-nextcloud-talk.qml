@@ -5,7 +5,7 @@ import "pages"
 
 ApplicationWindow
 {
-    AccountModel {
+    AccountService {
         id: accounts
     }
 

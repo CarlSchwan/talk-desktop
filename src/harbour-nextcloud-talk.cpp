@@ -1,7 +1,7 @@
 #include <QtQuick>
 
 #include <sailfishapp.h>
-#include "accountmodel.h"
+#include "services/accounts.h"
 #include "discovery.h"
 #include "roomservice.h"
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
     QScopedPointer<QQuickView> v(SailfishApp::createView());
 
-    qmlRegisterType<AccountModel>("harbour.nextcloud.talk", 1, 0, "AccountModel");
+    qmlRegisterType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService");
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
 

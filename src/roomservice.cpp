@@ -12,7 +12,7 @@
 RoomService::RoomService(QObject *parent)
     : QAbstractListModel(parent)
 {
-    m_accounts = readAccounts();
+
 }
 
 int RoomService::rowCount(const QModelIndex &parent) const
@@ -76,7 +76,7 @@ void RoomService::loadRooms() {
         return;
     }
     if(m_accounts.length() == 0) {
-        m_accounts = readAccounts();
+        m_accounts = m_accountService.getAccounts();
     }
     m_pendingRequests = m_accounts.length();
     if(m_pendingRequests > 0) {
@@ -126,6 +126,9 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     }
 
     const NextcloudAccount* currentAccount = nullptr;
+    if(m_accounts.length() == 0) {
+        m_accounts = m_accountService.getAccounts();
+    }
     int accounts = m_accounts.length();
     for(int i = 0; i < accounts; i++) {
         const NextcloudAccount* account = &m_accounts.at(i);
@@ -211,17 +214,6 @@ void RoomService::stopPolling() {
     isPolling = false;
 }
 
-NextcloudAccount RoomService::getAccountById(const int id) {
-    QVector<NextcloudAccount>::iterator i;
-    for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
-        if(i->id() == id) {
-            return *i;
-        }
-    }
-    QException e;
-    throw e;
-}
-
 Room RoomService::findRoomByTokenAndAccount(const QString token, const int accountId) {
     QVector<Room>::iterator i;
     for(i = m_rooms.begin(); i != m_rooms.end(); i++) {
@@ -238,7 +230,7 @@ void RoomService::pollRoom() {
         return;
     }
     connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
-    NextcloudAccount account = getAccountById(activeAccountId);
+    NextcloudAccount account = m_accountService.getAccountById(activeAccountId);
     int lastKnownMessageId = m_db.lastKnownMessageId(activeAccountId, activeToken);
     QString includeLastKnown = m_lookIntoFuture == 0 ? "1" : "0";
     QUrl endpoint = QUrl(account.host());
@@ -349,7 +341,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
 }
 
 void RoomService::sendMessage(QString messageText) {
-    NextcloudAccount account = getAccountById(activeAccountId);
+    NextcloudAccount account = m_accountService.getAccountById(activeAccountId);
     QUrl endpoint = QUrl(account.host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
 

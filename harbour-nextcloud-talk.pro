@@ -17,13 +17,12 @@ QT += sql
 
 SOURCES += src/harbour-nextcloud-talk.cpp \
     src/db.cpp \
-    src/accountmodel.cpp \
     src/nextcloudaccount.cpp \
     src/discovery.cpp \
     src/discoveryrun.cpp \
     src/roomservice.cpp \
     src/room.cpp \
-    src/accountreader.cpp
+    src/services/accounts.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/harbour-nextcloud-talk.qml \
@@ -53,10 +52,9 @@ TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
     src/db.h \
-    src/accountmodel.h \
     src/nextcloudaccount.h \
     src/discovery.h \
     src/discoveryrun.h \
     src/roomservice.h \
     src/room.h \
-    src/accountreader.h
+    src/services/accounts.h

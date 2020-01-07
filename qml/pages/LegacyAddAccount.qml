@@ -59,7 +59,7 @@ Dialog {
             }
         }
 
-        AccountModel {
+        AccountService {
             id: accountService;
         }
 
