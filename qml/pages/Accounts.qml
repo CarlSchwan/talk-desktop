@@ -6,12 +6,6 @@ Page {
     id: accounts
     allowedOrientations: Orientation.All
 
-    onStatusChanged: {
-        if(status === PageStatus.Activating) {
-            accountModel.loadAccounts()
-        }
-    }
-
     SilicaListView {
         id: accountList
         anchors.fill: parent
