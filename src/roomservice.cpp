@@ -75,14 +75,11 @@ void RoomService::loadRooms() {
         qDebug() << "previous room poll request still in progress, skipping";
         return;
     }
-    if(m_accounts.length() == 0) {
-        m_accounts = m_accountService.getAccounts();
-    }
-    m_pendingRequests = m_accounts.length();
+    m_pendingRequests = m_accountService.getAccounts().length();
     if(m_pendingRequests > 0) {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
-    foreach (const NextcloudAccount account, m_accounts) {
+    foreach (const NextcloudAccount account, m_accountService.getAccounts()) {
         QUrl endpoint = QUrl(account.host());
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room");
         endpoint.setQuery("format=json");
@@ -126,12 +123,9 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     }
 
     const NextcloudAccount* currentAccount = nullptr;
-    if(m_accounts.length() == 0) {
-        m_accounts = m_accountService.getAccounts();
-    }
-    int accounts = m_accounts.length();
+    int accounts = m_accountService.getAccounts().length();
     for(int i = 0; i < accounts; i++) {
-        const NextcloudAccount* account = &m_accounts.at(i);
+        const NextcloudAccount* account = &m_accountService.getAccounts().at(i);
         if(account->host().authority() == reply->url().authority()) {
             currentAccount = account;
             qDebug() << "related account" << account->host().url();

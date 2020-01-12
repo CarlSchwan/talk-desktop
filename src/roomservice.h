@@ -49,7 +49,6 @@ private slots:
 
 private:
     Accounts &m_accountService = Accounts::getInstance();
-    QVector<NextcloudAccount> m_accounts;
     QVector<Room> m_rooms;
     QNetworkAccessManager m_nam;
     QNetworkAccessManager namPosting;
