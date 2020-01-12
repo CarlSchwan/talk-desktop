@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QSettings>
 #include "accounts.h"
+#include "../db.h"
 
 Accounts::Accounts(QObject *parent)
     : QAbstractListModel(parent)
@@ -71,6 +72,40 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     accountSettings.endGroup();
     accountSettings.sync();
     qDebug() << "account saved, status " << accountSettings.status();
+
+    m_accounts.clear();
+    readAccounts();
+    loadAccounts();
+}
+
+void Accounts::deleteAccount(int accountId)
+{
+    QSettings accountSettings("Nextcloud", "Accounts");
+    accountSettings.beginGroup("account_" + QString::number(accountId));
+    accountSettings.remove("");
+    accountSettings.endGroup();
+    accountSettings.sync();
+    qDebug() << "account deleted, status " << accountSettings.status();
+
+    Db db;
+    db.deleteAccountEntries(accountId);
+
+    NextcloudAccount acc;
+    try {
+        acc = getAccountById(accountId);
+    } catch (QException &e) {
+        qDebug() << "Could not find account in vector for removal" << accountId;
+        dataChanged(index(0), index(m_accounts.length() - 1));
+        return;
+    }
+
+    int intIndex = m_accounts.indexOf(acc);
+    beginRemoveRows(QModelIndex(), intIndex, intIndex);
+    //readAccounts();
+    m_accounts.remove(intIndex);
+    //m_accounts.erase(i);
+    loadAccounts();
+    beginRemoveRows(QModelIndex(), intIndex, intIndex);
 }
 
 NextcloudAccount Accounts::getAccountById(const int id) {
@@ -80,10 +115,12 @@ NextcloudAccount Accounts::getAccountById(const int id) {
 
     QVector<NextcloudAccount>::iterator i;
     for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
+        qDebug() << "testing" << i->id() << "with" << id;
         if(i->id() == id) {
             return *i;
         }
     }
+    qDebug() << "No such account";
     QException e;
     throw e;
 }
@@ -111,6 +148,7 @@ QVector<NextcloudAccount> Accounts::readAccounts()
         m_accounts.append(NextcloudAccount::fromSettings(accountSettings));
         accountSettings.endGroup();
     }
+    qDebug() << "We have" << m_accounts.count() << "accounts";
 
     return m_accounts;
 }

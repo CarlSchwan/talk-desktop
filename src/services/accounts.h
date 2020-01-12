@@ -26,6 +26,7 @@ public:
 
 public slots:
     void addAccount(QString url, QString loginName, QString token, QString userId);
+    void deleteAccount(int accountId);
     void loadAccounts();
 
 private:

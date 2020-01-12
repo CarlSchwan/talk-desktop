@@ -68,3 +68,7 @@ void NextcloudAccount::setPassword(const QString password) { m_password = passwo
 
 QString NextcloudAccount::userId() const { return m_user_id; }
 void NextcloudAccount::setUserId(const QString user_id) { m_user_id = user_id; m_dirty = true; }
+
+bool NextcloudAccount::operator ==(const NextcloudAccount &toCompare) const {
+    return toCompare.id() == id();
+}

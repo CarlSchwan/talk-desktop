@@ -192,6 +192,7 @@ Room RoomService::getRoom(QString token, int accountId) {
             return *i;
         }
     }
+    qDebug() << "No such room";
     QException e;
     throw e;
 }
@@ -223,8 +224,14 @@ void RoomService::pollRoom() {
     if(!isPolling) {
         return;
     }
+    NextcloudAccount account;
+    try {
+        account = m_accountService.getAccountById(activeAccountId);
+    } catch (QException &e) {
+        qDebug() << "Failed to poll for room" << activeAccountId;
+        return;
+    }
     connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
-    NextcloudAccount account = m_accountService.getAccountById(activeAccountId);
     int lastKnownMessageId = m_db.lastKnownMessageId(activeAccountId, activeToken);
     QString includeLastKnown = m_lookIntoFuture == 0 ? "1" : "0";
     QUrl endpoint = QUrl(account.host());

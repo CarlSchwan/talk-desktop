@@ -73,6 +73,20 @@ bool Db::setLastKnownMessageId(int accountId, QString token, int messageId) {
     return result;
 }
 
+bool Db::deleteAccountEntries(int accountId)
+{
+    QSqlQuery query;
+    query.prepare("DELETE FROM lastKnownMessageMarkers WHERE accountId = :accountId;");
+    query.bindValue(":accountId", accountId);
+    bool result = query.exec();
+    if(!result) {
+        qWarning() << "Failed to delete entries for of an account"
+                    << "Query " << query.boundValues()
+                    << " :" << m_db.lastError().text();
+    }
+    return result;
+}
+
 void Db::initDb(QString dbPath) {
     if(!m_db.transaction()) {
         qCritical() << "Cannot start transaction"

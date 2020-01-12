@@ -11,6 +11,7 @@ public:
     Db();
     int lastKnownMessageId(int accountId, QString token);
     bool setLastKnownMessageId(int accountId, QString token, int messageId);
+    bool deleteAccountEntries(int accountId);
 
 private:
     void initDb(QString dbPath);

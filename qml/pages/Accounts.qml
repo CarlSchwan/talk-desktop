@@ -14,7 +14,7 @@ Page {
             title: qsTr("Accounts")
         }
 
-        delegate: BackgroundItem {
+        delegate: ListItem {
             Label {
                 text: name
                 anchors {
@@ -28,6 +28,15 @@ Page {
                     pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {
                         "onSuccessToRooms": accountList.count === 1
                     })
+                }
+            }
+            menu: ContextMenu {
+                hasContent: account !== -1
+                MenuItem {
+                    text: qsTr("Delete account")
+                    onClicked: {
+                        accountModel.deleteAccount(account)
+                    }
                 }
             }
         }
