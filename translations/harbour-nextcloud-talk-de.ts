@@ -7,6 +7,10 @@
         <source>Accounts</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Delete account</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>LegacyAddAccount</name>
