@@ -6,6 +6,8 @@ Page {
     id: rooms
     allowedOrientations: Orientation.All
 
+    property string lastUpdate
+
     Timer {
         id: roomPolling
         interval: rooms.visible ? 5000 : 30000;
@@ -23,6 +25,10 @@ Page {
              MenuItem {
                  text: qsTr("Accounts")
                  onClicked: pageStack.push(Qt.resolvedUrl("../Accounts.qml"), {})
+             }
+             MenuItem {
+                 text: qsTr("Last update: ") + lastUpdate
+                 enabled: false
              }
          }
 
@@ -70,6 +76,9 @@ Page {
             id: roomService
             onModelAboutToBeReset: pulley.busy = true
             onModelReset: pulley.busy = false
+            onDataChanged: {
+                lastUpdate = new Date().toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
+            }
         }
 
         VerticalScrollDecorator {}

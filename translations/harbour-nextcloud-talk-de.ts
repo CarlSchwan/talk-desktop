@@ -56,5 +56,9 @@
         <source>Conversations</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Last update: </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>
