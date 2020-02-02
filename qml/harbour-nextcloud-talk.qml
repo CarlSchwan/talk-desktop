@@ -5,15 +5,11 @@ import "pages"
 
 ApplicationWindow
 {
-    AccountService {
-        id: accounts
-    }
-
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
     Component.onCompleted: {
-        accounts.loadAccounts();
-        if(accounts.rowCount() === 1) {
+        AccountService.loadAccounts();
+        if(AccountService.rowCount() === 1) {
             console.log("let's login to an account")
             pageStack.push(Qt.resolvedUrl("./pages/Accounts.qml"), {})
         } else {

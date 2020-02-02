@@ -18,7 +18,7 @@ Dialog {
             legacyAddAccount.acceptDestinationAction = PageStackAction.Replace
         }
 
-        accountService.addAccount(accData.host, accData.loginName, accData.token, accData.userId)
+        AccountService.addAccount(accData.host, accData.loginName, accData.token, accData.userId)
     }
 
     SilicaFlickable {
@@ -57,10 +57,6 @@ Dialog {
                     "userId": userId,
                 }
             }
-        }
-
-        AccountService {
-            id: accountService;
         }
 
         Column {

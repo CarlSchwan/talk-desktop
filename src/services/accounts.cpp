@@ -67,6 +67,7 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     NextcloudAccount account(id, name, host, loginName, token, userId);
     QSettings accountSettings("Nextcloud", "Accounts");
 
+    beginResetModel();
     accountSettings.beginGroup("account_" + QString::number(id));
     account.toSettings(accountSettings);
     accountSettings.endGroup();
@@ -74,8 +75,7 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     qDebug() << "account saved, status " << accountSettings.status();
 
     m_accounts.clear();
-    readAccounts();
-    loadAccounts();
+    endResetModel();
 }
 
 void Accounts::deleteAccount(int accountId)
@@ -101,11 +101,8 @@ void Accounts::deleteAccount(int accountId)
 
     int intIndex = m_accounts.indexOf(acc);
     beginRemoveRows(QModelIndex(), intIndex, intIndex);
-    //readAccounts();
     m_accounts.remove(intIndex);
-    //m_accounts.erase(i);
-    loadAccounts();
-    beginRemoveRows(QModelIndex(), intIndex, intIndex);
+    endRemoveRows();
 }
 
 NextcloudAccount Accounts::getAccountById(const int id) {

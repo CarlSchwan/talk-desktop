@@ -21,9 +21,16 @@ int main(int argc, char *argv[])
 
     QScopedPointer<QQuickView> v(SailfishApp::createView());
 
-    qmlRegisterType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService");
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
+
+    qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
+        [](QQmlEngine *eng, QJSEngine *js) -> QObject *
+        {
+            eng->setObjectOwnership(&Accounts::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
+            return &Accounts::getInstance();
+        }
+    );
 
     v->setSource(SailfishApp::pathTo("qml/harbour-nextcloud-talk.qml"));
     v->show();

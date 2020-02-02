@@ -12,7 +12,8 @@
 RoomService::RoomService(QObject *parent)
     : QAbstractListModel(parent)
 {
-
+    connect(&m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
+    connect(&m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
 }
 
 int RoomService::rowCount(const QModelIndex &parent) const
@@ -359,4 +360,12 @@ void RoomService::sendMessage(QString messageText) {
     QByteArray payload = QString("message=" + QUrl::toPercentEncoding(messageText)).toUtf8();
 
     namPosting.post(request, payload);
+}
+
+void RoomService::onAccountsChanged() {
+    qDebug() << "RoomService acting on Accounts change";
+    beginResetModel();
+    m_rooms.clear();
+    endResetModel();
+    loadRooms();
 }

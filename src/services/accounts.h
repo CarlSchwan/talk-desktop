@@ -30,9 +30,7 @@ public slots:
     void loadAccounts();
 
 private:
-    //Accounts(QObject *parent = nullptr);
     Accounts(const Accounts&);
-    const Accounts& operator=(const Accounts&);
     QVector<NextcloudAccount> readAccounts();
     QVector<NextcloudAccount> m_accounts;
     bool is_initialized = false;

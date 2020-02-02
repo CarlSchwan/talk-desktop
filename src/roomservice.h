@@ -46,6 +46,7 @@ private slots:
     void pollRoom();
     void roomPolled(QNetworkReply *reply);
     Room findRoomByTokenAndAccount(const QString token, const int accountId);
+    void onAccountsChanged();
 
 private:
     Accounts &m_accountService = Accounts::getInstance();

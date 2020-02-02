@@ -35,15 +35,13 @@ Page {
                 MenuItem {
                     text: qsTr("Delete account")
                     onClicked: {
-                        accountModel.deleteAccount(account)
+                        AccountService.deleteAccount(account)
                     }
                 }
             }
         }
 
-        model: AccountService {
-            id: accountModel
-        }
+        model: AccountService
 
         VerticalScrollDecorator {}
     }
