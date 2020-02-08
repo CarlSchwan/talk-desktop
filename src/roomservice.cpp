@@ -71,9 +71,14 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 void RoomService::loadRooms() {
     if(
         isSignalConnected(QMetaMethod::fromSignal(&QNetworkAccessManager::finished))
-        || m_nam.networkAccessible() == QNetworkAccessManager::NotAccessible
     ) {
-        qDebug() << "previous room poll request still in progress, skipping";
+        foreach (QNetworkReply* reply, m_rooms_requests) {
+            reply->abort();
+        }
+        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
+        qDebug() << "client timeout for previous loadRooms request";
+    } else if (m_nam.networkAccessible() == QNetworkAccessManager::NotAccessible) {
+        qDebug() << "no network, waiting";
         return;
     }
     m_pendingRequests = m_accountService.getAccounts().length();
@@ -92,7 +97,8 @@ void RoomService::loadRooms() {
         request.setRawHeader("Authorization", authValue.toLocal8Bit());
         request.setRawHeader("OCS-APIRequest", "true");
 
-        m_nam.get(request);
+        QNetworkReply* reply = m_nam.get(request);
+        m_rooms_requests.append(reply);
     }
 }
 
@@ -102,8 +108,9 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
 
-    qDebug() << "rooms loading finished " << reply->error();
-    qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if(m_rooms_requests.contains(reply)) {
+        m_rooms_requests.removeOne(reply);
+    }
 
     switch (reply->error()) {
         case QNetworkReply::NetworkSessionFailedError:
@@ -119,7 +126,11 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     if(reply->error() != QNetworkReply::NoError
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
     {
-        qDebug() << "network issue or unauthed";
+        qDebug() << "network issue or unauthed, code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if(m_nam.networkAccessible() != QNetworkAccessManager::Accessible) {
+            qDebug() << "Network not accessible";
+        }
+
         return;
     }
 
@@ -129,7 +140,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         const NextcloudAccount* account = &m_accountService.getAccounts().at(i);
         if(account->host().authority() == reply->url().authority()) {
             currentAccount = account;
-            qDebug() << "related account" << account->host().url();
             break;
         }
     }

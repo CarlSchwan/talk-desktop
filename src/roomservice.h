@@ -51,6 +51,7 @@ private slots:
 private:
     Accounts &m_accountService = Accounts::getInstance();
     QVector<Room> m_rooms;
+    QVector<QNetworkReply*> m_rooms_requests;
     QNetworkAccessManager m_nam;
     QNetworkAccessManager namPosting;
     int m_pendingRequests = 0;
