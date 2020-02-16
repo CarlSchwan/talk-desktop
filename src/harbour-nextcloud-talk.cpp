@@ -2,6 +2,7 @@
 
 #include <sailfishapp.h>
 #include "services/accounts.h"
+#include "services/participants.h"
 #include "discovery.h"
 #include "roomservice.h"
 
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
+    qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
 
     qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *
