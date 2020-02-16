@@ -21,12 +21,23 @@ Page {
     onStatusChanged: {
         if(status === PageStatus.Activating) {
             roomService.startPolling(token, accountId)
+
         } else if(status === PageStatus.Deactivating) {
             roomService.stopPolling()
         } else if(status === PageStatus.Inactive) {
             messages.clear();
+            pageStack.popAttached()
+        } else if(status === PageStatus.Active) {
+            pageStack.pushAttached(Qt.resolvedUrl("./participants.qml"),
+                {
+                    token: room.token,
+                    accountId: room.accountId,
+                    textField: sendMessage
+                }
+            );
         }
     }
+
 
     function prepareMessage(message) {
         message.message = message.message.replace('{actor}', message.actorDisplayName)

@@ -22,11 +22,13 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/discoveryrun.cpp \
     src/roomservice.cpp \
     src/room.cpp \
-    src/services/accounts.cpp
+    src/services/accounts.cpp \
+    src/services/participants.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
+    qml/pages/chat/participants.qml \
     rpm/harbour-nextcloud-talk.changes.in \
     rpm/harbour-nextcloud-talk.changes.run.in \
     rpm/harbour-nextcloud-talk.spec \
@@ -57,4 +59,5 @@ HEADERS += \
     src/discoveryrun.h \
     src/roomservice.h \
     src/room.h \
-    src/services/accounts.h
+    src/services/accounts.h \
+    src/services/participants.h

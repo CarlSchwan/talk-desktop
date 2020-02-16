@@ -40,6 +40,21 @@
     </message>
 </context>
 <context>
+    <name>participants</name>
+    <message>
+        <source>Participants</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Moderator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Guest</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>room</name>
     <message>
         <source>shared</source>

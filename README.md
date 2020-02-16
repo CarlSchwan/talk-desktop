@@ -8,7 +8,7 @@ Nextcloud Talk lowers the barrier for communication and lets your team connect a
 
 Nextcloud Talk for Sailfish OS is a hobby project in development and currently in an alpha stage. Due to limitations on he available components on the operating system, video and audio chat cannot be supported as of now. It is merely a text chat application thus.
 
-Due to the earlier development stage, plus refrain from sending bug reports. Code contributions however are very welcome! 
+Due to the earlier development stage, plus refrain from sending bug reports. Code contributions however are very welcome!
 
 ## Features
 
@@ -26,10 +26,11 @@ This is a complete list of features. What is not mentioned, does not work as of 
 	- sets displaynames of mentions, actors
 	- recognize and format links
 	- stores the last seen message id per conversation
+	- view list of participants, click to mention
 * Online only, nothing is stored on the device except:
 	- account data (host, login, token, user ID plus generated account id and name)
 	- last seen message id per conversation
-	
+
 ## Please note
 
 * Account information is saved in a plain text file, for reasons. One of them was having reusability for other types of apps in mind (contrary to setting up the same account everywhere again), the lack of being able to add an account profile on Sailfish OS generally, and the lack of a credentials store in Sailfish OS (but there is something coming).
