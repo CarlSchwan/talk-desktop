@@ -36,7 +36,7 @@ QVariant Participants::data(const QModelIndex &index, int role) const
     case TypeRole:
         return QVariant(m_participants[index.row()].type);
     case StatusRole:
-        return QVariant(m_participants[index.row()].sessionId != 0);
+        return QVariant(m_participants[index.row()].sessionId != "0");
     case AvatarRole:
         if(m_participants.length() > 0) {
             QUrl endpoint = QUrl(m_activeAccount.host());
