@@ -37,14 +37,6 @@ QVariant Participants::data(const QModelIndex &index, int role) const
         return QVariant(m_participants[index.row()].type);
     case StatusRole:
         return QVariant(m_participants[index.row()].sessionId != "0");
-    case AvatarRole:
-        if(m_participants.length() > 0) {
-            QUrl endpoint = QUrl(m_activeAccount.host());
-            endpoint.setPath(endpoint.path() + "/avatar/" + m_participants[index.row()].userId + "/" );
-            endpoint.setUserName(m_activeAccount.loginName());
-            endpoint.setPassword(m_activeAccount.password());
-            return QVariant(endpoint.url());
-        }
     default:
         return QVariant();
     }
@@ -57,7 +49,6 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[NameRole] = "displayName";
     roles[TypeRole] = "participantType";
     roles[StatusRole] = "isOnline";
-    roles[AvatarRole] = "avatarUrl";
     return roles;
 }
 

@@ -1,6 +1,7 @@
 #include <QtQuick>
 
 #include <sailfishapp.h>
+#include "providers/avatarprovider.h"
 #include "services/accounts.h"
 #include "services/participants.h"
 #include "discovery.h"
@@ -33,6 +34,8 @@ int main(int argc, char *argv[])
             return &Accounts::getInstance();
         }
     );
+
+    v->engine()->addImageProvider("avatar", new AvatarProvider);
 
     v->setSource(SailfishApp::pathTo("qml/harbour-nextcloud-talk.qml"));
     v->show();

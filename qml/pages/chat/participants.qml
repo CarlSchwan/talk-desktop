@@ -52,8 +52,9 @@ Page {
                 }
                 Image {
                     id: avatar
-                    source: avatarUrl + Theme.itemSizeExtraSmall
-                    visible: paintedWidth > 0
+                    source: "image://avatar/" + accountId + "/" + userId + "/"
+                    height: Theme.itemSizeExtraSmall
+                    width: Theme.itemSizeExtraSmall
                 }
                 Label {
                     id: name
