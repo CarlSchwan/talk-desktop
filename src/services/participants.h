@@ -24,7 +24,6 @@ public:
         NameRole = Qt::UserRole + 2,
         TypeRole = Qt::UserRole + 3,
         StatusRole = Qt::UserRole + 4,
-        AvatarRole = Qt::UserRole + 5,
     };
 
     struct Participant

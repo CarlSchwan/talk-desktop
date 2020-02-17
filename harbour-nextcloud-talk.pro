@@ -20,6 +20,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/nextcloudaccount.cpp \
     src/discovery.cpp \
     src/discoveryrun.cpp \
+    src/providers/avatarprovider.cpp \
     src/roomservice.cpp \
     src/room.cpp \
     src/services/accounts.cpp \
@@ -57,6 +58,7 @@ HEADERS += \
     src/nextcloudaccount.h \
     src/discovery.h \
     src/discoveryrun.h \
+    src/providers/avatarprovider.h \
     src/roomservice.h \
     src/room.h \
     src/services/accounts.h \
