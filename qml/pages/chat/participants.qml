@@ -10,6 +10,8 @@ Page {
     property int accountId;
     property Item textField;
 
+    readonly property string pageName: "Participants";
+
     ParticipantService {
         id: participantService
     }

@@ -21,11 +21,14 @@ Page {
     onStatusChanged: {
         if(status === PageStatus.Activating) {
             roomService.startPolling(token, accountId)
-
         } else if(status === PageStatus.Deactivating) {
-            roomService.stopPolling()
+            if(pageStack.currentPage.pageName !== "Participants") {
+                roomService.stopPolling()
+            }
         } else if(status === PageStatus.Inactive) {
-            messages.clear();
+            if(pageStack.currentPage.pageName !== "Participants") {
+                messages.clear();
+            }
             pageStack.popAttached()
         } else if(status === PageStatus.Active) {
             pageStack.pushAttached(Qt.resolvedUrl("./participants.qml"),
@@ -37,7 +40,6 @@ Page {
             );
         }
     }
-
 
     function prepareMessage(message) {
         message.message = message.message.replace('{actor}', message.actorDisplayName)
