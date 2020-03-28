@@ -201,8 +201,13 @@ Page {
                 id: ctxMenu;
                 container: chat
                 MenuItem {
-                    text: qsTr("Copy text")
-                    onClicked: Clipboard.text = stripTags(message)
+                    text: qsTr("Reply")
+                    visible: isReplyable
+                    onClicked: {
+                        replyToId = mid
+                        replyToMsg = stripTags(message.replace)
+                        sendMessage.focus = true
+                    }
                 }
                 MenuItem {
                     text: qsTr("Mention")
@@ -212,14 +217,10 @@ Page {
                     }
                 }
                 MenuItem {
-                    text: qsTr("Reply")
-                    visible: isReplyable
-                    onClicked: {
-                        replyToId = mid
-                        replyToMsg = stripTags(message.replace)
-                        sendMessage.focus = true
-                    }
+                    text: qsTr("Copy text")
+                    onClicked: Clipboard.text = stripTags(message)
                 }
+
             }
         }
 
