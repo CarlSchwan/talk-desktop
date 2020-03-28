@@ -67,11 +67,12 @@ Page {
             message.message = formatLinksRich(message.message)
         }
 
+        message.repliedTo = ""
         if(message.parent) {
             if(message.parent.messageParameters) {
                 message.parent.message = handleMessageParameters(message.parent.messageParameters, message.parent.message);
             }
-            message.message = prependRepliedTo(message);
+            message.repliedTo = prepareRepliedTo(message);
         }
 
         delete message.messageParameters
@@ -112,11 +113,11 @@ Page {
         return mentionSnippet.replace('{CLASS}', useClass)
     }
 
-    function prependRepliedTo(message) {
+    function prepareRepliedTo(message) {
         var quote = messageRepliedTo;
         quote = quote.replace('{RTOMSG}', stripTags(message.parent.message));
         quote = quote.replace('{RTOACTOR}', message.parent.actorDisplayName);
-        return quote + message.message;
+        return quote;
     }
 
     function stripTags(s) {
@@ -184,7 +185,7 @@ Page {
                 }
                 Label {
                     id: messageText
-                    text: room.messageStyleSheet + message
+                    text: room.messageStyleSheet + repliedTo + message
                     textFormat: Text.RichText
                     height: contentHeight
                     anchors {
@@ -205,7 +206,7 @@ Page {
                     visible: isReplyable
                     onClicked: {
                         replyToId = mid
-                        replyToMsg = stripTags(message.replace)
+                        replyToMsg = stripTags(message)
                         sendMessage.focus = true
                     }
                 }
