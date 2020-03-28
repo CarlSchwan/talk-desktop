@@ -22,11 +22,13 @@ This is a complete list of features. What is not mentioned, does not work as of 
 	- loading most recent history
 	- constant long-polling of the currently open conversation
 	- automatically sets the read marker
-	- display of each messages author and text
+	- display of each messages author, text and date
+	- display of the message replied to, if applicable
 	- sets displaynames of mentions, actors
 	- recognize and format links
 	- stores the last seen message id per conversation
 	- view list of participants, click to mention
+	- message context menu to copy, mention and reply
 * Online only, nothing is stored on the device except:
 	- account data (host, login, token, user ID plus generated account id and name)
 	- last seen message id per conversation
