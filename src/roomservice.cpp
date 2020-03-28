@@ -352,7 +352,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
     pollRoom();
 }
 
-void RoomService::sendMessage(QString messageText) {
+void RoomService::sendMessage(QString messageText, int replyToId) {
     NextcloudAccount account = m_accountService.getAccountById(activeAccountId);
     QUrl endpoint = QUrl(account.host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
@@ -368,6 +368,9 @@ void RoomService::sendMessage(QString messageText) {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QByteArray payload = QString("message=" + QUrl::toPercentEncoding(messageText)).toUtf8();
+    if(replyToId > -1) {
+        payload += QString("&replyTo=" + QString::number(replyToId)).toUtf8();
+    }
 
     namPosting.post(request, payload);
 }

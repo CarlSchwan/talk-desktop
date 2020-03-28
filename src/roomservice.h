@@ -37,7 +37,7 @@ public slots:
     Room getRoom(QString token, int accountId);
     void startPolling(QString token, int accountId);
     void stopPolling();
-    void sendMessage(QString messageText);
+    void sendMessage(QString messageText, int replyToId);
 
 signals:
     void newMessage(QString message);

@@ -10,6 +10,8 @@ Page {
     property string roomName;
     property int accountId;
     property string accountUserId;
+    property int replyToId: -1;
+    property string replyToMsg: "";
     readonly property string messageStyleSheet:
         "<style>" +
             "a:link { color: " + Theme.highlightColor + "; }" +
@@ -49,10 +51,12 @@ Page {
     }
 
     function prepareMessage(message) {
+        message.mid = message.id
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
+        message.originalMessage = message.message
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
                 var insertSnippet = createMentionSnippet(message.messageParameters[key]);
@@ -181,6 +185,13 @@ Page {
                     onLinkActivated: Qt.openUrlExternally(link)
                 }
             }
+            onClicked: {
+                if(isReplyable) {
+                    replyToId = mid
+                    replyToMsg = originalMessage
+                    sendMessage.focus = true
+                }
+            }
 
         }
 
@@ -193,23 +204,68 @@ Page {
         }
     }
 
-    Row {
+    Column {
         id: sendMessagePart
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         width: parent.width
-        TextField {
+
+        Row {
             width: parent.width
-            id: sendMessage
-            placeholderText: "Write something excellent"
-            EnterKey.enabled: text.length > 0
-            EnterKey.onClicked: {
-                roomService.sendMessage(sendMessage.text);
-                // FIXME: only clear text after it was send
-                sendMessage.text = ""
+            visible: replyToId != -1
+            spacing: Theme.paddingSmall
+            height: Theme.iconSizeSmall
+
+            Separator {
+                width: Theme.horizontalPageMargin
             }
-            onClicked: chat.scrollToBottom()
+
+            Icon {
+                id: replyIndicator
+                source: "image://theme/icon-s-repost"
+                color: palette.secondaryHighlightColor
+            }
+
+            Label {
+                width: parent.width - Theme.horizontalPageMargin * 2 - Theme.iconSizeSmall - Theme.paddingSmall * 3 - replyToClear.width
+                id: replyTo
+                text: replyToMsg
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: "NoWrap"
+                elide: "ElideMiddle"
+                color: Theme.secondaryHighlightColor
+                height: parent.height
+            }
+            IconButton {
+                height: Theme.iconSizeSmall
+                width: Theme.iconSizeSmall
+                id: replyToClear
+                icon.source: "image://theme/icon-s-clear-opaque-cross"
+                icon.color: palette.secondaryHighlightColor
+                onClicked: {
+                    replyToMsg = ""
+                    replyToId = -1
+                }
+            }
+        }
+
+        Row {
+            width: parent.width
+
+            TextField {
+                width: parent.width
+                id: sendMessage
+                placeholderText: "Write something excellent"
+                EnterKey.enabled: text.length > 0
+                EnterKey.onClicked: {
+                    roomService.sendMessage(sendMessage.text, replyToId);
+                    // FIXME: only clear text after it was send
+                    sendMessage.text = ""
+                    replyToId = -1
+                }
+                onClicked: chat.scrollToBottom()
+            }
         }
     }
 
