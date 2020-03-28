@@ -56,7 +56,6 @@ Page {
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
-        message.originalMessage = message.message
         Object.keys(message.messageParameters).forEach(function(key) {
             if(key.substring(0, 8) === 'mention-') {
                 var insertSnippet = createMentionSnippet(message.messageParameters[key]);
@@ -191,7 +190,7 @@ Page {
                 container: chat
                 MenuItem {
                     text: qsTr("Copy text")
-                    onClicked: Clipboard.text = originalMessage
+                    onClicked: Clipboard.text = message.replace(/(<([^>]+)>)/ig,"")
                 }
                 MenuItem {
                     text: qsTr("Mention")
@@ -205,7 +204,7 @@ Page {
                     visible: isReplyable
                     onClicked: {
                         replyToId = mid
-                        replyToMsg = originalMessage
+                        replyToMsg = message.replace(/(<([^>]+)>)/ig,"")
                         sendMessage.focus = true
                     }
                 }
