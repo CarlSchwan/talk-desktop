@@ -14,9 +14,16 @@ Page {
         "<style>" +
             "a:link { color: " + Theme.highlightColor + "; }" +
             ".highlight { color: " + Theme.highlightColor + "; }" +
+            ".repliedTo {
+                color: " + Theme.secondaryColor +";
+                font-size: small;
+                font-style: italic;
+            }" +
         "</style>";
     readonly property string messageMention:
         "<strong class='{CLASS}'>{MENTION}</strong>";
+    readonly property string messageRepliedTo:
+        "<blockquote class='repliedTo'>{RTOMSG} <span class='repliedToActor'>({RTOACTOR})</span></blockquote>";
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -62,6 +69,10 @@ Page {
             message.message = formatLinksRich(message.message)
         }
 
+        if(message.parent) {
+            message.message = prependRepliedTo(message);
+        }
+
         delete message.messageParameters
 
         return message
@@ -88,6 +99,13 @@ Page {
         }
 
         return mentionSnippet.replace('{CLASS}', useClass)
+    }
+
+    function prependRepliedTo(message) {
+        var quote = messageRepliedTo;
+        quote = quote.replace('{RTOMSG}', message.parent.message);
+        quote = quote.replace('{RTOACTOR}', message.parent.actorDisplayName);
+        return quote + message.message;
     }
 
     function __linkReplacer(_, leadingSpace, protocol, url, trailingSpace) {
