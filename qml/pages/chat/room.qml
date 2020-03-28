@@ -56,12 +56,7 @@ Page {
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
-        Object.keys(message.messageParameters).forEach(function(key) {
-            if(key.substring(0, 8) === 'mention-') {
-                var insertSnippet = createMentionSnippet(message.messageParameters[key]);
-                message.message = message.message.replace('{' + key + '}', insertSnippet)
-            }
-        })
+        message.message = handleMessageParameters(message.messageParameters, message.message)
         if(message.message === "{file}") {
             var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
 
@@ -73,11 +68,24 @@ Page {
         }
 
         if(message.parent) {
+            if(message.parent.messageParameters) {
+                message.parent.message = handleMessageParameters(message.parent.messageParameters, message.parent.message);
+            }
             message.message = prependRepliedTo(message);
         }
 
         delete message.messageParameters
 
+        return message
+    }
+
+    function handleMessageParameters(parameters, message) {
+        Object.keys(parameters).forEach(function(key) {
+            if(key.substring(0, 8) === 'mention-') {
+                var insertSnippet = createMentionSnippet(parameters[key]);
+                message = message.replace('{' + key + '}', insertSnippet)
+            }
+        })
         return message
     }
 
@@ -106,9 +114,13 @@ Page {
 
     function prependRepliedTo(message) {
         var quote = messageRepliedTo;
-        quote = quote.replace('{RTOMSG}', message.parent.message);
+        quote = quote.replace('{RTOMSG}', stripTags(message.parent.message));
         quote = quote.replace('{RTOACTOR}', message.parent.actorDisplayName);
         return quote + message.message;
+    }
+
+    function stripTags(s) {
+        return s.replace(/(<([^>]+)>)/ig,"")
     }
 
     function __linkReplacer(_, leadingSpace, protocol, url, trailingSpace) {
@@ -190,7 +202,7 @@ Page {
                 container: chat
                 MenuItem {
                     text: qsTr("Copy text")
-                    onClicked: Clipboard.text = message.replace(/(<([^>]+)>)/ig,"")
+                    onClicked: Clipboard.text = stripTags(message)
                 }
                 MenuItem {
                     text: qsTr("Mention")
@@ -204,7 +216,7 @@ Page {
                     visible: isReplyable
                     onClicked: {
                         replyToId = mid
-                        replyToMsg = message.replace(/(<([^>]+)>)/ig,"")
+                        replyToMsg = stripTags(message.replace)
                         sendMessage.focus = true
                     }
                 }
