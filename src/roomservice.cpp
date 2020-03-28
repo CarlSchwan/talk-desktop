@@ -211,13 +211,19 @@ Room RoomService::getRoom(QString token, int accountId) {
 void RoomService::startPolling(QString token, int accountId) {
     activeToken = token;
     activeAccountId = accountId;
-    isPolling = true;
+    m_isPolling = true;
     m_lookIntoFuture = 0;
     pollRoom();
 }
 
+bool RoomService::isPolling(QString token, int accountId) {
+    return activeToken == token
+            && activeAccountId == accountId
+            && m_isPolling;
+}
+
 void RoomService::stopPolling() {
-    isPolling = false;
+    m_isPolling = false;
 }
 
 Room RoomService::findRoomByTokenAndAccount(const QString token, const int accountId) {
@@ -232,7 +238,7 @@ Room RoomService::findRoomByTokenAndAccount(const QString token, const int accou
 }
 
 void RoomService::pollRoom() {
-    if(!isPolling) {
+    if(!m_isPolling) {
         return;
     }
     NextcloudAccount account;
@@ -269,7 +275,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
 
     disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
 
-    if(!isPolling) {
+    if(!m_isPolling) {
         return;
     }
 

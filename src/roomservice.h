@@ -36,6 +36,7 @@ public slots:
     void roomsLoadedFromAccount(QNetworkReply *reply);
     Room getRoom(QString token, int accountId);
     void startPolling(QString token, int accountId);
+    bool isPolling(QString token, int accountId);
     void stopPolling();
     void sendMessage(QString messageText, int replyToId);
 
@@ -58,7 +59,7 @@ private:
     QTimer m_pollTimer;
     QString activeToken;
     int activeAccountId;
-    bool isPolling = false;
+    bool m_isPolling = false;
     Db m_db;
     int m_lookIntoFuture = 0;
 };

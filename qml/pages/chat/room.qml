@@ -29,7 +29,10 @@ Page {
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
-            roomService.startPolling(token, accountId)
+            if(!roomService.isPolling(token, accountId)) {
+                // do not re-enable when returning from participants
+                roomService.startPolling(token, accountId)
+            }
         } else if(status === PageStatus.Deactivating) {
             if(pageStack.currentPage.pageName !== "Participants") {
                 roomService.stopPolling()
