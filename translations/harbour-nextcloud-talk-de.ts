@@ -60,6 +60,14 @@
         <source>shared</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mention author</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>rooms</name>

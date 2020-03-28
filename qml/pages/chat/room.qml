@@ -154,8 +154,8 @@ Page {
         }
         headerPositioning: ListView.PullBackHeader
 
-        delegate: BackgroundItem {
-            height: author.contentHeight + messageText.contentHeight + Theme.paddingMedium
+        delegate: ListItem {
+            height: author.contentHeight + messageText.contentHeight + Theme.paddingMedium + ctxMenu.height
 
             Column {
                 width: parent.width
@@ -183,16 +183,29 @@ Page {
                     font.pixelSize: Theme.fontSizeSmall
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     onLinkActivated: Qt.openUrlExternally(link)
-                }
-            }
-            onClicked: {
-                if(isReplyable) {
-                    replyToId = mid
-                    replyToMsg = originalMessage
-                    sendMessage.focus = true
-                }
-            }
 
+                }
+            }
+            menu: ContextMenu {
+                id: ctxMenu;
+                container: chat
+                MenuItem {
+                    text: qsTr("Reply")
+                    visible: isReplyable
+                    onClicked: {
+                        replyToId = mid
+                        replyToMsg = originalMessage
+                        sendMessage.focus = true
+                    }
+                }
+                MenuItem {
+                    text: qsTr("Mention author")
+                    visible: actorType == "users"
+                    onClicked: {
+                        sendMessage.text = sendMessage.text + " @" + actorId;
+                    }
+                }
+            }
         }
 
         model: ListModel {
