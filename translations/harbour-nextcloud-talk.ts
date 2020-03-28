@@ -65,7 +65,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Mention author</source>
+        <source>Copy text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mention</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

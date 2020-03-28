@@ -190,19 +190,23 @@ Page {
                 id: ctxMenu;
                 container: chat
                 MenuItem {
+                    text: qsTr("Copy text")
+                    onClicked: Clipboard.text = originalMessage
+                }
+                MenuItem {
+                    text: qsTr("Mention")
+                    visible: actorType == "users"
+                    onClicked: {
+                        sendMessage.text = sendMessage.text + " @" + actorId;
+                    }
+                }
+                MenuItem {
                     text: qsTr("Reply")
                     visible: isReplyable
                     onClicked: {
                         replyToId = mid
                         replyToMsg = originalMessage
                         sendMessage.focus = true
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Mention author")
-                    visible: actorType == "users"
-                    onClicked: {
-                        sendMessage.text = sendMessage.text + " @" + actorId;
                     }
                 }
             }
