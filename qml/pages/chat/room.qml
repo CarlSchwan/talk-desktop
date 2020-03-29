@@ -16,16 +16,11 @@ Page {
         "<style>" +
             "a:link { color: " + Theme.highlightColor + "; }" +
             ".highlight { color: " + Theme.highlightColor + "; }" +
-            ".repliedTo {
-                color: " + Theme.secondaryColor +";
-                font-size: small;
-                font-style: italic;
-            }" +
         "</style>";
     readonly property string messageMention:
         "<strong class='{CLASS}'>{MENTION}</strong>";
     readonly property string messageRepliedTo:
-        "<blockquote class='repliedTo'>{RTOMSG} <span class='repliedToActor'>({RTOACTOR})</span></blockquote>";
+        "{RTOMSG} ({RTOACTOR})";
 
     onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -70,12 +65,17 @@ Page {
             message.message = formatLinksRich(message.message)
         }
 
-        message.repliedTo = ""
+        message.repliedTo = {
+            author: "",
+            message: ""
+        }
+
         if(message.parent) {
             if(message.parent.messageParameters) {
                 message.parent.message = handleMessageParameters(message.parent.messageParameters, message.parent.message);
             }
-            message.repliedTo = prepareRepliedTo(message);
+            message.repliedTo.author = message.parent.actorDisplayName
+            message.repliedTo.message = stripTags(message.parent.message)
         }
 
         delete message.messageParameters
@@ -114,13 +114,6 @@ Page {
         }
 
         return mentionSnippet.replace('{CLASS}', useClass)
-    }
-
-    function prepareRepliedTo(message) {
-        var quote = messageRepliedTo;
-        quote = quote.replace('{RTOMSG}', stripTags(message.parent.message));
-        quote = quote.replace('{RTOACTOR}', message.parent.actorDisplayName);
-        return quote;
     }
 
     function stripTags(s) {
@@ -170,10 +163,16 @@ Page {
         headerPositioning: ListView.PullBackHeader
 
         delegate: ListItem {
-            height: author.contentHeight + messageText.contentHeight + Theme.paddingMedium + ctxMenu.height
+            height: author.contentHeight
+                    + repliedToAuthor.height
+                    + repliedToText.height
+                    + messageText.contentHeight
+                    + Theme.paddingLarge
+                    + ctxMenu.height
 
             Column {
                 width: parent.width
+                spacing: Theme.paddingSmall
 
                 Label {
                     id: author
@@ -186,9 +185,60 @@ Page {
                     font.pixelSize: Theme.fontSizeTiny
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
+                Row {
+                    visible: repliedTo.message !== ""
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    Rectangle {
+                        color: Theme.secondaryColor
+                        width: 2
+                        height: repliedToAuthor.height + repliedToText.height
+                    }
+                    Column {
+                        width: parent.width - Theme.paddingSmall
+                        Label {
+                            id: repliedToAuthor
+                            width: parent.width
+                            text: repliedTo.author
+                            textFormat: Text.PlainText
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            leftPadding: Theme.paddingSmall
+                            font.pixelSize: Theme.fontSizeExtraSmall
+                            wrapMode: "NoWrap"
+                            elide: "ElideMiddle"
+                            visible: repliedTo.author !== ""
+                            color: Theme.secondaryColor
+                            font.italic: true
+                            height: visible ? contentHeight : 0
+                        }
+                        Label {
+                            id: repliedToText
+                            text: repliedTo.message
+                            textFormat: Text.PlainText
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            leftPadding: Theme.paddingSmall
+                            font.pixelSize: Theme.fontSizeExtraSmall
+                            wrapMode: "NoWrap"
+                            elide: "ElideMiddle"
+                            visible: repliedTo.message !== ""
+                            color: Theme.secondaryColor
+                            font.italic: true
+                            height: visible ? contentHeight : 0
+                        }
+                    }
+                }
                 Label {
                     id: messageText
-                    text: room.messageStyleSheet + repliedTo + message
+                    text: room.messageStyleSheet + message
                     textFormat: Text.RichText
                     height: contentHeight
                     anchors {
