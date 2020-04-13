@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
+import "../../components"
 
 Page {
     id: room
@@ -170,87 +171,100 @@ Page {
                     + Theme.paddingLarge
                     + ctxMenu.height
 
-            Column {
-                width: parent.width
+            Row {
                 spacing: Theme.paddingSmall
 
-                Label {
-                    id: author
-                    text: timeString + " · " + actorDisplayName + " · " + dateString
-                    textFormat: Text.PlainText;
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    font.pixelSize: Theme.fontSizeTiny
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                Avatar {
+                    id: avatar
+                    account: accountId
+                    user: actorId
+                    anchors.bottom: parent.bottom
                 }
-                Row {
-                    visible: repliedTo.message !== ""
-                    anchors {
-                        left: parent.left
-                        right: parent.right
+
+                Column {
+                    width: parent.width - avatar.width - Theme.paddingSmall
+                    spacing: Theme.paddingSmall
+
+                    Label {
+                        id: author
+                        text: timeString + " · " + actorDisplayName + " · " + dateString
+                        textFormat: Text.PlainText;
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        font.pixelSize: Theme.fontSizeTiny
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     }
 
-                    Rectangle {
-                        color: Theme.secondaryColor
-                        width: 2
-                        height: repliedToAuthor.height + repliedToText.height
-                    }
-                    Column {
-                        width: parent.width - Theme.paddingSmall
-                        Label {
-                            id: repliedToAuthor
-                            width: parent.width
-                            text: repliedTo.author
-                            textFormat: Text.PlainText
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-                            leftPadding: Theme.paddingSmall
-                            font.pixelSize: Theme.fontSizeExtraSmall
-                            wrapMode: "NoWrap"
-                            elide: "ElideMiddle"
-                            visible: repliedTo.author !== ""
-                            color: Theme.secondaryColor
-                            font.italic: true
-                            height: visible ? contentHeight : 0
+                    Row {
+                        visible: repliedTo.message !== ""
+                        anchors {
+                            left: parent.left
+                            right: parent.right
                         }
-                        Label {
-                            id: repliedToText
-                            text: repliedTo.message
-                            textFormat: Text.PlainText
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-                            leftPadding: Theme.paddingSmall
-                            font.pixelSize: Theme.fontSizeExtraSmall
-                            wrapMode: "NoWrap"
-                            elide: "ElideMiddle"
-                            visible: repliedTo.message !== ""
+                        Rectangle {
                             color: Theme.secondaryColor
-                            font.italic: true
-                            height: visible ? contentHeight : 0
+                            width: 2
+                            height: repliedToAuthor.height + repliedToText.height
+                        }
+                        Column {
+                            width: parent.width - Theme.paddingSmall
+                            Label {
+                                id: repliedToAuthor
+                                width: parent.width
+                                text: repliedTo.author
+                                textFormat: Text.PlainText
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                }
+                                leftPadding: Theme.paddingSmall
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                wrapMode: "NoWrap"
+                                elide: "ElideMiddle"
+                                visible: repliedTo.author !== ""
+                                color: Theme.secondaryColor
+                                font.italic: true
+                                height: visible ? contentHeight : 0
+                            }
+                            Label {
+                                id: repliedToText
+                                text: repliedTo.message
+                                textFormat: Text.PlainText
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                }
+                                leftPadding: Theme.paddingSmall
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                wrapMode: "NoWrap"
+                                elide: "ElideMiddle"
+                                visible: repliedTo.message !== ""
+                                color: Theme.secondaryColor
+                                font.italic: true
+                                height: visible ? contentHeight : 0
+                            }
                         }
                     }
-                }
-                Label {
-                    id: messageText
-                    text: room.messageStyleSheet + message
-                    textFormat: Text.RichText
-                    height: contentHeight
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    font.pixelSize: Theme.fontSizeSmall
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    onLinkActivated: Qt.openUrlExternally(link)
+                    Label {
+                        id: messageText
+                        text: room.messageStyleSheet + message
+                        textFormat: Text.RichText
+                        height: contentHeight
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        font.pixelSize: Theme.fontSizeSmall
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        onLinkActivated: Qt.openUrlExternally(link)
 
+                    }
                 }
+
             }
+
             menu: ContextMenu {
                 id: ctxMenu;
                 container: chat
