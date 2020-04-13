@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
 
@@ -57,6 +58,19 @@ Page {
                     source: "image://avatar/" + accountId + "/" + userId + "/"
                     height: Theme.itemSizeExtraSmall
                     width: Theme.itemSizeExtraSmall
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: Item {
+                           width: avatar.width
+                           height: avatar.height
+                           Rectangle {
+                               anchors.centerIn: parent
+                               width: avatar.adapt ? avatar.width : Math.min(avatar.width, avatar.height)
+                               height: avatar.adapt ? avatar.height : width
+                               radius: Math.min(width, height)
+                           }
+                       }
+                    }
                 }
                 Label {
                     id: name
