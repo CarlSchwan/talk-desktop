@@ -270,7 +270,7 @@ Page {
                 container: chat
                 MenuItem {
                     text: qsTr("Reply")
-                    visible: isReplyable
+                    visible: isReplyable ? true : false
                     onClicked: {
                         replyToId = mid
                         replyToMsg = stripTags(message)
