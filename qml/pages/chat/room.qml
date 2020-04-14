@@ -51,6 +51,7 @@ Page {
 
     function prepareMessage(message) {
         message.mid = message.id
+        message.lastOfActorGroup = true
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
@@ -139,6 +140,15 @@ Page {
                 + trailingSpace
     }
 
+    function updateLastOfActor(message) {
+        if(messages.count > 0) {
+            var previousMessage = messages.get(messages.count - 1)
+            if(previousMessage && previousMessage.actorId === message.actorId) {
+                messages.setProperty(messages.count - 1, 'lastOfActorGroup', false)
+            }
+        }
+    }
+
     SilicaListView {
         id: chat
         anchors {
@@ -179,6 +189,7 @@ Page {
                     account: accountId
                     user: actorId
                     anchors.bottom: parent.bottom
+                    opacity: lastOfActorGroup ? 100 : 0
                 }
 
                 Column {
@@ -373,8 +384,9 @@ Page {
     Connections {
         target: roomService
         onNewMessage: {
-            message = JSON.parse(message)
-            messages.append(prepareMessage(message))
+            message = prepareMessage(JSON.parse(message))
+            updateLastOfActor(message)
+            messages.append(message)
             chat.scrollToBottom()
         }
     }
