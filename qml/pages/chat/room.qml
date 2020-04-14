@@ -209,7 +209,7 @@ Page {
                             height: repliedToAuthor.height + repliedToText.height
                         }
                         Column {
-                            width: parent.width - Theme.paddingSmall
+                            width: chat.width - avatar.width - Theme.paddingSmall - 2
                             Label {
                                 id: repliedToAuthor
                                 width: parent.width
