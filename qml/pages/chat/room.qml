@@ -52,6 +52,7 @@ Page {
     function prepareMessage(message) {
         message.mid = message.id
         message.lastOfActorGroup = true
+        message.firstOfActorGroup = true
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
@@ -149,6 +150,15 @@ Page {
         }
     }
 
+    function updateFirstOfActor(message) {
+        if(messages.count > 0) {
+            var previousMessage = messages.get(messages.count - 1)
+            if(previousMessage && previousMessage.actorId === message.actorId) {
+                message.firstOfActorGroup = false
+            }
+        }
+    }
+
     SilicaListView {
         id: chat
         anchors {
@@ -174,6 +184,7 @@ Page {
         headerPositioning: ListView.PullBackHeader
 
         delegate: ListItem {
+
             height: author.contentHeight
                     + repliedToAuthor.height
                     + repliedToText.height
@@ -198,7 +209,12 @@ Page {
 
                     Label {
                         id: author
-                        text: timeString + " · " + actorDisplayName + " · " + dateString
+                        text: {
+                            if(firstOfActorGroup) {
+                                return timeString + " · " + actorDisplayName + " · " + dateString
+                            }
+                            return timeString
+                        }
                         textFormat: Text.PlainText;
                         anchors {
                             left: parent.left
@@ -386,7 +402,9 @@ Page {
         onNewMessage: {
             message = prepareMessage(JSON.parse(message))
             updateLastOfActor(message)
+            updateFirstOfActor(message)
             messages.append(message)
+
             chat.scrollToBottom()
         }
     }
