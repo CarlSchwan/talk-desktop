@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
+import "../../components"
 
 Page {
     id: room
@@ -50,6 +51,8 @@ Page {
 
     function prepareMessage(message) {
         message.mid = message.id
+        message.lastOfActorGroup = true
+        message.firstOfActorGroup = true
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
@@ -138,6 +141,24 @@ Page {
                 + trailingSpace
     }
 
+    function updateLastOfActor(message) {
+        if(messages.count > 0) {
+            var previousMessage = messages.get(messages.count - 1)
+            if(previousMessage && previousMessage.actorId === message.actorId) {
+                messages.setProperty(messages.count - 1, 'lastOfActorGroup', false)
+            }
+        }
+    }
+
+    function updateFirstOfActor(message) {
+        if(messages.count > 0) {
+            var previousMessage = messages.get(messages.count - 1)
+            if(previousMessage && previousMessage.actorId === message.actorId) {
+                message.firstOfActorGroup = false
+            }
+        }
+    }
+
     SilicaListView {
         id: chat
         anchors {
@@ -163,6 +184,7 @@ Page {
         headerPositioning: ListView.PullBackHeader
 
         delegate: ListItem {
+
             height: author.contentHeight
                     + repliedToAuthor.height
                     + repliedToText.height
@@ -170,93 +192,112 @@ Page {
                     + Theme.paddingLarge
                     + ctxMenu.height
 
-            Column {
-                width: parent.width
+            Row {
                 spacing: Theme.paddingSmall
 
-                Label {
-                    id: author
-                    text: timeString + " · " + actorDisplayName + " · " + dateString
-                    textFormat: Text.PlainText;
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    font.pixelSize: Theme.fontSizeTiny
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                Avatar {
+                    id: avatar
+                    account: accountId
+                    user: actorId
+                    anchors.bottom: parent.bottom
+                    opacity: lastOfActorGroup ? 100 : 0
                 }
-                Row {
-                    visible: repliedTo.message !== ""
-                    anchors {
-                        left: parent.left
-                        right: parent.right
+
+                Column {
+                    width: chat.width - avatar.width - Theme.paddingSmall
+                    spacing: Theme.paddingSmall
+
+                    Label {
+                        id: author
+                        text: {
+                            if(firstOfActorGroup) {
+                                return timeString + " · " + actorDisplayName + " · " + dateString
+                            }
+                            return timeString
+                        }
+                        textFormat: Text.PlainText;
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        font.pixelSize: Theme.fontSizeTiny
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     }
 
-                    Rectangle {
-                        color: Theme.secondaryColor
-                        width: 2
-                        height: repliedToAuthor.height + repliedToText.height
-                    }
-                    Column {
-                        width: parent.width - Theme.paddingSmall
-                        Label {
-                            id: repliedToAuthor
-                            width: parent.width
-                            text: repliedTo.author
-                            textFormat: Text.PlainText
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-                            leftPadding: Theme.paddingSmall
-                            font.pixelSize: Theme.fontSizeExtraSmall
-                            wrapMode: "NoWrap"
-                            elide: "ElideMiddle"
-                            visible: repliedTo.author !== ""
-                            color: Theme.secondaryColor
-                            font.italic: true
-                            height: visible ? contentHeight : 0
+                    Row {
+                        visible: repliedTo.message !== ""
+                        anchors {
+                            left: parent.left
+                            right: parent.right
                         }
-                        Label {
-                            id: repliedToText
-                            text: repliedTo.message
-                            textFormat: Text.PlainText
-                            anchors {
-                                left: parent.left
-                                right: parent.right
-                            }
-                            leftPadding: Theme.paddingSmall
-                            font.pixelSize: Theme.fontSizeExtraSmall
-                            wrapMode: "NoWrap"
-                            elide: "ElideMiddle"
-                            visible: repliedTo.message !== ""
+                        Rectangle {
                             color: Theme.secondaryColor
-                            font.italic: true
-                            height: visible ? contentHeight : 0
+                            width: 2
+                            height: repliedToAuthor.height + repliedToText.height
+                        }
+                        Column {
+                            width: chat.width - avatar.width - Theme.paddingSmall - 2
+                            Label {
+                                id: repliedToAuthor
+                                width: parent.width
+                                text: repliedTo.author
+                                textFormat: Text.PlainText
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                }
+                                leftPadding: Theme.paddingSmall
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                wrapMode: "NoWrap"
+                                elide: "ElideMiddle"
+                                visible: repliedTo.author !== ""
+                                color: Theme.secondaryColor
+                                font.italic: true
+                                height: visible ? contentHeight : 0
+                            }
+                            Label {
+                                id: repliedToText
+                                text: repliedTo.message
+                                textFormat: Text.PlainText
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                }
+                                leftPadding: Theme.paddingSmall
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                wrapMode: "NoWrap"
+                                elide: "ElideMiddle"
+                                visible: repliedTo.message !== ""
+                                color: Theme.secondaryColor
+                                font.italic: true
+                                height: visible ? contentHeight : 0
+                            }
                         }
                     }
-                }
-                Label {
-                    id: messageText
-                    text: room.messageStyleSheet + message
-                    textFormat: Text.RichText
-                    height: contentHeight
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                    font.pixelSize: Theme.fontSizeSmall
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    onLinkActivated: Qt.openUrlExternally(link)
+                    Label {
+                        id: messageText
+                        text: room.messageStyleSheet + message
+                        textFormat: Text.RichText
+                        height: contentHeight
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        font.pixelSize: Theme.fontSizeSmall
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                        onLinkActivated: Qt.openUrlExternally(link)
 
+                    }
                 }
+
             }
+
             menu: ContextMenu {
                 id: ctxMenu;
                 container: chat
                 MenuItem {
                     text: qsTr("Reply")
-                    visible: isReplyable
+                    visible: isReplyable ? true : false
                     onClicked: {
                         replyToId = mid
                         replyToMsg = stripTags(message)
@@ -359,8 +400,11 @@ Page {
     Connections {
         target: roomService
         onNewMessage: {
-            message = JSON.parse(message)
-            messages.append(prepareMessage(message))
+            message = prepareMessage(JSON.parse(message))
+            updateLastOfActor(message)
+            updateFirstOfActor(message)
+            messages.append(message)
+
             chat.scrollToBottom()
         }
     }

@@ -27,6 +27,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/services/participants.cpp
 
 DISTFILES += qml/lib/API.js \
+    qml/components/Avatar.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
     qml/pages/chat/participants.qml \

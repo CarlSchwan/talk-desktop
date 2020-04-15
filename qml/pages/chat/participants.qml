@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
+import "../../components/"
 
 Page {
     id: participants
@@ -44,6 +45,9 @@ Page {
 
                 textField.text = textField.text + separator + "@" + userId;
                 pageStack.navigateBack(PageStackAction.Animated);
+                console.log(avatar.source)
+                console.log(avatar.accountId)
+                console.log(avatar.userId)
             }
 
             Row {
@@ -52,11 +56,10 @@ Page {
                     right: parent.right
                     margins: Theme.paddingMedium
                 }
-                Image {
+                Avatar {
                     id: avatar
-                    source: "image://avatar/" + accountId + "/" + userId + "/"
-                    height: Theme.itemSizeExtraSmall
-                    width: Theme.itemSizeExtraSmall
+                    account: accountId
+                    user: userId
                 }
                 Label {
                     id: name
