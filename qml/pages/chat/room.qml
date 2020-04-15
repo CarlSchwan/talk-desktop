@@ -204,7 +204,7 @@ Page {
                 }
 
                 Column {
-                    width: parent.width - avatar.width - Theme.paddingSmall
+                    width: chat.width - avatar.width - Theme.paddingSmall
                     spacing: Theme.paddingSmall
 
                     Label {
