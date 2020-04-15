@@ -53,12 +53,15 @@ Page {
         message.mid = message.id
         message.lastOfActorGroup = true
         message.firstOfActorGroup = true
+        message.messageType = "posting"
+
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
         message.message = handleMessageParameters(message.messageParameters, message.message)
         if(message.message === "{file}") {
+            message.messageType = "file"
             var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
 
             message.message = actorSnippet + " " + qsTr("shared") + " " +
@@ -80,8 +83,6 @@ Page {
             message.repliedTo.author = message.parent.actorDisplayName
             message.repliedTo.message = stripTags(message.parent.message)
         }
-
-        delete message.messageParameters
 
         return message
     }
@@ -191,6 +192,7 @@ Page {
                     + messageText.contentHeight
                     + Theme.paddingLarge
                     + ctxMenu.height
+                    + filePreview.height
 
             Row {
                 spacing: Theme.paddingSmall
@@ -286,7 +288,14 @@ Page {
                         font.pixelSize: Theme.fontSizeSmall
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         onLinkActivated: Qt.openUrlExternally(link)
-
+                    }
+                    FilePreview {
+                        id: filePreview
+                        account: accountId
+                        fileId: (messageType === "file" && messageParameters.file && messageParameters.file.id) ? messageParameters.file.id : -1
+                        visible: messageType === "file"
+                        size: messageType === "file" ? Theme.itemSizeHuge : 0
+                        height: messageType === "file" ? Theme.itemSizeHuge : 0
                     }
                 }
 

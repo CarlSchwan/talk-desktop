@@ -2,6 +2,7 @@
 
 #include <sailfishapp.h>
 #include "providers/avatarprovider.h"
+#include "providers/previewprovider.h"
 #include "services/accounts.h"
 #include "services/participants.h"
 #include "discovery.h"
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     );
 
     v->engine()->addImageProvider("avatar", new AvatarProvider);
+    v->engine()->addImageProvider("preview", new PreviewProvider);
 
     v->setSource(SailfishApp::pathTo("qml/harbour-nextcloud-talk.qml"));
     v->show();

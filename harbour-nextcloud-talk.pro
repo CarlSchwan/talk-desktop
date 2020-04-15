@@ -21,6 +21,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/discovery.cpp \
     src/discoveryrun.cpp \
     src/providers/avatarprovider.cpp \
+    src/providers/previewprovider.cpp \
     src/roomservice.cpp \
     src/room.cpp \
     src/services/accounts.cpp \
@@ -28,6 +29,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
 
 DISTFILES += qml/lib/API.js \
     qml/components/Avatar.qml \
+    qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
     qml/pages/chat/participants.qml \
@@ -60,6 +62,7 @@ HEADERS += \
     src/discovery.h \
     src/discoveryrun.h \
     src/providers/avatarprovider.h \
+    src/providers/previewprovider.h \
     src/roomservice.h \
     src/room.h \
     src/services/accounts.h \
