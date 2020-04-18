@@ -1,20 +1,13 @@
 #ifndef AVATARPROVIDER_H
 #define AVATARPROVIDER_H
 
-#include <QImage>
-#include <QQuickAsyncImageProvider>
-#include <QQuickImageResponse>
-#include <QSize>
-#include <QThreadPool>
+#include "abstractnextcloudimageprovider.h"
 
-class AvatarProvider : public QQuickAsyncImageProvider
+class AvatarProvider : public AbstractNextcloudImageProvider
 {
 public:
     AvatarProvider();
-    QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize);
-
-private:
-    QThreadPool pool;
+    QNetworkRequest getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize);
 };
 
 #endif // AVATARPROVIDER_H

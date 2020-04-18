@@ -1,19 +1,13 @@
 #ifndef PREVIEWPROVIDER_H
 #define PREVIEWPROVIDER_H
 
-#include <QQuickAsyncImageProvider>
-#include <QQuickImageResponse>
-#include <QSize>
-#include <QThreadPool>
+#include "abstractnextcloudimageprovider.h"
 
-class PreviewProvider : public QQuickAsyncImageProvider
+class PreviewProvider : public AbstractNextcloudImageProvider
 {
 public:
     PreviewProvider();
-    QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize);
-
-private:
-    QThreadPool pool;
+     QNetworkRequest getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize);
 };
 
 #endif // PREVIEWPROVIDER_H
