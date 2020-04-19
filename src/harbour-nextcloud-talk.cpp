@@ -4,6 +4,7 @@
 #include "providers/avatarprovider.h"
 #include "providers/previewprovider.h"
 #include "services/accounts.h"
+#include "services/download.h"
 #include "services/participants.h"
 #include "discovery.h"
 #include "roomservice.h"
@@ -27,6 +28,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
     qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
+
+    qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
 
     qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *

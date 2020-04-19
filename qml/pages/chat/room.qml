@@ -293,6 +293,7 @@ Page {
                         id: filePreview
                         account: accountId
                         fileId: (messageType === "file" && messageParameters.file && messageParameters.file.id) ? messageParameters.file.id : -1
+                        filePath: (messageType === "file" && messageParameters.file && messageParameters.file.path) ? messageParameters.file.path : ""
                         visible: messageType === "file"
                         size: messageType === "file" ? Theme.itemSizeHuge : 0
                         height: messageType === "file" ? Theme.itemSizeHuge : 0

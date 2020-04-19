@@ -26,6 +26,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/roomservice.cpp \
     src/room.cpp \
     src/services/accounts.cpp \
+    src/services/download.cpp \
     src/services/participants.cpp
 
 DISTFILES += qml/lib/API.js \
@@ -68,4 +69,5 @@ HEADERS += \
     src/roomservice.h \
     src/room.h \
     src/services/accounts.h \
+    src/services/download.h \
     src/services/participants.h
