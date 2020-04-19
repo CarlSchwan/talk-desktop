@@ -63,9 +63,11 @@ Page {
         if(message.message === "{file}") {
             message.messageType = "file"
             var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
+            var path = message.messageParameters['file'].path
 
             message.message = actorSnippet + " " + qsTr("shared") + " " +
-                    '<a rel="noopener noreferrer" href="' + message.messageParameters['file'].link + '">' +
+                    '<a rel="noopener noreferrer" ' +
+                    'href="javascript:DownloadService.getFile(\"' + path + "\", " + accountId + ')">' +
                     message.messageParameters['file'].name + '</a>';
         } else {
             message.message = formatLinksRich(message.message)
