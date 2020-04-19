@@ -7,6 +7,7 @@
 #include <QNetworkRequest>
 #include <QMetaMethod>
 #include "participants.h"
+#include "requestfactory.h"
 
 Participants::Participants(QObject *parent)
     : QAbstractListModel(parent)
@@ -69,15 +70,7 @@ void Participants::pullParticipants(QString token, int accountId)
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room/" + token + "/participants");
     endpoint.setQuery("format=json");
 
-    QNetworkRequest request(endpoint);
-
-    QString concatanated = m_activeAccount.loginName() + ":" + m_activeAccount.password();
-    QByteArray data = concatanated.toLocal8Bit().toBase64();
-    QString authValue = "Basic " + data;
-
-    request.setRawHeader("Authorization", authValue.toLocal8Bit());
-    request.setRawHeader("OCS-APIRequest", "true");
-
+    QNetworkRequest request = RequestFactory::getRequest(endpoint, m_activeAccount);
     m_reply = m_nam.get(request);
 }
 

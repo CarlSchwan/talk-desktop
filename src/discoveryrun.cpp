@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include "services/requestfactory.h"
 
 DiscoveryRun::DiscoveryRun(QString url, QObject *parent) : QObject(parent)
 {
@@ -90,12 +91,7 @@ void DiscoveryRun::testCredentials(int result, QUrl host, QString originalHost)
     // TODO we can just use nc_server instead of host and originalHost
     host.setPath(host.path() + "/ocs/v2.php/cloud/user");
     host.setQuery("format=json");
-    QNetworkRequest request(host);
-    QString concatanated = m_loginName + ":" + m_token;
-    QByteArray data = concatanated.toLocal8Bit().toBase64();
-    QString authValue = "Basic " + data;
-    request.setRawHeader("Authorization", authValue.toLocal8Bit());
-    request.setRawHeader("OCS-APIRequest", "true");
+    QNetworkRequest request = RequestFactory::getRequest(host, m_loginName, m_token);
     connect(&nam, &QNetworkAccessManager::finished, this, &DiscoveryRun::credentialsCheckFinished);
     nam.get(request);
 }

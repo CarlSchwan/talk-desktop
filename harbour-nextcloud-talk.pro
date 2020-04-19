@@ -27,7 +27,8 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/room.cpp \
     src/services/accounts.cpp \
     src/services/download.cpp \
-    src/services/participants.cpp
+    src/services/participants.cpp \
+    src/services/requestfactory.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/components/Avatar.qml \
@@ -70,4 +71,5 @@ HEADERS += \
     src/room.h \
     src/services/accounts.h \
     src/services/download.h \
-    src/services/participants.h
+    src/services/participants.h \
+    src/services/requestfactory.h

@@ -8,6 +8,7 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <qdebug.h>
+#include "services/requestfactory.h"
 
 RoomService::RoomService(QObject *parent)
     : QAbstractListModel(parent)
@@ -89,14 +90,7 @@ void RoomService::loadRooms() {
         QUrl endpoint = QUrl(account.host());
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room");
         endpoint.setQuery("format=json");
-        QNetworkRequest request(endpoint);
-
-        QString concatanated = account.loginName() + ":" + account.password();
-        QByteArray data = concatanated.toLocal8Bit().toBase64();
-        QString authValue = "Basic " + data;
-        request.setRawHeader("Authorization", authValue.toLocal8Bit());
-        request.setRawHeader("OCS-APIRequest", "true");
-
+        QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
         QNetworkReply* reply = m_nam.get(request);
         m_rooms_requests.append(reply);
     }
@@ -257,15 +251,7 @@ void RoomService::pollRoom() {
                       "&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId) +
                       "&includeLastKnown=" + includeLastKnown);
 
-    QNetworkRequest request(endpoint);
-
-    QString concatanated = account.loginName() + ":" + account.password();
-    QByteArray data = concatanated.toLocal8Bit().toBase64();
-    QString authValue = "Basic " + data;
-
-    request.setRawHeader("Authorization", authValue.toLocal8Bit());
-    request.setRawHeader("OCS-APIRequest", "true");
-
+    QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
     m_nam.get(request);
 }
 
@@ -363,14 +349,7 @@ void RoomService::sendMessage(QString messageText, int replyToId) {
     QUrl endpoint = QUrl(account.host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
 
-    QNetworkRequest request(endpoint);
-
-    QString concatanated = account.loginName() + ":" + account.password();
-    QByteArray data = concatanated.toLocal8Bit().toBase64();
-    QString authValue = "Basic " + data;
-
-    request.setRawHeader("Authorization", authValue.toLocal8Bit());
-    request.setRawHeader("OCS-APIRequest", "true");
+    QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QByteArray payload = QString("message=" + QUrl::toPercentEncoding(messageText)).toUtf8();
