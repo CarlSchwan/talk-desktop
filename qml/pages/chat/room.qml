@@ -50,10 +50,9 @@ Page {
     }
 
     function prepareMessage(message) {
-        message.mid = message.id
-        message.lastOfActorGroup = true
-        message.firstOfActorGroup = true
-        message.messageType = "posting"
+        message._lastOfActorGroup = true
+        message._firstOfActorGroup = true
+        message._type = "posting"
 
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
@@ -61,7 +60,11 @@ Page {
         message.message = escapeTags(message.message)
         message.message = handleMessageParameters(message.messageParameters, message.message)
         if(message.message === "{file}") {
-            message.messageType = "file"
+            message._type = "file"
+            message._fileId = message.messageParameters.file.id
+            message._fileName = message.messageParameters.file.name
+            message._filePath = message.messageParameters.file.path
+
             var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
             var path = message.messageParameters['file'].path
 
@@ -148,7 +151,7 @@ Page {
         if(messages.count > 0) {
             var previousMessage = messages.get(messages.count - 1)
             if(previousMessage && previousMessage.actorId === message.actorId) {
-                messages.setProperty(messages.count - 1, 'lastOfActorGroup', false)
+                previousMessage._lastOfActorGroup = false
             }
         }
     }
@@ -157,7 +160,7 @@ Page {
         if(messages.count > 0) {
             var previousMessage = messages.get(messages.count - 1)
             if(previousMessage && previousMessage.actorId === message.actorId) {
-                message.firstOfActorGroup = false
+                message._firstOfActorGroup = false
             }
         }
     }
@@ -204,7 +207,7 @@ Page {
                     account: accountId
                     user: actorId
                     anchors.bottom: parent.bottom
-                    opacity: lastOfActorGroup ? 100 : 0
+                    opacity: _lastOfActorGroup ? 100 : 0
                 }
 
                 Column {
@@ -214,7 +217,7 @@ Page {
                     Label {
                         id: author
                         text: {
-                            if(firstOfActorGroup) {
+                            if(_firstOfActorGroup) {
                                 return timeString + " · " + actorDisplayName + " · " + dateString
                             }
                             return timeString
@@ -294,11 +297,11 @@ Page {
                     FilePreview {
                         id: filePreview
                         account: accountId
-                        fileId: (messageType === "file" && messageParameters.file && messageParameters.file.id) ? messageParameters.file.id : -1
-                        filePath: (messageType === "file" && messageParameters.file && messageParameters.file.path) ? messageParameters.file.path : ""
-                        visible: messageType === "file"
-                        size: messageType === "file" ? Theme.itemSizeHuge : 0
-                        height: messageType === "file" ? Theme.itemSizeHuge : 0
+                        fileId: (_type === "file" && _fileId) ? _fileId : -1
+                        filePath: (_type === "file" && _filePath) ? _filePath : ""
+                        visible: _type === "file"
+                        size: _type === "file" ? Theme.itemSizeHuge : 0
+                        height: _type === "file" ? Theme.itemSizeHuge : 0
                     }
                 }
 
@@ -415,8 +418,8 @@ Page {
             message = prepareMessage(JSON.parse(message))
             updateLastOfActor(message)
             updateFirstOfActor(message)
+            delete message.messageParameters // Otherwise QML runs into type problems sometimes (VariantMap vs List) in next step
             messages.append(message)
-
             chat.scrollToBottom()
         }
     }

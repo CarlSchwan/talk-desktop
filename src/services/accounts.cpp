@@ -112,7 +112,6 @@ NextcloudAccount Accounts::getAccountById(const int id) {
 
     QVector<NextcloudAccount>::iterator i;
     for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
-        qDebug() << "testing" << i->id() << "with" << id;
         if(i->id() == id) {
             return *i;
         }
