@@ -116,7 +116,7 @@ NextcloudAccount Accounts::getAccountById(const int id) {
             return *i;
         }
     }
-    qDebug() << "No such account";
+    qDebug() << "No such account" << id;
     QException e;
     throw e;
 }
