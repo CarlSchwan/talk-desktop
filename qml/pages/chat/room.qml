@@ -53,6 +53,7 @@ Page {
         message._lastOfActorGroup = true
         message._firstOfActorGroup = true
         message._type = "posting"
+        message._mid = message.id
 
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
@@ -314,7 +315,7 @@ Page {
                     text: qsTr("Reply")
                     visible: isReplyable ? true : false
                     onClicked: {
-                        replyToId = mid
+                        replyToId = _mid
                         replyToMsg = stripTags(message)
                         sendMessage.focus = true
                     }
