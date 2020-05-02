@@ -50,19 +50,28 @@ Page {
     }
 
     function prepareMessage(message) {
-        message.mid = message.id
-        message.lastOfActorGroup = true
-        message.firstOfActorGroup = true
+        message._lastOfActorGroup = true
+        message._firstOfActorGroup = true
+        message._type = "posting"
+        message._mid = message.id
+
         message.message = message.message.replace('{actor}', message.actorDisplayName)
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
         message.message = handleMessageParameters(message.messageParameters, message.message)
         if(message.message === "{file}") {
+            message._type = "file"
+            message._fileId = message.messageParameters.file.id
+            message._fileName = message.messageParameters.file.name
+            message._filePath = message.messageParameters.file.path
+
             var actorSnippet = createMentionSnippet(message.messageParameters['actor']);
+            var path = message.messageParameters['file'].path
 
             message.message = actorSnippet + " " + qsTr("shared") + " " +
-                    '<a rel="noopener noreferrer" href="' + message.messageParameters['file'].link + '">' +
+                    '<a rel="noopener noreferrer" ' +
+                    'href="javascript:DownloadService.getFile(\"' + path + "\", " + accountId + ')">' +
                     message.messageParameters['file'].name + '</a>';
         } else {
             message.message = formatLinksRich(message.message)
@@ -80,8 +89,6 @@ Page {
             message.repliedTo.author = message.parent.actorDisplayName
             message.repliedTo.message = stripTags(message.parent.message)
         }
-
-        delete message.messageParameters
 
         return message
     }
@@ -145,7 +152,7 @@ Page {
         if(messages.count > 0) {
             var previousMessage = messages.get(messages.count - 1)
             if(previousMessage && previousMessage.actorId === message.actorId) {
-                messages.setProperty(messages.count - 1, 'lastOfActorGroup', false)
+                previousMessage._lastOfActorGroup = false
             }
         }
     }
@@ -154,7 +161,7 @@ Page {
         if(messages.count > 0) {
             var previousMessage = messages.get(messages.count - 1)
             if(previousMessage && previousMessage.actorId === message.actorId) {
-                message.firstOfActorGroup = false
+                message._firstOfActorGroup = false
             }
         }
     }
@@ -191,6 +198,7 @@ Page {
                     + messageText.contentHeight
                     + Theme.paddingLarge
                     + ctxMenu.height
+                    + filePreview.height
 
             Row {
                 spacing: Theme.paddingSmall
@@ -200,7 +208,7 @@ Page {
                     account: accountId
                     user: actorId
                     anchors.bottom: parent.bottom
-                    opacity: lastOfActorGroup ? 100 : 0
+                    opacity: _lastOfActorGroup ? 100 : 0
                 }
 
                 Column {
@@ -210,7 +218,7 @@ Page {
                     Label {
                         id: author
                         text: {
-                            if(firstOfActorGroup) {
+                            if(_firstOfActorGroup) {
                                 return timeString + " · " + actorDisplayName + " · " + dateString
                             }
                             return timeString
@@ -286,7 +294,15 @@ Page {
                         font.pixelSize: Theme.fontSizeSmall
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         onLinkActivated: Qt.openUrlExternally(link)
-
+                    }
+                    FilePreview {
+                        id: filePreview
+                        account: accountId
+                        fileId: (_type === "file" && _fileId) ? _fileId : -1
+                        filePath: (_type === "file" && _filePath) ? _filePath : ""
+                        visible: _type === "file"
+                        size: _type === "file" ? Theme.itemSizeHuge : 0
+                        height: _type === "file" ? Theme.itemSizeHuge : 0
                     }
                 }
 
@@ -299,7 +315,7 @@ Page {
                     text: qsTr("Reply")
                     visible: isReplyable ? true : false
                     onClicked: {
-                        replyToId = mid
+                        replyToId = _mid
                         replyToMsg = stripTags(message)
                         sendMessage.focus = true
                     }
@@ -403,8 +419,8 @@ Page {
             message = prepareMessage(JSON.parse(message))
             updateLastOfActor(message)
             updateFirstOfActor(message)
+            delete message.messageParameters // Otherwise QML runs into type problems sometimes (VariantMap vs List) in next step
             messages.append(message)
-
             chat.scrollToBottom()
         }
     }

@@ -2,7 +2,9 @@
 
 #include <sailfishapp.h>
 #include "providers/avatarprovider.h"
+#include "providers/previewprovider.h"
 #include "services/accounts.h"
+#include "services/download.h"
 #include "services/participants.h"
 #include "discovery.h"
 #include "roomservice.h"
@@ -27,6 +29,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
     qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
 
+    qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
+
     qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *
         {
@@ -36,6 +40,7 @@ int main(int argc, char *argv[])
     );
 
     v->engine()->addImageProvider("avatar", new AvatarProvider);
+    v->engine()->addImageProvider("preview", new PreviewProvider);
 
     v->setSource(SailfishApp::pathTo("qml/harbour-nextcloud-talk.qml"));
     v->show();

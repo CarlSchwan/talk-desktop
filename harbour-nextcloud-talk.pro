@@ -20,14 +20,19 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/nextcloudaccount.cpp \
     src/discovery.cpp \
     src/discoveryrun.cpp \
+    src/providers/abstractnextcloudimageprovider.cpp \
     src/providers/avatarprovider.cpp \
+    src/providers/previewprovider.cpp \
     src/roomservice.cpp \
     src/room.cpp \
     src/services/accounts.cpp \
-    src/services/participants.cpp
+    src/services/download.cpp \
+    src/services/participants.cpp \
+    src/services/requestfactory.cpp
 
 DISTFILES += qml/lib/API.js \
     qml/components/Avatar.qml \
+    qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
     qml/pages/chat/participants.qml \
@@ -59,8 +64,12 @@ HEADERS += \
     src/nextcloudaccount.h \
     src/discovery.h \
     src/discoveryrun.h \
+    src/providers/abstractnextcloudimageprovider.h \
     src/providers/avatarprovider.h \
+    src/providers/previewprovider.h \
     src/roomservice.h \
     src/room.h \
     src/services/accounts.h \
-    src/services/participants.h
+    src/services/download.h \
+    src/services/participants.h \
+    src/services/requestfactory.h
