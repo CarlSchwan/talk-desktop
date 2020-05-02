@@ -1,11 +1,11 @@
 Name: harbour-nextcloud-talk
 Summary: Nextcloud Talk for Sailfish OS
 Version: 1.0.0
-Release: alpha.4
+Release: alpha.5
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
 Group: Applications/Communications
-URL: https://git.sr.ht/~blizzz/harbour-nextcloud-talk
+URL: https://codeberg.org/blizzz/harbour-nextcloud-talk
 License: GPLv3+
 # This must be generated before uploading a package to a remote build service.
 # Usually this line does not need to be modified.
