@@ -342,6 +342,17 @@ Page {
         VerticalScrollDecorator {
             flickable: chat
         }
+
+        onCountChanged: {
+            // when previous last item is fully visible scroll to end
+            var isLastVisible = (chat.currentItem.y + chat.currentItem.height) >= chat.contentY
+                && (chat.currentItem.y + chat.currentItem.height) <= (chat.contentY + height)
+            if(chat.currentIndex == 0 || isLastVisible) {
+                var newIndex = chat.count - 1;
+                chat.positionViewAtEnd();
+                chat.currentIndex = newIndex;
+            }
+        }
     }
 
     Column {
@@ -404,7 +415,6 @@ Page {
                     sendMessage.text = ""
                     replyToId = -1
                 }
-                onClicked: chat.scrollToBottom()
             }
         }
     }
@@ -421,7 +431,6 @@ Page {
             updateFirstOfActor(message)
             delete message.messageParameters // Otherwise QML runs into type problems sometimes (VariantMap vs List) in next step
             messages.append(message)
-            chat.scrollToBottom()
         }
     }
 
