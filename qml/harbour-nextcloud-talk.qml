@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
 import "pages"
+import "components"
 
 ApplicationWindow
 {
@@ -18,4 +19,6 @@ ApplicationWindow
 
         //}
     }
+
+    DBusHandler {}
 }

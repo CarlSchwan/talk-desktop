@@ -222,18 +222,41 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
             m_rooms.replace(i, model);
             if(shallNotify(room, knownRoom)) {
                 QJsonObject message = room.value("lastMessage").toObject();
-                Notification notification;
-                notification.setAppName("Nextcloud Talk");
-                notification.setSummary(room.value("displayName").toString());
-                notification.setMaxContentLines(3);
-                notification.setBody(renderMessage(
+                QString renderedMessage = renderMessage(
                     message.value("message").toString(),
                     message.value("messageParameters").toObject(),
                     message.value("actorDisplayName").toString()
-                ));
+                );
+                Notification notification;
+                notification.setAppName("Nextcloud Talk");
+                notification.setCategory("x-nextcloud-talk.im");
+                notification.setSummary(room.value("displayName").toString());
+                notification.setPreviewSummary(room.value("displayName").toString());
+                notification.setMaxContentLines(3);
+                notification.setBody(renderedMessage);
+                notification.setPreviewBody(renderedMessage);
                 if(m_rooms.at(i).nemoNotificationId() != 0) {
                     notification.setReplacesId(m_rooms.at(i).nemoNotificationId());
                 }
+
+                QVariantList parameters;
+                parameters.append(model.token());
+                parameters.append(model.name());
+                parameters.append(model.account().id());
+                parameters.append(model.account().userId());
+
+                QVariantList actions;
+                actions.append(Notification::remoteAction(
+                    "default",
+                    "openConversation",
+                    "org.nextcloud.talk",
+                    "/org/nextcloud/talk",
+                    "org.nextcloud.talk",
+                    "openConversation",
+                    parameters
+                ));
+                notification.setRemoteActions(actions);
+
                 notification.publish();
                 m_rooms[i].setNemoNotificationId(notification.replacesId());
             }

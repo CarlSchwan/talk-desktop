@@ -33,6 +33,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
 
 DISTFILES += qml/lib/API.js \
     qml/components/Avatar.qml \
+    qml/components/DBusHandler.qml \
     qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
