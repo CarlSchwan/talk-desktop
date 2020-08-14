@@ -13,7 +13,8 @@
 TARGET = harbour-nextcloud-talk
 
 CONFIG += sailfishapp
-QT += sql
+PKGCONFIG += nemonotifications-qt5
+QT += sql dbus
 
 SOURCES += src/harbour-nextcloud-talk.cpp \
     src/db.cpp \
