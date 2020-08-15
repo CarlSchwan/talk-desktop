@@ -13,7 +13,16 @@
 TARGET = harbour-nextcloud-talk
 
 CONFIG += sailfishapp
-QT += sql
+PKGCONFIG += nemonotifications-qt5
+QT += sql dbus
+
+notificationcategories.files=$$PWD/notificationcategories/*.conf
+notificationcategories.path=/usr/share/lipstick/notificationcategories
+
+events.files=$$PWD/events/*.ini
+events.path=/usr/share/ngfd/events.d
+
+INSTALLS += notificationcategories events
 
 SOURCES += src/harbour-nextcloud-talk.cpp \
     src/db.cpp \
@@ -31,7 +40,10 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/services/requestfactory.cpp
 
 DISTFILES += qml/lib/API.js \
+    events/nextcloud_talk_im.ini \
+    notificationcategories/x-nextcloud.talk.im.conf \
     qml/components/Avatar.qml \
+    qml/components/DBusHandler.qml \
     qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \

@@ -36,7 +36,7 @@ Db::Db()
     initDb(dbPath);
 }
 
-int Db::lastKnownMessageId(int accountId, QString token) {
+int Db::lastKnownMessageId(int accountId, QString token, bool silent) {
     QSqlQuery query(m_db);
     query.prepare(
         "SELECT messageId FROM lastKnownMessageMarkers "
@@ -47,8 +47,10 @@ int Db::lastKnownMessageId(int accountId, QString token) {
     query.bindValue(":token", token);
     query.exec();
     if(!query.first()) {
-        qDebug() << query.boundValues();
-        qDebug() << query.lastError();
+        if(!silent) {
+            qDebug() << query.boundValues();
+            qDebug() << query.lastError();
+        }
         return 0;
     }
     int id = query.value(0).toInt();

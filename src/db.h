@@ -9,7 +9,7 @@ class Db : public QObject
     Q_OBJECT
 public:
     Db();
-    int lastKnownMessageId(int accountId, QString token);
+    int lastKnownMessageId(int accountId, QString token, bool silent = false);
     bool setLastKnownMessageId(int accountId, QString token, int messageId);
     bool deleteAccountEntries(int accountId);
 
