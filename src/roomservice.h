@@ -50,7 +50,9 @@ private slots:
     Room findRoomByTokenAndAccount(const QString token, const int accountId);
     void onAccountsChanged();
     bool shallNotify(QJsonObject conversationData, Room oldConversationState);
+    bool shallNotify(QJsonObject conversationData, int accountId);
     QString renderMessage(QString message, QJsonObject parameters, QString actorName);
+    void emitNotification(QJsonObject roomData, Room room, int index);
 
 private:
     Accounts &m_accountService = Accounts::getInstance();

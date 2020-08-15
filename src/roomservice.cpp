@@ -107,6 +107,15 @@ bool RoomService::shallNotify(QJsonObject conversationData, Room oldConversation
         return false;
     }
 
+    int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
+    int lastReadMessageId = std::max(
+        conversationData.value("lastReadMessage").toInt(),
+        m_db.lastKnownMessageId(oldConversationState.account().id(), conversationData.value("token").toString())
+    );
+    if(lastReadMessageId >= lastMessageId) {
+        return false;
+    }
+
     int conversationType = conversationData.value("type").toInt();
     if(notificationLevel == 0) {
         // interpret default value
@@ -125,6 +134,43 @@ bool RoomService::shallNotify(QJsonObject conversationData, Room oldConversation
         if(unreadMessages != oldConversationState.unreadMessages()) {
             return true;
         }
+    }
+
+    return false;
+}
+
+/**
+ * @see https://github.com/nextcloud/spreed/blob/master/docs/constants.md
+ */
+bool RoomService::shallNotify(QJsonObject conversationData, int accountId) {
+    int notificationLevel = conversationData.value("notificationLevel").toInt();
+
+    if(notificationLevel == 3) { // never
+        return false;
+    }
+
+    int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
+    int lastReadMessageId = std::max(
+        conversationData.value("lastReadMessage").toInt(),
+        m_db.lastKnownMessageId(accountId, conversationData.value("token").toString())
+    );
+    if(lastReadMessageId >= lastMessageId) {
+        // FIXME: or read state from server >= last message id. get it back to the other function, too
+        return false;
+    }
+
+    int conversationType = conversationData.value("type").toInt();
+    if(notificationLevel == 0) {
+        // interpret default value
+        notificationLevel = conversationType == 1 ? 1 : 2;
+    }
+
+    if(notificationLevel == 2) { // mentions
+        return conversationData.value("unreadMention").toBool();
+    }
+
+    if(notificationLevel == 1) { // always
+        return conversationData.value("unreadMessages").toInt() > 0;
     }
 
     return false;
@@ -221,49 +267,15 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
             model.setNemoNotificationId(m_rooms.at(i).nemoNotificationId());
             m_rooms.replace(i, model);
             if(shallNotify(room, knownRoom)) {
-                QJsonObject message = room.value("lastMessage").toObject();
-                QString renderedMessage = renderMessage(
-                    message.value("message").toString(),
-                    message.value("messageParameters").toObject(),
-                    message.value("actorDisplayName").toString()
-                );
-                Notification notification;
-                notification.setAppName("Nextcloud Talk");
-                notification.setCategory("x-nextcloud-talk.im");
-                notification.setSummary(room.value("displayName").toString());
-                notification.setPreviewSummary(room.value("displayName").toString());
-                notification.setMaxContentLines(3);
-                notification.setBody(renderedMessage);
-                notification.setPreviewBody(renderedMessage);
-                if(m_rooms.at(i).nemoNotificationId() != 0) {
-                    notification.setReplacesId(m_rooms.at(i).nemoNotificationId());
-                }
-
-                QVariantList parameters;
-                parameters.append(model.token());
-                parameters.append(model.name());
-                parameters.append(model.account().id());
-                parameters.append(model.account().userId());
-
-                QVariantList actions;
-                actions.append(Notification::remoteAction(
-                    "default",
-                    "openConversation",
-                    "org.nextcloud.talk",
-                    "/org/nextcloud/talk",
-                    "org.nextcloud.talk",
-                    "openConversation",
-                    parameters
-                ));
-                notification.setRemoteActions(actions);
-
-                notification.publish();
-                m_rooms[i].setNemoNotificationId(notification.replacesId());
+                emitNotification(room, model, i);
             }
         } catch (QException& e) {
             beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
             m_rooms.append(model);
             endInsertRows();
+            if(shallNotify(room, currentAccount->id())) {
+                emitNotification(room, model, m_rooms.indexOf(model));
+            }
         }
     }
 
@@ -271,6 +283,47 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         return a.lastActivity() > b.lastActivity();
     });
     dataChanged(index(0), index(m_rooms.length() - 1));
+}
+
+void RoomService::emitNotification(QJsonObject roomData, Room room, int index) {
+    QJsonObject message = roomData.value("lastMessage").toObject();
+    QString renderedMessage = renderMessage(
+        message.value("message").toString(),
+        message.value("messageParameters").toObject(),
+        message.value("actorDisplayName").toString()
+    );
+    Notification notification;
+    notification.setAppName("Nextcloud Talk");
+    notification.setCategory("x-nextcloud-talk.im");
+    notification.setSummary(roomData.value("displayName").toString());
+    notification.setPreviewSummary(roomData.value("displayName").toString());
+    notification.setMaxContentLines(3);
+    notification.setBody(renderedMessage);
+    notification.setPreviewBody(renderedMessage);
+    if(m_rooms.at(index).nemoNotificationId() != 0) {
+        notification.setReplacesId(m_rooms.at(index).nemoNotificationId());
+    }
+
+    QVariantList parameters;
+    parameters.append(room.token());
+    parameters.append(room.name());
+    parameters.append(room.account().id());
+    parameters.append(room.account().userId());
+
+    QVariantList actions;
+    actions.append(Notification::remoteAction(
+        "default",
+        "openConversation",
+        "org.nextcloud.talk",
+        "/org/nextcloud/talk",
+        "org.nextcloud.talk",
+        "openConversation",
+        parameters
+    ));
+    notification.setRemoteActions(actions);
+
+    notification.publish();
+    m_rooms[index].setNemoNotificationId(notification.replacesId());
 }
 
 Room RoomService::getRoom(QString token, int accountId) {
