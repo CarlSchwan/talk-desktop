@@ -110,7 +110,7 @@ bool RoomService::shallNotify(QJsonObject conversationData, Room oldConversation
     int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
     int lastReadMessageId = std::max(
         conversationData.value("lastReadMessage").toInt(),
-        m_db.lastKnownMessageId(oldConversationState.account().id(), conversationData.value("token").toString())
+        m_db.lastKnownMessageId(oldConversationState.account().id(), conversationData.value("token").toString(), true)
     );
     if(lastReadMessageId >= lastMessageId) {
         return false;
@@ -152,7 +152,7 @@ bool RoomService::shallNotify(QJsonObject conversationData, int accountId) {
     int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
     int lastReadMessageId = std::max(
         conversationData.value("lastReadMessage").toInt(),
-        m_db.lastKnownMessageId(accountId, conversationData.value("token").toString())
+        m_db.lastKnownMessageId(accountId, conversationData.value("token").toString(), true)
     );
     if(lastReadMessageId >= lastMessageId) {
         // FIXME: or read state from server >= last message id. get it back to the other function, too
@@ -294,7 +294,7 @@ void RoomService::emitNotification(QJsonObject roomData, Room room, int index) {
     );
     Notification notification;
     notification.setAppName("Nextcloud Talk");
-    notification.setCategory("x-nextcloud-talk.im");
+    notification.setCategory("x-nextcloud.talk.im");
     notification.setSummary(roomData.value("displayName").toString());
     notification.setPreviewSummary(roomData.value("displayName").toString());
     notification.setMaxContentLines(3);
