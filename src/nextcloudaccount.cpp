@@ -36,7 +36,7 @@ NextcloudAccount NextcloudAccount::fromSettings(const QSettings &settings)
         settings.value("name").toString(),
         settings.value("host").toUrl(),
         settings.value("login_name").toString(),
-        settings.value("password").toString(),
+        settings.value("password").toString(),  // for compatibility/migration, dating back to alpha 7
         settings.value("user_id").toString()
     );
 }
@@ -47,7 +47,7 @@ void NextcloudAccount::toSettings(QSettings &settings) const
     settings.setValue("name", m_name);
     settings.setValue("host", m_host.url());
     settings.setValue("login_name", m_login_name);
-    settings.setValue("password", m_password);
+    settings.setValue("password", "");
     settings.setValue("user_id", m_user_id);
 }
 

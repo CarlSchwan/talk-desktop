@@ -72,6 +72,7 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     account.toSettings(accountSettings);
     accountSettings.endGroup();
     accountSettings.sync();
+    m_secrets.set("token_" + QString::number(id), token.toUtf8());
     qDebug() << "account saved, status " << accountSettings.status();
 
     m_accounts.clear();
@@ -85,6 +86,7 @@ void Accounts::deleteAccount(int accountId)
     accountSettings.remove("");
     accountSettings.endGroup();
     accountSettings.sync();
+    m_secrets.unset("token_" + QString::number(accountId));
     qDebug() << "account deleted, status " << accountSettings.status();
 
     Db db;
@@ -139,10 +141,23 @@ QVector<NextcloudAccount> Accounts::readAccounts()
         m_accounts.clear();
     }
 
+    bool dirty = false;
     foreach(const QString &group, accountGroups) {
         accountSettings.beginGroup(group);
-        m_accounts.append(NextcloudAccount::fromSettings(accountSettings));
+        NextcloudAccount account = NextcloudAccount::fromSettings(accountSettings);
+        if(account.password() != "") {
+            // migration from pre-alpha7 where pwd was stored in plain text
+            m_secrets.set("token_"  + QString::number(account.id()), account.password().toUtf8());
+            account.setPassword("");
+            account.toSettings(accountSettings);
+            dirty = true;
+        }
+        account.setPassword(m_secrets.get("token_" + QString::number(account.id())));
+        m_accounts.append(account);
         accountSettings.endGroup();
+    }
+    if(dirty) {
+        accountSettings.sync();
     }
     qDebug() << "We have" << m_accounts.count() << "accounts";
 
