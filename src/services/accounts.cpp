@@ -56,6 +56,10 @@ QHash<int, QByteArray> Accounts::roleNames() const {
     return roles;
 }
 
+QString getSecretsKey(const NextcloudAccount& account) {
+    return account.name() + " (" + QString::number(account.id()) +")";
+}
+
 void Accounts::addAccount(QString url, QString loginName, QString token, QString userId)
 {
     loadAccounts();
@@ -72,7 +76,7 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     account.toSettings(accountSettings);
     accountSettings.endGroup();
     accountSettings.sync();
-    m_secrets.set("token_" + QString::number(id), token.toUtf8());
+    m_secrets.set(getSecretsKey(account), token.toUtf8());
     qDebug() << "account saved, status " << accountSettings.status();
 
     m_accounts.clear();
@@ -82,11 +86,12 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
 void Accounts::deleteAccount(int accountId)
 {
     QSettings accountSettings("Nextcloud", "Accounts");
+    NextcloudAccount account = getAccountById(accountId);
     accountSettings.beginGroup("account_" + QString::number(accountId));
     accountSettings.remove("");
     accountSettings.endGroup();
     accountSettings.sync();
-    m_secrets.unset("token_" + QString::number(accountId));
+    m_secrets.unset(getSecretsKey(account));
     qDebug() << "account deleted, status " << accountSettings.status();
 
     Db db;
@@ -147,12 +152,12 @@ QVector<NextcloudAccount> Accounts::readAccounts()
         NextcloudAccount account = NextcloudAccount::fromSettings(accountSettings);
         if(account.password() != "") {
             // migration from pre-alpha7 where pwd was stored in plain text
-            m_secrets.set("token_"  + QString::number(account.id()), account.password().toUtf8());
+            m_secrets.set(getSecretsKey(account), account.password().toUtf8());
             account.setPassword("");
             account.toSettings(accountSettings);
             dirty = true;
         }
-        account.setPassword(m_secrets.get("token_" + QString::number(account.id())));
+        account.setPassword(m_secrets.get(getSecretsKey(account)));
         m_accounts.append(account);
         accountSettings.endGroup();
     }
