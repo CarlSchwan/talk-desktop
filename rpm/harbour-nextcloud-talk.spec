@@ -59,6 +59,7 @@ rm -rf %{buildroot}
 # >> install post
 %post
 systemctl-user restart ngfd.service
+systemctl-user restart sailfish-secretsd.service
 # << install post
 
 desktop-file-install --delete-original       \
