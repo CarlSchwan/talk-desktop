@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QVector>
 #include "../nextcloudaccount.h"
+#include "secrets.h"
 
 class Accounts : public QAbstractListModel
 {
@@ -35,6 +36,7 @@ private:
     QVector<NextcloudAccount> m_accounts;
     bool is_initialized = false;
     int max_id = 0;
+    Secrets m_secrets;
 
 };
 

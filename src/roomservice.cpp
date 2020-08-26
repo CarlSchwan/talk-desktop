@@ -88,6 +88,10 @@ void RoomService::loadRooms() {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
     foreach (const NextcloudAccount account, m_accountService.getAccounts()) {
+        if(account.password().isEmpty()) {
+            m_pendingRequests--;
+            continue;
+        }
         QUrl endpoint = QUrl(account.host());
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room");
         endpoint.setQuery("format=json");

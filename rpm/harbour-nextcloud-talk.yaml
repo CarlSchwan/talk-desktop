@@ -33,7 +33,8 @@ PkgConfigBR:
 
 # Runtime dependencies which are not automatically detected
 Requires:
-  - sailfishsilica-qt5 >= 0.10.9 
+  - sailfishsilica-qt5 >= 0.10.9
+  - sailfishsecretsdaemon-secretsplugins-default
 
 # All installed files
 Files:
