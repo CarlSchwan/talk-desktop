@@ -14,7 +14,7 @@ Name:       harbour-nextcloud-talk
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    Nextcloud Talk for Sailfish OS
 Version:    1.0.0
-Release:    alpha.6
+Release:    alpha.7
 Group:      Applications/Communications
 License:    GPLv3+
 URL:        https://codeberg.org/blizzz/harbour-nextcloud-talk

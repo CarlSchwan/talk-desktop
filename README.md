@@ -37,6 +37,6 @@ This is a complete list of features. What is not mentioned, does not work as of 
 
 ## Please note
 
-* Some account information is stored in plain text (login name, user id, host url). The token/password is stored securly with Sailfish Secrets as of 1.0.0 Alpha 7(!). Previously the password was stored in plain text. With Alpha 7 it is migrated automatically to Sailfish Secrets.
+* Some account information is stored in plain text (login name, user id, host url). The token/password is stored securely with Sailfish Secrets as of 1.0.0 Alpha 7(!). Previously the password was stored in plain text. With Alpha 7 it is migrated automatically to Sailfish Secrets.
 * I am not a seasoned C++/Qt developer, quite the opposite, I am learning it on the way.
 * A lot of thanks go to other open source app developers in whose code bases I could find inspiration and solutions!
