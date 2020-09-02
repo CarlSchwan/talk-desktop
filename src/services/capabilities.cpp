@@ -2,6 +2,7 @@
 #include "requestfactory.h"
 
 #include <QMetaMethod>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -11,6 +12,18 @@ Capabilities::Capabilities(NextcloudAccount *account) {
 
 bool Capabilities::areAvailable() const {
     return m_available;
+}
+
+bool Capabilities::hasConversationV2() const {
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return false;
+    }
+
+    return m_capabilities
+            .find("spreed").value().toObject()
+            .find("features").value().toArray()
+            .toVariantList().contains("conversation-v2");
 }
 
 void Capabilities::request() {

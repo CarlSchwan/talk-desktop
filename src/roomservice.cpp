@@ -98,7 +98,8 @@ void RoomService::loadRooms() {
             continue;
         }
         QUrl endpoint = QUrl(account->host());
-        endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room");
+        QString apiV = account->capabilities()->hasConversationV2() ? "v2" : "v1";
+        endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
         endpoint.setQuery("format=json");
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
         QNetworkReply* reply = m_nam.get(request);

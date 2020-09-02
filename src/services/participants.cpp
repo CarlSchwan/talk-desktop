@@ -8,6 +8,7 @@
 #include <QMetaMethod>
 #include "participants.h"
 #include "requestfactory.h"
+#include "capabilities.h"
 
 Participants::Participants(QObject *parent)
     : QAbstractListModel(parent)
@@ -68,7 +69,8 @@ void Participants::pullParticipants(QString token, int accountId)
         m_reply->abort();
     }
     QUrl endpoint = QUrl(m_activeAccount->host());
-    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room/" + token + "/participants");
+    QString apiV = m_activeAccount->capabilities()->hasConversationV2() ? "v2" : "v1";
+    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + token + "/participants");
     endpoint.setQuery("format=json");
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, m_activeAccount);

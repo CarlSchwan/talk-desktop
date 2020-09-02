@@ -15,6 +15,7 @@ public:
     bool areAvailable() const;
     void request();
     NextcloudAccount *m_account;
+    bool hasConversationV2() const;
 
 private:
     QNetworkAccessManager m_nam;
