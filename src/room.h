@@ -30,7 +30,7 @@ private:
     bool m_hasPassword;
     bool m_isFavorite;
     int m_lastActivity;
-    int m_nemoNotificationId = 0;
+    quint32 m_nemoNotificationId = 0;
 
 public slots:
     const NextcloudAccount &account() const;

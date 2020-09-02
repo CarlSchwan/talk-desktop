@@ -34,8 +34,9 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *
         {
-            eng->setObjectOwnership(&Accounts::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
-            return &Accounts::getInstance();
+            Q_UNUSED(js)
+            eng->setObjectOwnership(Accounts::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
+            return Accounts::getInstance();
         }
     );
 

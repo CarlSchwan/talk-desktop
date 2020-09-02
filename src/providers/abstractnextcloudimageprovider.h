@@ -13,10 +13,10 @@ class AbstractNextcloudImageProvider : public QQuickAsyncImageProvider
 {
 public:
     QQuickImageResponse *requestImageResponse(const QString &id, const QSize &requestedSize);
-    virtual QNetworkRequest getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize) = 0;
+    virtual QNetworkRequest getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize) = 0;
 
 private:
-    NextcloudAccount accountFromId(const QString &id);
+    NextcloudAccount* accountFromId(const QString &id);
     QThreadPool pool;
 };
 

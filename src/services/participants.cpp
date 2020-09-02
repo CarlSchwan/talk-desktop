@@ -56,8 +56,9 @@ QHash<int, QByteArray> Participants::roleNames() const
 void Participants::pullParticipants(QString token, int accountId)
 {
     try {
-        m_activeAccount = m_accountService.getAccountById(accountId);
+        m_activeAccount = m_accountService->getAccountById(accountId);
     } catch (QException &e) {
+        Q_UNUSED(e)
         qDebug() << "Failed to pull participants for room" << accountId;
         return;
     }
@@ -66,7 +67,7 @@ void Participants::pullParticipants(QString token, int accountId)
     } else {
         m_reply->abort();
     }
-    QUrl endpoint = QUrl(m_activeAccount.host());
+    QUrl endpoint = QUrl(m_activeAccount->host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room/" + token + "/participants");
     endpoint.setQuery("format=json");
 

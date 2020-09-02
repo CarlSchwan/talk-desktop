@@ -7,7 +7,7 @@ class PreviewProvider : public AbstractNextcloudImageProvider
 {
 public:
     PreviewProvider();
-     QNetworkRequest getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize);
+     QNetworkRequest getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize);
 };
 
 #endif // PREVIEWPROVIDER_H

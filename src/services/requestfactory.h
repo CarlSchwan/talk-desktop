@@ -7,7 +7,7 @@
 class RequestFactory
 {
 public:
-    static QNetworkRequest getRequest(QUrl url, NextcloudAccount account);
+    static QNetworkRequest getRequest(QUrl url, NextcloudAccount* account);
     static QNetworkRequest getRequest(QUrl url, QString login, QString token);
 };
 

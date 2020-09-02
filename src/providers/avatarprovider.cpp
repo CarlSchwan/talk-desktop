@@ -6,12 +6,11 @@
 
 AvatarProvider::AvatarProvider() : AbstractNextcloudImageProvider()
 {
-
 }
 
-QNetworkRequest AvatarProvider::getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize)
+QNetworkRequest AvatarProvider::getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize)
 {
-    QUrl endpoint = QUrl(account.host());
+    QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/avatar/" + subject + "/" + QString::number(requestedSize.height()));
 
     return RequestFactory::getRequest(endpoint, account);

@@ -29,7 +29,7 @@ public:
     struct Participant
     {
         Participant() {}
-        Participant(QString userId, QString displayName, int type, int ping, QString sessionId)
+        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false)
         {
             this->userId = userId;
             this->displayName = displayName;
@@ -60,8 +60,8 @@ private slots:
     void participantsPulled(QNetworkReply *reply);
 
 private:
-    Accounts &m_accountService = Accounts::getInstance();
-    NextcloudAccount m_activeAccount;
+    Accounts* m_accountService = Accounts::getInstance();
+    NextcloudAccount* m_activeAccount;
     QNetworkAccessManager m_nam;
     QNetworkReply* m_reply;
     QVector<Participant> m_participants;
