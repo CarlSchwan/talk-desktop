@@ -11,21 +11,21 @@ Accounts::Accounts(QObject *parent)
     Q_UNUSED(parent);
 }
 
-Accounts& Accounts::getInstance()
+Accounts* Accounts::getInstance()
 {
-    static Accounts instance;
+    static Accounts* instance = new Accounts();
     return instance;
 }
 
 int Accounts::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return getInstance().getAccounts().count() + 1;
+    return getInstance()->getAccounts().count() + 1;
 }
 
 QVariant Accounts::data(const QModelIndex &index, int role) const
 {
-    QVector<NextcloudAccount> accounts = getInstance().getAccounts();
+    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
     int knownAccounts = accounts.count();
 
     if (role == NameRole && index.row() == knownAccounts)
@@ -39,11 +39,11 @@ QVariant Accounts::data(const QModelIndex &index, int role) const
 
     if (role == NameRole)
     {
-        return QVariant(accounts[index.row()].name());
+        return QVariant(accounts.at(index.row())->name());
     }
     else if (role == AccountRole && index.row() < knownAccounts)
     {
-        return QVariant(accounts[index.row()].id());
+        return QVariant(accounts.at(index.row())->id());
     }
 
     return QVariant();
@@ -56,8 +56,8 @@ QHash<int, QByteArray> Accounts::roleNames() const {
     return roles;
 }
 
-QString getSecretsKey(const NextcloudAccount& account) {
-    return account.name() + " (" + QString::number(account.id()) +")";
+QString getSecretsKey(const NextcloudAccount* account) {
+    return account->name() + " (" + QString::number(account->id()) +")";
 }
 
 void Accounts::addAccount(QString url, QString loginName, QString token, QString userId)
@@ -68,12 +68,12 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
     QUrl host(url);
     QString name(loginName + "@" + host.host() + host.path());
 
-    NextcloudAccount account(id, name, host, loginName, token, userId);
+    NextcloudAccount* account = new NextcloudAccount(id, name, host, loginName, token, userId);
     QSettings accountSettings("Nextcloud", "Accounts");
 
     beginResetModel();
     accountSettings.beginGroup("account_" + QString::number(id));
-    account.toSettings(accountSettings);
+    account->toSettings(accountSettings);
     accountSettings.endGroup();
     accountSettings.sync();
     m_secrets.set(getSecretsKey(account), token.toUtf8());
@@ -86,7 +86,7 @@ void Accounts::addAccount(QString url, QString loginName, QString token, QString
 void Accounts::deleteAccount(int accountId)
 {
     QSettings accountSettings("Nextcloud", "Accounts");
-    NextcloudAccount account = getAccountById(accountId);
+    NextcloudAccount* account = getAccountById(accountId);
     accountSettings.beginGroup("account_" + QString::number(accountId));
     accountSettings.remove("");
     accountSettings.endGroup();
@@ -97,10 +97,11 @@ void Accounts::deleteAccount(int accountId)
     Db db;
     db.deleteAccountEntries(accountId);
 
-    NextcloudAccount acc;
+    NextcloudAccount* acc;
     try {
         acc = getAccountById(accountId);
     } catch (QException &e) {
+        Q_UNUSED(e)
         qDebug() << "Could not find account in vector for removal" << accountId;
         dataChanged(index(0), index(m_accounts.length() - 1));
         return;
@@ -112,14 +113,14 @@ void Accounts::deleteAccount(int accountId)
     endRemoveRows();
 }
 
-NextcloudAccount Accounts::getAccountById(const int id) {
+NextcloudAccount* Accounts::getAccountById(const int id) {
     if(m_accounts.length() == 0) {
         readAccounts();
     }
 
-    QVector<NextcloudAccount>::iterator i;
+    QVector<NextcloudAccount*>::iterator i;
     for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
-        if(i->id() == id) {
+        if((*i)->id() == id) {
             return *i;
         }
     }
@@ -128,7 +129,7 @@ NextcloudAccount Accounts::getAccountById(const int id) {
     throw e;
 }
 
-QVector<NextcloudAccount> Accounts::getAccounts() {
+QVector<NextcloudAccount*> Accounts::getAccounts() {
     if(m_accounts.length() == 0) {
         readAccounts();
     }
@@ -136,7 +137,7 @@ QVector<NextcloudAccount> Accounts::getAccounts() {
     return m_accounts;
 }
 
-QVector<NextcloudAccount> Accounts::readAccounts()
+QVector<NextcloudAccount*> Accounts::readAccounts()
 {
     qDebug() << "reading accs";
     QSettings accountSettings("Nextcloud", "Accounts");
@@ -149,15 +150,15 @@ QVector<NextcloudAccount> Accounts::readAccounts()
     bool dirty = false;
     foreach(const QString &group, accountGroups) {
         accountSettings.beginGroup(group);
-        NextcloudAccount account = NextcloudAccount::fromSettings(accountSettings);
-        if(account.password() != "") {
+        NextcloudAccount* account = NextcloudAccount::fromSettings(accountSettings);
+        if(account->password() != "") {
             // migration from pre-alpha7 where pwd was stored in plain text
-            m_secrets.set(getSecretsKey(account), account.password().toUtf8());
-            account.setPassword("");
-            account.toSettings(accountSettings);
+            m_secrets.set(getSecretsKey(account), account->password().toUtf8());
+            account->setPassword("");
+            account->toSettings(accountSettings);
             dirty = true;
         }
-        account.setPassword(m_secrets.get(getSecretsKey(account)));
+        account->setPassword(m_secrets.get(getSecretsKey(account)));
         m_accounts.append(account);
         accountSettings.endGroup();
     }
@@ -172,12 +173,12 @@ QVector<NextcloudAccount> Accounts::readAccounts()
 void Accounts::loadAccounts()
 {
     beginResetModel();
-    QVector<NextcloudAccount> accounts = getInstance().getAccounts();
+    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
 
     max_id = 0;
-    foreach (NextcloudAccount account, accounts) {
-        if(account.id() > max_id) {
-            max_id = account.id();
+    foreach (NextcloudAccount* account, accounts) {
+        if(account->id() > max_id) {
+            max_id = account->id();
         }
     }
 

@@ -1,7 +1,9 @@
 #include "requestfactory.h"
 
-QNetworkRequest RequestFactory::getRequest(QUrl url, NextcloudAccount account) {
-    return RequestFactory::getRequest(url, account.loginName(), account.password());
+#include <qdebug.h>
+
+QNetworkRequest RequestFactory::getRequest(QUrl url, NextcloudAccount* account) {
+    return RequestFactory::getRequest(url, account->loginName(), account->password());
 }
 
 QNetworkRequest RequestFactory::getRequest(QUrl url, QString login, QString token) {

@@ -11,10 +11,10 @@
 
 void Download::getFile(QString path, int accountId)
 {
-    Accounts &accountService = Accounts::getInstance();
-    NextcloudAccount account = accountService.getAccountById(accountId);
+    Accounts* accountService = Accounts::getInstance();
+    NextcloudAccount* account = accountService->getAccountById(accountId);
 
-    QUrl endpoint = QUrl(account.host());
+    QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/remote.php/webdav/" + path);
 
     if(!isSignalConnected(QMetaMethod::fromSignal(&QNetworkAccessManager::finished))) {
@@ -24,7 +24,7 @@ void Download::getFile(QString path, int accountId)
     QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
     QNetworkReply *reply = m_nam.get(request);
 
-    QString target = buildPath(path, account);
+    QString target = buildPath(path, *account);
 
     NcDownload dl = NcDownload(target, reply);
     m_currentDownloads.append(dl);
@@ -32,18 +32,18 @@ void Download::getFile(QString path, int accountId)
 
 bool Download::fileExists(QString path, int accountId)
 {
-    Accounts &accountService = Accounts::getInstance();
-    NextcloudAccount account = accountService.getAccountById(accountId);
-    QString target = buildPath(path, account);
+    Accounts* accountService = Accounts::getInstance();
+    NextcloudAccount* account = accountService->getAccountById(accountId);
+    QString target = buildPath(path, *account);
     QFile file(target);
     return file.exists();
 }
 
 QString Download::filePath(QString path, int accountId)
 {
-    Accounts &accountService = Accounts::getInstance();
-    NextcloudAccount account = accountService.getAccountById(accountId);
-    return buildPath(path, account);
+    Accounts* accountService = Accounts::getInstance();
+    NextcloudAccount* account = accountService->getAccountById(accountId);
+    return buildPath(path, *account);
 }
 
 QString Download::buildPath(QString path, NextcloudAccount account)

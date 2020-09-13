@@ -16,9 +16,9 @@ public:
         AccountRole = Qt::UserRole + 2,
     };
     explicit Accounts(QObject *parent = nullptr);
-    static Accounts& getInstance();
-    NextcloudAccount getAccountById(const int id);
-    QVector<NextcloudAccount> getAccounts();
+    static Accounts* getInstance();
+    NextcloudAccount* getAccountById(const int id);
+    QVector<NextcloudAccount*> getAccounts();
 
     // Basic functionality:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -31,9 +31,9 @@ public slots:
     void loadAccounts();
 
 private:
-    Accounts(const Accounts&);
-    QVector<NextcloudAccount> readAccounts();
-    QVector<NextcloudAccount> m_accounts;
+    Accounts(const Accounts*);
+    QVector<NextcloudAccount*> readAccounts();
+    QVector<NextcloudAccount*> m_accounts;
     bool is_initialized = false;
     int max_id = 0;
     Secrets m_secrets;

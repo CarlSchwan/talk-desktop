@@ -1,6 +1,9 @@
+#include "services/capabilities.h"
 #include "nextcloudaccount.h"
 
-NextcloudAccount::NextcloudAccount() {}
+NextcloudAccount::NextcloudAccount() {
+    m_capabilities = new Capabilities(this);
+}
 
 NextcloudAccount::NextcloudAccount(
     const int id,
@@ -17,6 +20,7 @@ NextcloudAccount::NextcloudAccount(
     m_login_name = login_name;
     m_password = password;
     m_user_id = user_id;
+    m_capabilities = new Capabilities(this);
 }
 
 NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
@@ -27,11 +31,17 @@ NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
     m_login_name = account.loginName();
     m_password = account.password();
     m_user_id = account.userId();
+    m_capabilities = new Capabilities(this);
 }
 
-NextcloudAccount NextcloudAccount::fromSettings(const QSettings &settings)
+NextcloudAccount::~NextcloudAccount()
 {
-    return NextcloudAccount(
+    delete m_capabilities;
+}
+
+NextcloudAccount* NextcloudAccount::fromSettings(const QSettings &settings)
+{
+    return new NextcloudAccount(
         settings.value("id").toInt(),
         settings.value("name").toString(),
         settings.value("host").toUrl(),
@@ -71,4 +81,8 @@ void NextcloudAccount::setUserId(const QString user_id) { m_user_id = user_id; m
 
 bool NextcloudAccount::operator ==(const NextcloudAccount &toCompare) const {
     return toCompare.id() == id();
+}
+
+Capabilities* NextcloudAccount::capabilities() const {
+    return m_capabilities;
 }

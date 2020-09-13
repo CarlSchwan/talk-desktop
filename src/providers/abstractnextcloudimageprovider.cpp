@@ -25,12 +25,12 @@ class AsyncImageResponse : public QQuickImageResponse
         QImage m_image;
     private:
         QNetworkAccessManager m_qnam;
-        Accounts &m_accountService = Accounts::getInstance();
+        Accounts* m_accountService = Accounts::getInstance();
 };
 
 QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const QString &id, const QSize &requestedSize)
 {
-    NextcloudAccount account = accountFromId(id);
+    NextcloudAccount* account = accountFromId(id);
     QString subject = id;
     subject.remove(0, id.indexOf('/') + 1);
     QNetworkRequest request = getRequest(subject, account, requestedSize);
@@ -38,9 +38,10 @@ QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const 
     return response;
 }
 
-NextcloudAccount AbstractNextcloudImageProvider::accountFromId(const QString &id)
+NextcloudAccount* AbstractNextcloudImageProvider::accountFromId(const QString &id)
 {
     const int accountId = id.left(id.indexOf('/')).toInt();
-    Accounts &accountService = Accounts::getInstance();
-    return accountService.getAccountById(accountId);
+    Accounts* accountService = Accounts::getInstance();
+    NextcloudAccount* account = accountService->getAccountById(accountId);
+    return account;
 }

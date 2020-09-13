@@ -10,12 +10,13 @@
 #include <QJsonArray>
 #include <qdebug.h>
 #include "services/requestfactory.h"
+#include "services/capabilities.h"
 
 RoomService::RoomService(QObject *parent)
     : QAbstractListModel(parent)
 {
-    connect(&m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
-    connect(&m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
+    connect(m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
+    connect(m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
 }
 
 int RoomService::rowCount(const QModelIndex &parent) const
@@ -83,17 +84,25 @@ void RoomService::loadRooms() {
         qDebug() << "no network, waiting";
         return;
     }
-    m_pendingRequests = m_accountService.getAccounts().length();
+    m_pendingRequests = m_accountService->getAccounts().length();
     if(m_pendingRequests > 0) {
         connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
     }
-    foreach (const NextcloudAccount account, m_accountService.getAccounts()) {
-        if(account.password().isEmpty()) {
+    foreach (NextcloudAccount* account, m_accountService->getAccounts()) {
+        if(account->password().isEmpty()) {
+            m_pendingRequests--;
+            continue;
+        } else if (!account->capabilities()->areAvailable()) {
+            account->capabilities()->request();
             m_pendingRequests--;
             continue;
         }
-        QUrl endpoint = QUrl(account.host());
-        endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/room");
+        // room endpoint carries talk specific indicator whether capabilities have changed
+        connect(&m_nam, &QNetworkAccessManager::finished, account->capabilities(), &Capabilities::checkTalkCapHash);
+
+        QUrl endpoint = QUrl(account->host());
+        QString apiV = account->capabilities()->hasConversationV2() ? "v2" : "v1";
+        endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
         endpoint.setQuery("format=json");
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
         QNetworkReply* reply = m_nam.get(request);
@@ -221,9 +230,9 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     }
 
     const NextcloudAccount* currentAccount = nullptr;
-    int accounts = m_accountService.getAccounts().length();
+    int accounts = m_accountService->getAccounts().length();
     for(int i = 0; i < accounts; i++) {
-        const NextcloudAccount* account = &m_accountService.getAccounts().at(i);
+        const NextcloudAccount* account = m_accountService->getAccounts().at(i);
         if(account->host().authority() == reply->url().authority()) {
             currentAccount = account;
             break;
@@ -260,7 +269,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
                 .setFavorite(room.value("isFavorite").toBool())
                 .setHasPassword(room.value("hasPassword").toBool())
                 .setToken(room.value("token").toString())
-                .setType((Room::RoomType)room.value("type").toInt())
+                .setType(static_cast<Room::RoomType>(room.value("type").toInt()))
                 .setUnreadMention(room.value("unreadMention").toBool())
                 .setUnreadMessages(room.value("unreadMessages").toInt())
                 .setLastActivity(room.value("lastActivity").toInt());
@@ -274,6 +283,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
                 emitNotification(room, model, i);
             }
         } catch (QException& e) {
+            Q_UNUSED(e)
             beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
             m_rooms.append(model);
             endInsertRows();
@@ -375,17 +385,18 @@ void RoomService::pollRoom() {
     if(!m_isPolling) {
         return;
     }
-    NextcloudAccount account;
+    NextcloudAccount* account;
     try {
-        account = m_accountService.getAccountById(activeAccountId);
+        account = m_accountService->getAccountById(activeAccountId);
     } catch (QException &e) {
+        Q_UNUSED(e)
         qDebug() << "Failed to poll for room" << activeAccountId;
         return;
     }
     connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
     int lastKnownMessageId = m_db.lastKnownMessageId(activeAccountId, activeToken);
     QString includeLastKnown = m_lookIntoFuture == 0 ? "1" : "0";
-    QUrl endpoint = QUrl(account.host());
+    QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
     endpoint.setQuery("format=json&lookIntoFuture=" + QString::number(m_lookIntoFuture) +
                       "&timeout=30&lastKnownMessageId=" + QString::number(lastKnownMessageId) +
@@ -485,8 +496,8 @@ void RoomService::roomPolled(QNetworkReply *reply) {
 }
 
 void RoomService::sendMessage(QString messageText, int replyToId) {
-    NextcloudAccount account = m_accountService.getAccountById(activeAccountId);
-    QUrl endpoint = QUrl(account.host());
+    NextcloudAccount* account = m_accountService->getAccountById(activeAccountId);
+    QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/v1/chat/" + activeToken);
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, account);

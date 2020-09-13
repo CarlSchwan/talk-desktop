@@ -8,9 +8,9 @@ PreviewProvider::PreviewProvider() : AbstractNextcloudImageProvider()
 
 }
 
-QNetworkRequest PreviewProvider::getRequest(QString subject, NextcloudAccount account, const QSize &requestedSize)
+QNetworkRequest PreviewProvider::getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize)
 {
-    QUrl endpoint = QUrl(account.host());
+    QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/core/preview");
     endpoint.setQuery("fileId=" + subject
                       + "&x=" + QString::number(requestedSize.width())

@@ -5,6 +5,8 @@
 #include <QUrl>
 #include <QSettings>
 
+QT_FORWARD_DECLARE_CLASS(Capabilities)
+
 class NextcloudAccount
 {
     Q_PROPERTY(int id READ id WRITE setId)
@@ -24,7 +26,8 @@ public:
         const QString user_id
     );
     NextcloudAccount(const NextcloudAccount& account);
-    static NextcloudAccount fromSettings(const QSettings &settings);
+    ~NextcloudAccount();
+    static NextcloudAccount* fromSettings(const QSettings &settings);
     void toSettings(QSettings &settings) const;
     bool operator ==(const NextcloudAccount &toCompare) const;
 
@@ -36,6 +39,7 @@ private:
     QString m_password;
     QString m_user_id;
     bool m_dirty = false;
+    Capabilities *m_capabilities = nullptr;
 
 public slots:
     int id() const;
@@ -44,6 +48,7 @@ public slots:
     QString loginName() const;
     QString password() const;
     QString userId() const;
+    Capabilities *capabilities() const;
 
     void setId(const int id);
     void setName(const QString name);

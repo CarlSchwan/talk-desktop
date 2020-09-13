@@ -55,7 +55,7 @@ private slots:
     void emitNotification(QJsonObject roomData, Room room, int index);
 
 private:
-    Accounts &m_accountService = Accounts::getInstance();
+    Accounts* m_accountService = Accounts::getInstance();
     QVector<Room> m_rooms;
     QVector<QNetworkReply*> m_rooms_requests;
     QNetworkAccessManager m_nam;

@@ -6,7 +6,7 @@ Page {
     id: rooms
     allowedOrientations: Orientation.All
 
-    property string lastUpdate
+    property string lastUpdate: ""
 
     Timer {
         id: roomPolling
@@ -82,5 +82,11 @@ Page {
         }
 
         VerticalScrollDecorator {}
+    }
+
+    BusyIndicator {
+        size: BusyIndicatorSize.Large
+        running: lastUpdate === ""
+        anchors.centerIn: parent
     }
 }
