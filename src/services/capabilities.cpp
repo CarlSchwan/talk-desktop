@@ -63,3 +63,16 @@ void Capabilities::requestFinished(QNetworkReply *reply) {
 
     disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
 }
+
+void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
+    QByteArray newHash = reply->rawHeader("X-Nextcloud-Talk-Hash");
+    if(m_talkCapHash == newHash) {
+        return;
+    } else if (m_talkCapHash == "") {
+        m_talkCapHash = newHash;
+        return;
+    }
+    m_available = false;
+    m_talkCapHash = newHash;
+    this->request();
+}

@@ -97,6 +97,9 @@ void RoomService::loadRooms() {
             m_pendingRequests--;
             continue;
         }
+        // room endpoint carries talk specific indicator whether capabilities have changed
+        connect(&m_nam, &QNetworkAccessManager::finished, account->capabilities(), &Capabilities::checkTalkCapHash);
+
         QUrl endpoint = QUrl(account->host());
         QString apiV = account->capabilities()->hasConversationV2() ? "v2" : "v1";
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");

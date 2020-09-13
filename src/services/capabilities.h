@@ -22,10 +22,12 @@ private:
     bool m_available = false;
     QJsonObject m_capabilities;
     QNetworkReply *m_reply = nullptr;
+    QByteArray m_talkCapHash;
 
 public slots:
     void requestFinished(QNetworkReply*);
     void handleError(QNetworkReply::NetworkError code) { qDebug() << "Error:" << code; }
+    void checkTalkCapHash(QNetworkReply *reply);
 };
 
 #endif // CAPABILITIES_H
