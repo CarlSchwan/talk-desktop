@@ -336,7 +336,7 @@ void RoomService::emitNotification(QJsonObject roomData, Room room, int index) {
     ));
     notification.setRemoteActions(actions);
 
-    notification.publish();
+    //notification.publish();
     m_rooms[index].setNemoNotificationId(notification.replacesId());
 }
 
