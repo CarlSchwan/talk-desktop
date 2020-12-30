@@ -23,11 +23,14 @@ public slots:
 private slots:
     void notificationPayloadReceived(QNetworkReply* reply);
     void watchAccounts();
+    void afterCloseNotification(int ncNotificationId, int accountId);
 
 private:
     void processPayload(QNetworkReply* reply);
     void processNotificationData(const QJsonObject data, const int accountId);
     static const QString NC_NOTIFICATION_ENDPOINT;
+    static const int STARTUP_INTERVAL;
+    static const int REGULAR_INTERVAL;
     QVector<NextcloudAccount*> m_accounts;
     int m_notificationStateId = 0;
     QNetworkAccessManager m_nam;

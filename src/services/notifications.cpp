@@ -7,6 +7,8 @@
 #include "requestfactory.h"
 
 const QString Notifications::NC_NOTIFICATION_ENDPOINT = "/ocs/v2.php/apps/notifications/api/v2/notifications";
+const int Notifications::STARTUP_INTERVAL = 4000;
+const int Notifications::REGULAR_INTERVAL = 29000;
 
 Notifications::Notifications(): QObject ()
 {
@@ -25,6 +27,7 @@ Notifications::~Notifications()
 
 void Notifications::watchAccounts(QVector<NextcloudAccount*> accounts)
 {
+    // FIXME: remove m_notificationStateId (or remember what it was meant to be for)
     m_notificationStateId++;
     m_accounts = accounts;
     RequestFactory rf;
@@ -44,12 +47,15 @@ void Notifications::watchAccounts(QVector<NextcloudAccount*> accounts)
 void Notifications::watchAccounts(Accounts* accountService)
 {
     m_accountService = accountService;
-    //watchAccounts();
-    m_pollTimer->start();
+    m_pollTimer->start(4000);
 }
 
 void Notifications::watchAccounts()
 {
+    if(m_pollTimer->interval() == STARTUP_INTERVAL)
+    {
+        m_pollTimer->setInterval(REGULAR_INTERVAL);
+    }
     watchAccounts(m_accountService->getAccounts());
 }
 
@@ -159,6 +165,23 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
     ));
     notification->setRemoteActions(actions);
 
+    connect(&*notification, &Notification::closed,
+            [=]( const uint &reason ) {
+                Q_UNUSED(reason)
+                this->afterCloseNotification(ncNotificationId, accountId);
+            }
+    );
+
     notification->publish();
     m_notifications[ncNotificationId] = notification;
+}
+
+void Notifications::afterCloseNotification(int ncNotificationId, int accountId)
+{
+    RequestFactory rf;
+    NextcloudAccount* account = m_accountService->getAccountById(accountId);
+    QUrl endpoint = QUrl(account->host());
+    endpoint.setPath(endpoint.path() + NC_NOTIFICATION_ENDPOINT + "/" + QString::number(ncNotificationId));
+    QNetworkRequest request = rf.getRequest(endpoint, account);
+    m_nam.deleteResource(request);
 }
