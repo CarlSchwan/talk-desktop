@@ -6,7 +6,6 @@
 #include <QNetworkAccessManager>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTimer>
 #include "db.h"
 #include "nextcloudaccount.h"
 #include "room.h"
@@ -61,7 +60,6 @@ private:
     QNetworkAccessManager m_nam;
     QNetworkAccessManager namPosting;
     int m_pendingRequests = 0;
-    QTimer m_pollTimer;
     QString activeToken;
     int activeAccountId;
     bool m_isPolling = false;
