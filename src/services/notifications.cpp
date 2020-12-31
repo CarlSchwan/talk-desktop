@@ -81,6 +81,13 @@ void Notifications::notificationPayloadReceived(QNetworkReply* reply)
 
 void Notifications::processPayload(QNetworkReply* reply)
 {
+    QString userStatus = reply->rawHeader("X-Nextcloud-User-Status");
+    if(userStatus == "dnd") {
+        // »in case of dnd no notifications should be directly shown«
+        // https://github.com/nextcloud/notifications/blob/master/docs/ocs-endpoint-v2.md
+        return;
+    }
+
     QByteArray payload = reply->readAll();
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
