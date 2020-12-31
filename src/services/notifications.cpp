@@ -128,19 +128,21 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
         return;
     }
 
-    QString roomName = subjectParameters.constFind("call").value().toString();
+    QString roomName = subjectParameters.constFind("call").value().toObject().find("name").value().toString();
     QString roomId = data.constFind("object_id").value().toString();
-    QString userId = data.constFind("user").value().toString();
+    QString userId = subjectParameters.constFind("user").value().toObject().find("id").value().toString();
+    QString userName = subjectParameters.constFind("user").value().toObject().find("name").value().toString();
     auto dateTime = QDateTime::fromString(data.constFind("datetime").value().toString(), Qt::ISODate);
-    QString renderedMessage = data.constFind("subject").value().toString();
+    QString renderedMessage = data.constFind("message").value().toString();
+    QString renderedSubject = data.constFind("subject").value().toString();
 
     QSharedPointer<Notification> notification = QSharedPointer<Notification>(new Notification);
     notification->setAppName("Nextcloud Talk");
     notification->setCategory("x-nextcloud.talk.im");
     notification->setSummary(roomName);
     notification->setPreviewSummary(roomName);
-    notification->setMaxContentLines(3);
-    notification->setBody(renderedMessage);
+    notification->setMaxContentLines(4);
+    notification->setBody(renderedSubject + ": " + renderedMessage);
     notification->setPreviewBody(renderedMessage);
     notification->setTimestamp(dateTime);
     notification->setProperty("NcNotificationId", ncNotificationId);
