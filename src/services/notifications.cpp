@@ -40,7 +40,6 @@ void Notifications::watchAccounts(QVector<NextcloudAccount*> accounts)
         QNetworkReply* reply = m_nam.get(request);
         reply->setProperty("AccountID", account->id());
         reply->setProperty("NotificationStateId", m_notificationStateId);
-        qDebug() << "Notification watching" << account->id();
     }
 }
 
@@ -61,8 +60,6 @@ void Notifications::watchAccounts()
 
 void Notifications::notificationPayloadReceived(QNetworkReply* reply)
 {
-    qDebug() << "Notification payload receided aid " << reply->property("AccountID") << "nsid" << reply->property("NotificationStateId");
-
     QVariant aid = reply->property("AccountID");
     QVariant nsid = reply->property("NotificationStateId");
     if(
@@ -74,9 +71,6 @@ void Notifications::notificationPayloadReceived(QNetworkReply* reply)
     }
 
     processPayload(reply);
-    if(!m_pollTimer->isActive()) {
-        m_pollTimer->start();
-    }
 }
 
 void Notifications::processPayload(QNetworkReply* reply)
@@ -92,7 +86,7 @@ void Notifications::processPayload(QNetworkReply* reply)
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    qDebug() << "Participant JSON" << payload;
+    //qDebug() << "Participant JSON" << payload;
 
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
@@ -128,8 +122,6 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
         return;
     }
 
-    qDebug() << "Checking for present notifications";
-    qDebug() << m_notifications;
     int ncNotificationId = data.constFind("notification_id").value().toInt();
     if(m_notifications.contains(ncNotificationId)) {
         return;
