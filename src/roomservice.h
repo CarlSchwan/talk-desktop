@@ -52,6 +52,7 @@ private slots:
     bool shallNotify(QJsonObject conversationData, int accountId);
     QString renderMessage(QString message, QJsonObject parameters, QString actorName);
     void emitNotification(QJsonObject roomData, Room room, int index);
+    void emitAfterActiveRoomChanged(QString token, int accountId);
 
 private:
     Accounts* m_accountService = Accounts::getInstance();

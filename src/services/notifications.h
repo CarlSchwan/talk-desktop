@@ -24,6 +24,7 @@ private slots:
     void notificationPayloadReceived(QNetworkReply* reply);
     void watchAccounts();
     void afterCloseNotification(int ncNotificationId, int accountId);
+    void afterActiveConversationChanged(QString tolen, int accountId);
 
 private:
     void processPayload(QNetworkReply* reply);

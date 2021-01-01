@@ -1,3 +1,5 @@
+#include <QDBusConnection>
+#include <QDBusError>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -14,7 +16,10 @@ Notifications::Notifications(): QObject ()
 {
     connect(&m_nam, &QNetworkAccessManager::finished, this, &Notifications::notificationPayloadReceived);
     connect(m_pollTimer, SIGNAL(timeout()), this, SLOT(watchAccounts()));
-    m_pollTimer->setInterval(29000);
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    bus.connect("", "/conversation", "org.nextcloud.talk", "afterActiveConversationChanged",
+                this, SLOT(afterActiveConversationChanged(QString, int)));
 }
 
 Notifications::~Notifications()
@@ -185,4 +190,15 @@ void Notifications::afterCloseNotification(int ncNotificationId, int accountId)
     endpoint.setPath(endpoint.path() + NC_NOTIFICATION_ENDPOINT + "/" + QString::number(ncNotificationId));
     QNetworkRequest request = rf.getRequest(endpoint, account);
     m_nam.deleteResource(request);
+}
+
+void Notifications::afterActiveConversationChanged(QString token, int accountId)
+{
+    foreach(QSharedPointer<Notification> n, m_notifications)
+    {
+        if(n->property("NcRoomId") == token && n->property("NcAccountId") == accountId) {
+            // notifications are dismissed by Nextcloud automatically on entering a conversation
+            n->close();
+        }
+    }
 }

@@ -1,5 +1,7 @@
 #include "roomservice.h"
 #include <nemonotifications-qt5/notification.h>
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QException>
 #include <QMetaMethod>
 #include <QNetworkRequest>
@@ -358,6 +360,14 @@ void RoomService::startPolling(QString token, int accountId) {
     m_isPolling = true;
     m_lookIntoFuture = 0;
     pollRoom();
+    emitAfterActiveRoomChanged(token, accountId);
+}
+
+void RoomService::emitAfterActiveRoomChanged(QString token, int accountId) {
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusMessage event = QDBusMessage::createSignal("/conversation", "org.nextcloud.talk", "afterActiveConversationChanged");
+    event << token << accountId;
+    bus.send(event);
 }
 
 bool RoomService::isPolling(QString token, int accountId) {
