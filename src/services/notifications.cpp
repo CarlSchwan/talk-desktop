@@ -10,7 +10,7 @@
 
 const QString Notifications::NC_NOTIFICATION_ENDPOINT = "/ocs/v2.php/apps/notifications/api/v2/notifications";
 const int Notifications::STARTUP_INTERVAL = 4000;
-const int Notifications::REGULAR_INTERVAL = 29000;
+const int Notifications::REGULAR_INTERVAL = 14000;
 
 Notifications::Notifications(): QObject ()
 {
