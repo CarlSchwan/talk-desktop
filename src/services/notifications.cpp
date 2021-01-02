@@ -108,6 +108,13 @@ void Notifications::processPayload(QNetworkReply* reply)
     foreach(QJsonValue v, data) {
         processNotificationData(v.toObject(), accountId);
     }
+
+    while(!m_notificationsToPublish.isEmpty())
+    {
+        QSharedPointer<Notification> notification = m_notificationsToPublish.takeLast();
+        notification->publish();
+    }
+
     removeNotificationsExternallyDismissed(accountId, reply->property("NotificationStateId").toInt());
 }
 
@@ -180,7 +187,28 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
             }
     );
 
-    notification->publish();
+    foreach(QSharedPointer<Notification> n, m_notifications)
+    {
+        if (n->property("NcRoomId").toString() == roomId
+                && n->property("NcAccountId").toInt() == accountId
+                && n->property("TopOfThread").toString() == "yes"
+        ) {
+            // one notification slot per conversation
+            if (n->timestamp() < notification->timestamp())
+            {
+                notification->setReplacesId(n->replacesId());
+                n->setProperty("TopOfThread", "no");
+                break;
+            }
+            notification->setProperty("TopOThread", "no");
+            // needs to remain in the list until dismissed, otherwise it would be reprocessed over and over again
+            m_notifications[ncNotificationId] = notification;
+            return;
+        }
+    }
+
+    notification->setProperty("TopOfThread", "yes");
+    m_notificationsToPublish.append(notification);
     m_notifications[ncNotificationId] = notification;
 }
 
@@ -189,9 +217,20 @@ void Notifications::afterCloseNotification(int ncNotificationId, int accountId)
     RequestFactory rf;
     NextcloudAccount* account = m_accountService->getAccountById(accountId);
     QUrl endpoint = QUrl(account->host());
-    endpoint.setPath(endpoint.path() + NC_NOTIFICATION_ENDPOINT + "/" + QString::number(ncNotificationId));
-    QNetworkRequest request = rf.getRequest(endpoint, account);
-    m_nam.deleteResource(request);
+
+    QString roomId = m_notifications[ncNotificationId]->property("NcRoomId").toString();
+    QString originalPath = endpoint.path();
+
+    foreach(QSharedPointer<Notification> n, m_notifications)
+    {
+        if(n->property("NcRoomId").toString() == roomId
+                && n->property("NcAccountId").toInt() == accountId)
+        {
+            endpoint.setPath(originalPath + NC_NOTIFICATION_ENDPOINT + "/" + n->property("NcNotificationId").toString());
+            QNetworkRequest request = rf.getRequest(endpoint, account);
+            m_nam.deleteResource(request);
+        }
+    }
 }
 
 void Notifications::afterActiveConversationChanged(QString token, int accountId)

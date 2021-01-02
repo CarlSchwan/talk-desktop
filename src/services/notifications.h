@@ -40,5 +40,6 @@ private:
     QMap<qint64, QSharedPointer<Notification>> m_notifications;
     Accounts* m_accountService;
     QTimer* m_pollTimer = new QTimer(this);
+    QVector<QSharedPointer<Notification>> m_notificationsToPublish;
 };
 #endif // NOTIFICATIONS_H
