@@ -1,5 +1,4 @@
 #include "roomservice.h"
-#include <nemonotifications-qt5/notification.h>
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QException>
@@ -112,94 +111,6 @@ void RoomService::loadRooms() {
     }
 }
 
-/**
- * @see https://github.com/nextcloud/spreed/blob/master/docs/constants.md
- */
-bool RoomService::shallNotify(QJsonObject conversationData, Room oldConversationState) {
-    int notificationLevel = conversationData.value("notificationLevel").toInt();
-
-    if(notificationLevel == 3) { // never
-        return false;
-    }
-
-    int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
-    int lastReadMessageId = std::max(
-        conversationData.value("lastReadMessage").toInt(),
-        m_db.lastKnownMessageId(oldConversationState.account().id(), conversationData.value("token").toString(), true)
-    );
-    if(lastReadMessageId >= lastMessageId) {
-        return false;
-    }
-
-    int conversationType = conversationData.value("type").toInt();
-    if(notificationLevel == 0) {
-        // interpret default value
-        notificationLevel = conversationType == 1 ? 1 : 2;
-    }
-
-    if(notificationLevel == 2) { // mentions
-        bool wasMentioned = conversationData.value("unreadMention").toBool();
-        if(wasMentioned && !oldConversationState.unreadMention()) {
-            return true;
-        }
-    }
-
-    if(notificationLevel == 1) { // always
-        int unreadMessages = conversationData.value("unreadMessages").toInt();
-        if(unreadMessages != oldConversationState.unreadMessages()) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * @see https://github.com/nextcloud/spreed/blob/master/docs/constants.md
- */
-bool RoomService::shallNotify(QJsonObject conversationData, int accountId) {
-    int notificationLevel = conversationData.value("notificationLevel").toInt();
-
-    if(notificationLevel == 3) { // never
-        return false;
-    }
-
-    int lastMessageId = conversationData.value("lastMessage").toObject().value("id").toInt();
-    int lastReadMessageId = std::max(
-        conversationData.value("lastReadMessage").toInt(),
-        m_db.lastKnownMessageId(accountId, conversationData.value("token").toString(), true)
-    );
-    if(lastReadMessageId >= lastMessageId) {
-        // FIXME: or read state from server >= last message id. get it back to the other function, too
-        return false;
-    }
-
-    int conversationType = conversationData.value("type").toInt();
-    if(notificationLevel == 0) {
-        // interpret default value
-        notificationLevel = conversationType == 1 ? 1 : 2;
-    }
-
-    if(notificationLevel == 2) { // mentions
-        return conversationData.value("unreadMention").toBool();
-    }
-
-    if(notificationLevel == 1) { // always
-        return conversationData.value("unreadMessages").toInt() > 0;
-    }
-
-    return false;
-}
-
-QString RoomService::renderMessage(QString message, QJsonObject parameters, QString actorName) {
-    QStringList keys = parameters.keys();
-    foreach(const QString &key, keys) {
-        QJsonObject parameter = parameters.value(key).toObject();
-        message = message.replace('{' + key + '}', parameter.value("name").toString());
-    }
-    return actorName + ": " + message;
-}
-
 void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     m_pendingRequests--;
     if(m_pendingRequests == 0) {
@@ -279,19 +190,12 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         try {
             Room knownRoom = findRoomByTokenAndAccount(model.token(), model.account().id());
             int i = m_rooms.indexOf(knownRoom);
-            model.setNemoNotificationId(m_rooms.at(i).nemoNotificationId());
             m_rooms.replace(i, model);
-            if(shallNotify(room, knownRoom)) {
-                emitNotification(room, model, i);
-            }
         } catch (QException& e) {
             Q_UNUSED(e)
             beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
             m_rooms.append(model);
             endInsertRows();
-            if(shallNotify(room, currentAccount->id())) {
-                emitNotification(room, model, m_rooms.indexOf(model));
-            }
         }
     }
 
@@ -299,47 +203,6 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         return a.lastActivity() > b.lastActivity();
     });
     dataChanged(index(0), index(m_rooms.length() - 1));
-}
-
-void RoomService::emitNotification(QJsonObject roomData, Room room, int index) {
-    QJsonObject message = roomData.value("lastMessage").toObject();
-    QString renderedMessage = renderMessage(
-        message.value("message").toString(),
-        message.value("messageParameters").toObject(),
-        message.value("actorDisplayName").toString()
-    );
-    Notification notification;
-    notification.setAppName("Nextcloud Talk");
-    notification.setCategory("x-nextcloud.talk.im");
-    notification.setSummary(roomData.value("displayName").toString());
-    notification.setPreviewSummary(roomData.value("displayName").toString());
-    notification.setMaxContentLines(3);
-    notification.setBody(renderedMessage);
-    notification.setPreviewBody(renderedMessage);
-    if(m_rooms.at(index).nemoNotificationId() != 0) {
-        notification.setReplacesId(m_rooms.at(index).nemoNotificationId());
-    }
-
-    QVariantList parameters;
-    parameters.append(room.token());
-    parameters.append(room.name());
-    parameters.append(room.account().id());
-    parameters.append(room.account().userId());
-
-    QVariantList actions;
-    actions.append(Notification::remoteAction(
-        "default",
-        "openConversation",
-        "org.nextcloud.talk",
-        "/org/nextcloud/talk",
-        "org.nextcloud.talk",
-        "openConversation",
-        parameters
-    ));
-    notification.setRemoteActions(actions);
-
-    //notification.publish();
-    m_rooms[index].setNemoNotificationId(notification.replacesId());
 }
 
 Room RoomService::getRoom(QString token, int accountId) {
