@@ -104,10 +104,11 @@ void Notifications::processPayload(QNetworkReply* reply)
     }
 
     QJsonArray data = root.constFind("data").value().toArray();
+    const int accountId = reply->property("AccountID").toInt();
     foreach(QJsonValue v, data) {
-        processNotificationData(v.toObject(), reply->property("AccountID").toInt());
+        processNotificationData(v.toObject(), accountId);
     }
-
+    removeNotificationsExternallyDismissed(accountId, reply->property("NotificationStateId").toInt());
 }
 
 void Notifications::processNotificationData(const QJsonObject data, const int accountId)
@@ -151,6 +152,7 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
     notification->setProperty("NcNotificationId", ncNotificationId);
     notification->setProperty("NcRoomId", roomId);
     notification->setProperty("NcAccountId", accountId);
+    notification->setProperty("PullCycleId", m_notificationStateId); // not necessarily the original cycle
 
     QVariantList parameters;
     parameters.append(roomId);
@@ -197,6 +199,17 @@ void Notifications::afterActiveConversationChanged(QString token, int accountId)
     {
         if(n->property("NcRoomId") == token && n->property("NcAccountId") == accountId) {
             // notifications are dismissed by Nextcloud automatically on entering a conversation
+            n->close();
+        }
+    }
+}
+
+void Notifications::removeNotificationsExternallyDismissed(const int accountId, const int pullCycleId)
+{
+    foreach(QSharedPointer<Notification> n, m_notifications)
+    {
+        if(n->property("NcAccountId") == accountId && n->property("PullCycleId").toInt() < pullCycleId) {
+            // notifications was dismissed externally
             n->close();
         }
     }
