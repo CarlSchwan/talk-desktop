@@ -41,5 +41,6 @@ private:
     Accounts* m_accountService;
     QTimer* m_pollTimer = new QTimer(this);
     QVector<QSharedPointer<Notification>> m_notificationsToPublish;
+    bool m_isQuitting = false;
 };
 #endif // NOTIFICATIONS_H

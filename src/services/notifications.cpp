@@ -24,6 +24,7 @@ Notifications::Notifications(): QObject ()
 
 Notifications::~Notifications()
 {
+    m_isQuitting = true;
     foreach(QSharedPointer<Notification> n, m_notifications)
     {
         n->close();
@@ -214,6 +215,10 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
 
 void Notifications::afterCloseNotification(int ncNotificationId, int accountId)
 {
+    if(m_isQuitting) {
+        return;
+    }
+
     RequestFactory rf;
     NextcloudAccount* account = m_accountService->getAccountById(accountId);
     QUrl endpoint = QUrl(account->host());
