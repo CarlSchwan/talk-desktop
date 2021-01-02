@@ -129,6 +129,7 @@ void Notifications::processNotificationData(const QJsonObject data, const int ac
 
     int ncNotificationId = data.constFind("notification_id").value().toInt();
     if(m_notifications.contains(ncNotificationId)) {
+        m_notifications.value(ncNotificationId)->setProperty("PullCycleId", m_notificationStateId);
         return;
     }
 
