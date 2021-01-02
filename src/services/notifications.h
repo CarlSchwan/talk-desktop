@@ -33,9 +33,9 @@ private:
     static const int STARTUP_INTERVAL;
     static const int REGULAR_INTERVAL;
     QVector<NextcloudAccount*> m_accounts;
+    // ID of notification pull cycle
     int m_notificationStateId = 0;
     QNetworkAccessManager m_nam;
-    //QVector<Notification> m_notifications;
     QMap<qint64, QSharedPointer<Notification>> m_notifications;
     Accounts* m_accountService;
     QTimer* m_pollTimer = new QTimer(this);

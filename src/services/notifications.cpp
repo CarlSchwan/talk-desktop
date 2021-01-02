@@ -32,7 +32,6 @@ Notifications::~Notifications()
 
 void Notifications::watchAccounts(QVector<NextcloudAccount*> accounts)
 {
-    // FIXME: remove m_notificationStateId (or remember what it was meant to be for)
     m_notificationStateId++;
     m_accounts = accounts;
     RequestFactory rf;
@@ -70,7 +69,7 @@ void Notifications::notificationPayloadReceived(QNetworkReply* reply)
     if(
         !aid.isValid()
         || !nsid.isValid()
-        || nsid.toInt() != m_notificationStateId
+        || nsid.toInt() != m_notificationStateId  // ignore replies for old requests
     ) {
         return;
     }
