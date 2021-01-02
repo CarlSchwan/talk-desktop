@@ -196,22 +196,28 @@ void Notifications::afterCloseNotification(int ncNotificationId, int accountId)
 
 void Notifications::afterActiveConversationChanged(QString token, int accountId)
 {
-    foreach(QSharedPointer<Notification> n, m_notifications)
-    {
-        if(n->property("NcRoomId") == token && n->property("NcAccountId") == accountId) {
+    QMutableMapIterator<qint64, QSharedPointer<Notification>> i(m_notifications);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value()->property("NcRoomId").toString() == token && accountId == i.value()->property("NcAccountId").toInt())
+        {
             // notifications are dismissed by Nextcloud automatically on entering a conversation
-            n->close();
+            i.value()->close();
+            i.remove();
         }
     }
 }
 
 void Notifications::removeNotificationsExternallyDismissed(const int accountId, const int pullCycleId)
 {
-    foreach(QSharedPointer<Notification> n, m_notifications)
-    {
-        if(n->property("NcAccountId") == accountId && n->property("PullCycleId").toInt() < pullCycleId) {
+    QMutableMapIterator<qint64, QSharedPointer<Notification>> i(m_notifications);
+    while (i.hasNext()) {
+        i.next();
+        if (accountId == i.value()->property("NcAccountId").toInt() && i.value()->property("PullCycleId").toInt() < pullCycleId)
+        {
             // notifications was dismissed externally
-            n->close();
+            i.value()->close();
+            i.remove();
         }
     }
 }
