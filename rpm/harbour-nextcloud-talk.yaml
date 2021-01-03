@@ -1,7 +1,7 @@
 Name: harbour-nextcloud-talk
 Summary: Nextcloud Talk for Sailfish OS
 Version: 1.0.0
-Release: alpha.7
+Release: alpha.8
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
 Group: Applications/Communications

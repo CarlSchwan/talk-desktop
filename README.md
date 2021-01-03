@@ -18,7 +18,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 * Multi-account support
 * List of all conversations, sorted by activity. It contains an unread counter, which is highlighted when an unread mention is present.
 	- Regular polling
-	- SailfishOS notifications
+	- SailfishOS notifications, synced with Nextcloud
 * Chat with any conversation
 	- loading most recent history
 	- constant long-polling of the currently open conversation
