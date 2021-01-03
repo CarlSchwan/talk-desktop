@@ -30,6 +30,8 @@ private:
     void processPayload(QNetworkReply* reply);
     void processNotificationData(const QJsonObject data, const int accountId);
     void removeNotificationsExternallyDismissed(const int accountId, const int pullCycleId);
+    void publishNotifications();
+    QMap<QString, int> getNumberOfNotificationsPerRoom();
     static const QString NC_NOTIFICATION_ENDPOINT;
     static const int STARTUP_INTERVAL;
     static const int REGULAR_INTERVAL;

@@ -109,14 +109,29 @@ void Notifications::processPayload(QNetworkReply* reply)
     foreach(QJsonValue v, data) {
         processNotificationData(v.toObject(), accountId);
     }
+    publishNotifications();
+    removeNotificationsExternallyDismissed(accountId, reply->property("NotificationStateId").toInt());
+}
 
+void Notifications::publishNotifications()
+{
+    auto itemCountPerRoom = getNumberOfNotificationsPerRoom();
     while(!m_notificationsToPublish.isEmpty())
     {
         QSharedPointer<Notification> notification = m_notificationsToPublish.takeLast();
+        notification->setItemCount(itemCountPerRoom[notification->property("NcAccountId").toString() + "__" + notification->property("NcRoomId").toString()]);
         notification->publish();
     }
+}
 
-    removeNotificationsExternallyDismissed(accountId, reply->property("NotificationStateId").toInt());
+QMap<QString, int> Notifications::getNumberOfNotificationsPerRoom()
+{
+    QMap<QString, int> itemCountPerRoom;
+    foreach(QSharedPointer<Notification> n, m_notifications)
+    {
+        itemCountPerRoom[n->property("NcAccountId").toString() + "__" + n->property("NcRoomId").toString()]++;
+    }
+    return itemCountPerRoom;
 }
 
 void Notifications::processNotificationData(const QJsonObject data, const int accountId)
