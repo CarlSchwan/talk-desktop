@@ -8,7 +8,7 @@
 Accounts::Accounts(QObject *parent)
     : QAbstractListModel(parent)
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
 }
 
 Accounts* Accounts::getInstance()
@@ -19,7 +19,7 @@ Accounts* Accounts::getInstance()
 
 int Accounts::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
+    Q_UNUSED(parent)
     return getInstance()->getAccounts().count() + 1;
 }
 

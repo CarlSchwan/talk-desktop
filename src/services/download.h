@@ -14,8 +14,8 @@ class Download : public QObject
 public:
     static QObject *qmlInstance(QQmlEngine *engine, QJSEngine *scriptEngine)
     {
-        Q_UNUSED(engine);
-        Q_UNUSED(scriptEngine);
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
 
         return new Download;
     }

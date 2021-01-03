@@ -37,6 +37,7 @@ SOURCES += src/harbour-nextcloud-talk.cpp \
     src/services/accounts.cpp \
     src/services/capabilities.cpp \
     src/services/download.cpp \
+    src/services/notifications.cpp \
     src/services/participants.cpp \
     src/services/requestfactory.cpp \
     src/services/secrets.cpp
@@ -86,6 +87,7 @@ HEADERS += \
     src/services/accounts.h \
     src/services/capabilities.h \
     src/services/download.h \
+    src/services/notifications.h \
     src/services/participants.h \
     src/services/requestfactory.h \
     src/services/secrets.h

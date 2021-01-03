@@ -107,12 +107,3 @@ bool Room::operator ==(const Room &toCompare) const {
     return toCompare.account().id() == account().id()
             && toCompare.token() == token();
 }
-
-Room& Room::setNemoNotificationId(const quint32 nemoNotificationId) {
-    m_nemoNotificationId = nemoNotificationId;
-    return *this;
-}
-
-quint32 Room::nemoNotificationId() const {
-    return m_nemoNotificationId;
-}

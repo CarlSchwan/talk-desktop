@@ -6,8 +6,10 @@
 #include "services/accounts.h"
 #include "services/download.h"
 #include "services/participants.h"
+#include "services/notifications.h"
 #include "discovery.h"
 #include "roomservice.h"
+#include "nextcloudaccount.h"
 
 int main(int argc, char *argv[])
 {
@@ -39,6 +41,9 @@ int main(int argc, char *argv[])
             return Accounts::getInstance();
         }
     );
+
+    Notifications notificationService;
+    notificationService.watchAccounts(Accounts::getInstance());
 
     v->engine()->addImageProvider("avatar", new AvatarProvider);
     v->engine()->addImageProvider("preview", new PreviewProvider);
