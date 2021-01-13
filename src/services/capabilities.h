@@ -2,6 +2,7 @@
 #define CAPABILITIES_H
 
 #include "../nextcloudaccount.h"
+#include <QColor>
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -16,6 +17,7 @@ public:
     void request();
     NextcloudAccount *m_account;
     bool hasConversationV2() const;
+    QColor primaryColor() const;
 
 private:
     QNetworkAccessManager m_nam;

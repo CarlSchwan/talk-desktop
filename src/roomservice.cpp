@@ -58,6 +58,11 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         return QVariant(m_rooms[index.row()].unreadMention());
     }
 
+    if (role == ColorRole)
+    {
+        return QVariant(m_rooms[index.row()].account().capabilities()->primaryColor());
+    }
+
     return QVariant();
 }
 
@@ -69,6 +74,7 @@ QHash<int, QByteArray> RoomService::roleNames() const {
     roles[UserIdRole] = "accountUserId";
     roles[UnreadRole] = "unreadMessages";
     roles[MentionedRole] = "unreadMention";
+    roles[ColorRole] = "primaryColor";
     return roles;
 }
 

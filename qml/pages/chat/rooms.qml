@@ -44,12 +44,25 @@ Page {
                 anchors {
                     left: parent.left
                     right: parent.right
-                    margins: Theme.paddingMedium
+                    rightMargin: Theme.paddingMedium
+                    leftMargin: 0;
                 }
-                spacing: width - (roomName.width + unreadCounter.width)
-                Label {
-                    id: roomName
-                    text: name
+                spacing: width - (nameRow.width + unreadCounter.width)
+                Row {
+                    id: nameRow
+
+                    Rectangle {
+                        id: accountIndicator
+                        width: Theme.paddingSmall / 3
+                        height: parent.height
+                        color: primaryColor
+                    }
+
+                    Label {
+                        id: roomName
+                        text: name
+                        leftPadding: Theme.paddingSmall;
+                    }
                 }
 
                 Label {

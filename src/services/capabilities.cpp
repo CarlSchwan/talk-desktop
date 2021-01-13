@@ -26,6 +26,26 @@ bool Capabilities::hasConversationV2() const {
             .toVariantList().contains("conversation-v2");
 }
 
+QColor Capabilities::primaryColor() const {
+    QColor color;
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return color;
+    }
+
+    color.setNamedColor(m_capabilities
+                        .find("theming").value().toObject()
+                        .find("color").value().toString());
+
+    if (!color.isValid())
+    {
+        // fallback to Nextcloud-blue when no color is provided
+        color.setNamedColor("#0082c9");
+    }
+
+    return color;
+}
+
 void Capabilities::request() {
     if(m_reply && m_reply->isRunning()) {
         return;
