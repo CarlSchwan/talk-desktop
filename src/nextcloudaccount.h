@@ -4,6 +4,7 @@
 #include <QString>
 #include <QUrl>
 #include <QSettings>
+#include <QSharedPointer>
 
 QT_FORWARD_DECLARE_CLASS(Capabilities)
 
@@ -39,7 +40,7 @@ private:
     QString m_password;
     QString m_user_id;
     bool m_dirty = false;
-    Capabilities *m_capabilities = nullptr;
+    QSharedPointer<Capabilities> m_capabilities;
 
 public slots:
     int id() const;

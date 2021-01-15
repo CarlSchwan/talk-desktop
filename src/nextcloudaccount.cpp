@@ -2,7 +2,7 @@
 #include "nextcloudaccount.h"
 
 NextcloudAccount::NextcloudAccount() {
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::NextcloudAccount(
@@ -20,7 +20,7 @@ NextcloudAccount::NextcloudAccount(
     m_login_name = login_name;
     m_password = password;
     m_user_id = user_id;
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
@@ -31,12 +31,11 @@ NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
     m_login_name = account.loginName();
     m_password = account.password();
     m_user_id = account.userId();
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::~NextcloudAccount()
 {
-    delete m_capabilities;
 }
 
 NextcloudAccount* NextcloudAccount::fromSettings(const QSettings &settings)
@@ -84,5 +83,5 @@ bool NextcloudAccount::operator ==(const NextcloudAccount &toCompare) const {
 }
 
 Capabilities* NextcloudAccount::capabilities() const {
-    return m_capabilities;
+    return m_capabilities.data();
 }

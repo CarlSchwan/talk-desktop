@@ -62,6 +62,8 @@ void Capabilities::request() {
 }
 
 void Capabilities::requestFinished(QNetworkReply *reply) {
+    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
+
     if(reply->error() != QNetworkReply::NoError
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
     {
@@ -80,11 +82,12 @@ void Capabilities::requestFinished(QNetworkReply *reply) {
     QJsonObject data = root.find("data").value().toObject();
     m_capabilities = data.find("capabilities").value().toObject();
     m_available = true;
-
-    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
 }
 
 void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
+    if(reply->property("AccountID") != this->m_account->id()) {
+        return;
+    }
     QByteArray newHash = reply->rawHeader("X-Nextcloud-Talk-Hash");
     if(m_talkCapHash == newHash) {
         return;

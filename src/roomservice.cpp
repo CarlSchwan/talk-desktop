@@ -114,6 +114,7 @@ void RoomService::loadRooms() {
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
         QNetworkReply* reply = m_nam.get(request);
         m_rooms_requests.append(reply);
+        reply->setProperty("AccountID", account->id());
     }
 }
 
