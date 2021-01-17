@@ -103,7 +103,34 @@ Room& Room::setLastActivity(const int lastActivity)
     return *this;
 }
 
+Room& Room::setLastMessage(const QString lastMessage, const QString lastAuthor, const uint timestamp, const bool isSystemMessage)
+{
+    m_lastMessageText = lastMessage;
+    m_lastMessageAuthor = lastAuthor;
+    m_lastMessageTimestamp = timestamp;
+    m_lastMessageIsSystemMessage = isSystemMessage;
+    return *this;
+}
+
+QString Room::lastMessageText() const {
+    return m_lastMessageText;
+}
+
+QString Room::lastMessageAuthor() const {
+    return m_lastMessageAuthor;
+}
+
+uint Room::lastMessageTimestamp() const {
+    return m_lastMessageTimestamp;
+}
+
+bool Room::lastMessageIsSystemMessage() const {
+    return m_lastMessageIsSystemMessage;
+}
+
+
 bool Room::operator ==(const Room &toCompare) const {
     return toCompare.account().id() == account().id()
             && toCompare.token() == token();
 }
+

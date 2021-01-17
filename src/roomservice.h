@@ -21,6 +21,11 @@ public:
         MentionedRole = Qt::UserRole + 5,
         UserIdRole = Qt::UserRole + 6,
         ColorRole = Qt::UserRole + 7,
+        LastMessageTextRole = Qt::UserRole + 8,
+        LastMessageAuthorRole = Qt::UserRole + 9,
+        LastMessageTimestampRole = Qt::UserRole + 10,
+        LastMessageIsSystemMessageRole = Qt::UserRole + 11,
+        TypeRole = Qt::UserRole + 12,
     };
 
     explicit RoomService(QObject *parent = nullptr);
