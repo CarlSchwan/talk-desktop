@@ -88,6 +88,11 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         return QVariant(m_rooms[index.row()].type());
     }
 
+    if (role == ConversationNameRole)
+    {
+        return QVariant(m_rooms[index.row()].conversationName());
+    }
+
     return QVariant();
 }
 
@@ -105,6 +110,7 @@ QHash<int, QByteArray> RoomService::roleNames() const {
     roles[LastMessageTimestampRole] = "lastMessageTimestamp";
     roles[LastMessageIsSystemMessageRole] = "lastMessageIsSystemMessage";
     roles[TypeRole] = "conversationType";
+    roles[ConversationNameRole] = "conversationName";
     return roles;
 }
 
@@ -197,7 +203,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    qDebug() << "JSON" << payload;
+    // qDebug() << "JSON" << payload;
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
@@ -215,6 +221,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         Room model;
         model
                 .setAccount(currentAccount)
+                .setConversationName(room.value("name").toString())
                 .setName(room.value("displayName").toString())
                 .setFavorite(room.value("isFavorite").toBool())
                 .setHasPassword(room.value("hasPassword").toBool())

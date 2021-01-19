@@ -34,6 +34,7 @@ private:
     QString m_lastMessageAuthor;
     uint m_lastMessageTimestamp;
     bool m_lastMessageIsSystemMessage;
+    QString m_conversationName;
 
 public slots:
     const NextcloudAccount &account() const;
@@ -49,6 +50,7 @@ public slots:
     QString lastMessageAuthor() const;
     uint lastMessageTimestamp() const;
     bool lastMessageIsSystemMessage() const;
+    QString conversationName() const;
 
     Room& setName(const QString name);
     Room& setToken(const QString token);
@@ -60,6 +62,7 @@ public slots:
     Room& setFavorite(const bool isFavorite);
     Room& setLastActivity(const int lastActivity);
     Room& setLastMessage(const QString lastMessage, const QString lastAuthor, const uint timestamp, const bool isSystemMessage);
+    Room& setConversationName(const QString name);
 };
 
 #endif // ROOM_H

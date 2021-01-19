@@ -1,6 +1,8 @@
 import QtQuick 2.5
+import QtQml 2.2
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
+import "../../components"
 
 Page {
     id: rooms
@@ -80,27 +82,27 @@ Page {
                                 color: primaryColor
                             }
 
-                            Image {
+                            Loader {
                                 id: conversationLogo
-                                //TODO: image from model
-                                //source: "image://theme/icon-m-users"
-                                source: {
-                                    switch (conversatiorType) {
-                                        case 3:
-                                            return "image://theme/icon-m-region"
+                                width: Theme.iconSizeMedium
+                                asynchronous: false
 
-                                        case 2:
-                                        default:
-                                            return "image://theme/icon-m-users"
+                                // bind Avatar properties
+                                property int _account: accountId
+                                property string _user: conversationName
+                                property int _size: Theme.iconSizeMedium
+                                // bind ConversationIcon properties
+                                property int _conversationType: conversationType
+
+                                source: {
+                                    switch (conversationType) {
+                                    case ConversationType.OneToOne:
+                                        return "../../components/Avatar.qml"
+                                    default:
+
+                                        return "../../components/ConversationIcon.qml"
                                     }
                                 }
-
-                                width: Theme.iconSizeMedium
-                                fillMode: Image.PreserveAspectFit
-                                height: roomName.paintedHeight + lastMessage.paintedHeight
-                                verticalAlignment: Qt.AlignVCenter
-                            }
-
                             }
 
                             Column {

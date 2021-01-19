@@ -1,5 +1,6 @@
 #include "abstractnextcloudimageprovider.h"
 
+#include <QException>
 #include <QNetworkReply>
 #include "../services/accounts.h"
 
@@ -30,7 +31,12 @@ class AsyncImageResponse : public QQuickImageResponse
 
 QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const QString &id, const QSize &requestedSize)
 {
-    NextcloudAccount* account = accountFromId(id);
+    NextcloudAccount* account = nullptr;
+    try {
+        account = accountFromId(id);
+    } catch (...) {
+        return nullptr;
+    }
     QString subject = id;
     subject.remove(0, id.indexOf('/') + 1);
     QNetworkRequest request = getRequest(subject, account, requestedSize);

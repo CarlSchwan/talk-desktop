@@ -128,6 +128,17 @@ bool Room::lastMessageIsSystemMessage() const {
     return m_lastMessageIsSystemMessage;
 }
 
+Room& Room::setConversationName(const QString name)
+{
+    m_conversationName = name;
+    return *this;
+}
+
+QString Room::conversationName() const
+{
+    return m_conversationName;
+}
+
 
 bool Room::operator ==(const Room &toCompare) const {
     return toCompare.account().id() == account().id()

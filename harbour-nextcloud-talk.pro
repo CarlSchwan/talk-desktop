@@ -46,6 +46,7 @@ DISTFILES += qml/lib/API.js \
     events/nextcloud_talk_im.ini \
     notificationcategories/x-nextcloud.talk.im.conf \
     qml/components/Avatar.qml \
+    qml/components/ConversationIcon.qml \
     qml/components/DBusHandler.qml \
     qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
@@ -75,6 +76,7 @@ CONFIG += sailfishapp_i18n
 TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
+    src/constants/ConversationTypeClass.h \
     src/db.h \
     src/nextcloudaccount.h \
     src/discovery.h \

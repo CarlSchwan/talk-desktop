@@ -26,6 +26,7 @@ public:
         LastMessageTimestampRole = Qt::UserRole + 10,
         LastMessageIsSystemMessageRole = Qt::UserRole + 11,
         TypeRole = Qt::UserRole + 12,
+        ConversationNameRole = Qt::UserRole + 13,
     };
 
     explicit RoomService(QObject *parent = nullptr);
