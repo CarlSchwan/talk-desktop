@@ -34,21 +34,6 @@ Page {
              }
          }
 
-        TextMetrics {
-            id: textMetricsUnread
-            text: "99+"
-            //font.weight: Font.DemiBold
-            font.weight: Font.Bold
-            font.pixelSize: Theme.fontSizeMedium
-        }
-
-        TextMetrics {
-            id: textMetricsUnreadSingleDigit
-            text: "9"
-            font.weight: Font.Bold
-            font.pixelSize: Theme.fontSizeMedium
-        }
-
         id: roomList
         anchors.fill: parent
 
@@ -69,10 +54,11 @@ Page {
                     }
 
                     Row {
-                        width: parent.width - Theme.horizontalPageMargin
+                        width: parent.width
+
                         Row {
                             id: nameRow
-                            width: parent.width
+                            width: parent.width - unreadCounterItem.width
                             spacing: Theme.paddingMedium
 
                             Rectangle {
@@ -105,8 +91,10 @@ Page {
                                 }
                             }
 
+
                             Column {
-                                width: parent.width - accountIndicator.width - conversationLogo.width - unreadCounter.width
+                                width: parent.width - accountIndicator.width - conversationLogo.width - unreadCounterItem.width
+
                                 Label {
                                     id: roomName
                                     width: parent.width
@@ -146,29 +134,19 @@ Page {
 
                         Item {
                             id: unreadCounterItem
-                            width: textMetricsUnread.width
-                            height: parent.height
+                            width: unreadCounter.text == "" ? Theme.horizontalPageMargin : Theme.iconSizeMedium
+                            height: unreadCounter.text == "" ? 0 : parent.height
                             visible: unreadCounter.text != ""
 
                             Rectangle {
-                                width: unreadCounter.paintedWidth * 2
-                                height: parent.height * 0.7
+                                width: Theme.iconSizeMedium * 0.8
+                                height: Theme.iconSizeMedium * 0.8
+                                anchors.centerIn: unreadCounterItem
                                 border.color: unreadCounter.color
-                                border.width: 1
-                                radius: 75
+                                border.width: 2
+                                radius: Theme.iconSizeMedium
                                 color: unreadMention ? Theme.secondaryHighlightColor : "transparent"
-                                y: parent.height * 0.15
                                 antialiasing: true
-                                x: {
-                                    if(unreadCounter.text == "") {
-                                        return 0;
-                                    }
-                                    var factor = unreadCounter.text.length - 1;
-
-                                    //this.width = textMetricsUnreadSingleDigit.width * (unreadCounter.text.length + 1.6 + factor/10 * 2) // large font size
-                                    this.width = textMetricsUnreadSingleDigit.width * (unreadCounter.text.length + 1.2 + factor/10 * 2)
-                                    return 0 - textMetricsUnreadSingleDigit.width * factor * 1.2
-                                }
                             }
 
                             Label {
@@ -177,12 +155,13 @@ Page {
                                         : unreadMessages > 99 ? "99+"
                                         : unreadMessages
                                 color: Theme.primaryColor
-                                font.pixelSize: textMetricsUnread.font.pixelSize;
-                                font.weight: textMetricsUnread.font.weight
-                                horizontalAlignment: Qt.AlignRight
-                                width: parent.visible ? textMetricsUnread.width : 0
-                                height: parent.height
-                                rightPadding: Theme.horizontalPageMargin
+                                anchors.centerIn: parent
+                                font.pixelSize: Theme.fontSizeMedium
+                                font.weight: Font.Bold
+                                fontSizeMode: Text.Fit
+                                horizontalAlignment: Qt.AlignHCenter
+                                width: parent.visible ? parent.width * 0.7 : 0
+                                height: parent.width * 0.7
                                 antialiasing: true
                                 verticalAlignment: Qt.AlignVCenter
                             }
