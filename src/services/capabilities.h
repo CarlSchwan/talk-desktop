@@ -18,6 +18,8 @@ public:
     NextcloudAccount *m_account;
     bool hasConversationV2() const;
     QColor primaryColor() const;
+    QUrl logoUrl() const;
+    QString name() const;
 
 private:
     QNetworkAccessManager m_nam;

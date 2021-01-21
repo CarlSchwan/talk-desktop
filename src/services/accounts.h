@@ -14,6 +14,8 @@ public:
     enum AccountRoles {
         NameRole = Qt::UserRole + 1,
         AccountRole = Qt::UserRole + 2,
+        LogoRole = Qt::UserRole + 3,
+        InstanceNameRole = Qt::UserRole + 4,
     };
     explicit Accounts(QObject *parent = nullptr);
     static Accounts* getInstance();

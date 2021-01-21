@@ -46,6 +46,29 @@ QColor Capabilities::primaryColor() const {
     return color;
 }
 
+QUrl Capabilities::logoUrl() const {
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return QUrl();
+    }
+
+    return QUrl::fromUserInput(m_capabilities
+                               .find("theming").value().toObject()
+                               .find("logo").value().toString()
+                               );
+}
+
+QString Capabilities::name() const {
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return "";
+    }
+
+    return m_capabilities
+            .find("theming").value().toObject()
+            .find("name").value().toString();
+}
+
 void Capabilities::request() {
     if(m_reply && m_reply->isRunning()) {
         return;
