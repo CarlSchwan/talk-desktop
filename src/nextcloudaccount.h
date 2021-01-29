@@ -1,9 +1,11 @@
 #ifndef NEXTCLOUDACCOUNT_H
 #define NEXTCLOUDACCOUNT_H
 
+#include <QColor>
 #include <QString>
 #include <QUrl>
 #include <QSettings>
+#include <QSharedPointer>
 
 QT_FORWARD_DECLARE_CLASS(Capabilities)
 
@@ -27,6 +29,7 @@ public:
     );
     NextcloudAccount(const NextcloudAccount& account);
     ~NextcloudAccount();
+
     static NextcloudAccount* fromSettings(const QSettings &settings);
     void toSettings(QSettings &settings) const;
     bool operator ==(const NextcloudAccount &toCompare) const;
@@ -39,7 +42,8 @@ private:
     QString m_password;
     QString m_user_id;
     bool m_dirty = false;
-    Capabilities *m_capabilities = nullptr;
+    QColor m_colorOverride;
+    QSharedPointer<Capabilities> m_capabilities;
 
 public slots:
     int id() const;
@@ -48,6 +52,7 @@ public slots:
     QString loginName() const;
     QString password() const;
     QString userId() const;
+    QColor colorOverride() const;
     Capabilities *capabilities() const;
 
     void setId(const int id);
@@ -56,6 +61,7 @@ public slots:
     void setLoginName(const QString login_name);
     void setPassword(const QString password);
     void setUserId(const QString user_id);
+    void setColorOverride(const QColor colorOverride);
 };
 
 #endif // NEXTCLOUDACCOUNT_H

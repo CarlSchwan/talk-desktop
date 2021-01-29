@@ -26,6 +26,49 @@ bool Capabilities::hasConversationV2() const {
             .toVariantList().contains("conversation-v2");
 }
 
+QColor Capabilities::primaryColor() const {
+    QColor color;
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return color;
+    }
+
+    color.setNamedColor(m_capabilities
+                        .find("theming").value().toObject()
+                        .find("color").value().toString());
+
+    if (!color.isValid())
+    {
+        // fallback to Nextcloud-blue when no color is provided
+        color.setNamedColor("#0082c9");
+    }
+
+    return color;
+}
+
+QUrl Capabilities::logoUrl() const {
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return QUrl();
+    }
+
+    return QUrl::fromUserInput(m_capabilities
+                               .find("theming").value().toObject()
+                               .find("logo").value().toString()
+                               );
+}
+
+QString Capabilities::name() const {
+    if(!m_available) {
+        qDebug() << "capabilities have not been requested yet!";
+        return "";
+    }
+
+    return m_capabilities
+            .find("theming").value().toObject()
+            .find("name").value().toString();
+}
+
 void Capabilities::request() {
     if(m_reply && m_reply->isRunning()) {
         return;
@@ -42,6 +85,8 @@ void Capabilities::request() {
 }
 
 void Capabilities::requestFinished(QNetworkReply *reply) {
+    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
+
     if(reply->error() != QNetworkReply::NoError
             || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
     {
@@ -60,11 +105,12 @@ void Capabilities::requestFinished(QNetworkReply *reply) {
     QJsonObject data = root.find("data").value().toObject();
     m_capabilities = data.find("capabilities").value().toObject();
     m_available = true;
-
-    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
 }
 
 void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
+    if(reply->property("AccountID") != this->m_account->id()) {
+        return;
+    }
     QByteArray newHash = reply->rawHeader("X-Nextcloud-Talk-Hash");
     if(m_talkCapHash == newHash) {
         return;

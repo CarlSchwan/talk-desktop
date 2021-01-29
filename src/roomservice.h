@@ -20,6 +20,13 @@ public:
         UnreadRole = Qt::UserRole + 4,
         MentionedRole = Qt::UserRole + 5,
         UserIdRole = Qt::UserRole + 6,
+        ColorRole = Qt::UserRole + 7,
+        LastMessageTextRole = Qt::UserRole + 8,
+        LastMessageAuthorRole = Qt::UserRole + 9,
+        LastMessageTimestampRole = Qt::UserRole + 10,
+        LastMessageIsSystemMessageRole = Qt::UserRole + 11,
+        TypeRole = Qt::UserRole + 12,
+        ConversationNameRole = Qt::UserRole + 13,
     };
 
     explicit RoomService(QObject *parent = nullptr);
@@ -47,6 +54,7 @@ private slots:
     Room findRoomByTokenAndAccount(const QString token, const int accountId);
     void onAccountsChanged();
     void emitAfterActiveRoomChanged(QString token, int accountId);
+    void onAccountUpdated();
 
 private:
     Accounts* m_accountService = Accounts::getInstance();

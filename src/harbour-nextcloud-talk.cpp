@@ -10,6 +10,7 @@
 #include "discovery.h"
 #include "roomservice.h"
 #include "nextcloudaccount.h"
+#include "constants/ConversationTypeClass.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,6 +27,8 @@ int main(int argc, char *argv[])
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
 
     QScopedPointer<QQuickView> v(SailfishApp::createView());
+
+    qmlRegisterUncreatableType<ConversationTypeClass>("harbour.nextcloud.talk", 1, 0, "ConversationType", "Enum type");
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");

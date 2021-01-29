@@ -18,6 +18,7 @@ RoomService::RoomService(QObject *parent)
 {
     connect(m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
     connect(m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
+    connect(m_accountService, &QAbstractItemModel::dataChanged, this, &RoomService::onAccountUpdated);
 }
 
 int RoomService::rowCount(const QModelIndex &parent) const
@@ -58,6 +59,44 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         return QVariant(m_rooms[index.row()].unreadMention());
     }
 
+    if (role == ColorRole)
+    {
+        if (m_rooms[index.row()].account().colorOverride().isValid()) {
+            return QVariant(m_rooms[index.row()].account().colorOverride());
+        }
+        return QVariant(m_rooms[index.row()].account().capabilities()->primaryColor());
+    }
+
+    if (role == LastMessageTextRole)
+    {
+        return QVariant(m_rooms[index.row()].lastMessageText());
+    }
+
+    if (role == LastMessageAuthorRole)
+    {
+        return QVariant(m_rooms[index.row()].lastMessageAuthor());
+    }
+
+    if (role == LastMessageTimestampRole)
+    {
+        return QVariant(m_rooms[index.row()].lastMessageTimestamp());
+    }
+
+    if (role == LastMessageIsSystemMessageRole)
+    {
+        return QVariant(m_rooms[index.row()].lastMessageIsSystemMessage());
+    }
+
+    if (role == TypeRole)
+    {
+        return QVariant(m_rooms[index.row()].type());
+    }
+
+    if (role == ConversationNameRole)
+    {
+        return QVariant(m_rooms[index.row()].conversationName());
+    }
+
     return QVariant();
 }
 
@@ -69,6 +108,13 @@ QHash<int, QByteArray> RoomService::roleNames() const {
     roles[UserIdRole] = "accountUserId";
     roles[UnreadRole] = "unreadMessages";
     roles[MentionedRole] = "unreadMention";
+    roles[ColorRole] = "primaryColor";
+    roles[LastMessageTextRole] = "lastMessageText";
+    roles[LastMessageAuthorRole] = "lastMessageAuthor";
+    roles[LastMessageTimestampRole] = "lastMessageTimestamp";
+    roles[LastMessageIsSystemMessageRole] = "lastMessageIsSystemMessage";
+    roles[TypeRole] = "conversationType";
+    roles[ConversationNameRole] = "conversationName";
     return roles;
 }
 
@@ -108,6 +154,7 @@ void RoomService::loadRooms() {
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
         QNetworkReply* reply = m_nam.get(request);
         m_rooms_requests.append(reply);
+        reply->setProperty("AccountID", account->id());
     }
 }
 
@@ -160,7 +207,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
     QJsonDocument apiResult = QJsonDocument::fromJson(payload);
     QJsonObject q = apiResult.object();
     QJsonObject root = q.find("ocs").value().toObject();
-    //qDebug() << "JSON" << payload;
+    // qDebug() << "JSON" << payload;
     QJsonObject meta = root.find("meta").value().toObject();
     QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
@@ -178,6 +225,7 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
         Room model;
         model
                 .setAccount(currentAccount)
+                .setConversationName(room.value("name").toString())
                 .setName(room.value("displayName").toString())
                 .setFavorite(room.value("isFavorite").toBool())
                 .setHasPassword(room.value("hasPassword").toBool())
@@ -186,6 +234,26 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
                 .setUnreadMention(room.value("unreadMention").toBool())
                 .setUnreadMessages(room.value("unreadMessages").toInt())
                 .setLastActivity(room.value("lastActivity").toInt());
+
+        if(room.contains("lastMessage"))
+        {
+            QJsonObject lastMessage = room.value("lastMessage").toObject();
+            QString message = lastMessage.value("message").toString();
+            QJsonObject parameters = lastMessage.value("messageParameters").toObject();
+
+            foreach(QString placeholder, parameters.keys())
+            {
+                QString name = parameters.value(placeholder).toObject().value("name").toString();
+                message.replace("{" + placeholder + "}", name, Qt::CaseSensitive);
+            }
+
+            model.setLastMessage(
+                message,
+                lastMessage.value("actorDisplayName").toString(),
+                lastMessage.value("timestamp").toVariant().toUInt(),
+                lastMessage.value("systemMessage").toString() != ""
+            );
+        }
 
         try {
             Room knownRoom = findRoomByTokenAndAccount(model.token(), model.account().id());
@@ -390,4 +458,10 @@ void RoomService::onAccountsChanged() {
     m_rooms.clear();
     endResetModel();
     loadRooms();
+}
+
+void RoomService::onAccountUpdated() {
+    qDebug() << "RoomService acting on Account update";
+    beginResetModel();
+    endResetModel();
 }

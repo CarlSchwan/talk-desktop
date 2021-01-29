@@ -2,7 +2,7 @@
 #include "nextcloudaccount.h"
 
 NextcloudAccount::NextcloudAccount() {
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::NextcloudAccount(
@@ -20,7 +20,7 @@ NextcloudAccount::NextcloudAccount(
     m_login_name = login_name;
     m_password = password;
     m_user_id = user_id;
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
@@ -31,17 +31,16 @@ NextcloudAccount::NextcloudAccount(const NextcloudAccount& account)
     m_login_name = account.loginName();
     m_password = account.password();
     m_user_id = account.userId();
-    m_capabilities = new Capabilities(this);
+    m_capabilities = QSharedPointer<Capabilities>(new Capabilities(this));
 }
 
 NextcloudAccount::~NextcloudAccount()
 {
-    delete m_capabilities;
 }
 
 NextcloudAccount* NextcloudAccount::fromSettings(const QSettings &settings)
 {
-    return new NextcloudAccount(
+    auto account = new NextcloudAccount(
         settings.value("id").toInt(),
         settings.value("name").toString(),
         settings.value("host").toUrl(),
@@ -49,6 +48,10 @@ NextcloudAccount* NextcloudAccount::fromSettings(const QSettings &settings)
         settings.value("password").toString(),  // for compatibility/migration, dating back to alpha 7
         settings.value("user_id").toString()
     );
+    if(settings.contains("colorOverride")) {
+        account->setColorOverride(QColor(settings.value("colorOverride").toString()));
+    }
+    return account;
 }
 
 void NextcloudAccount::toSettings(QSettings &settings) const
@@ -59,6 +62,9 @@ void NextcloudAccount::toSettings(QSettings &settings) const
     settings.setValue("login_name", m_login_name);
     settings.setValue("password", "");
     settings.setValue("user_id", m_user_id);
+    if(m_colorOverride.isValid()) {
+        settings.setValue("colorOverride", m_colorOverride);
+    }
 }
 
 int NextcloudAccount::id() const { return m_id; }
@@ -79,10 +85,14 @@ void NextcloudAccount::setPassword(const QString password) { m_password = passwo
 QString NextcloudAccount::userId() const { return m_user_id; }
 void NextcloudAccount::setUserId(const QString user_id) { m_user_id = user_id; m_dirty = true; }
 
+QColor NextcloudAccount::colorOverride() const { return m_colorOverride; }
+void NextcloudAccount::setColorOverride(QColor colorOverride) { m_colorOverride = colorOverride; m_dirty = true; }
+
+
 bool NextcloudAccount::operator ==(const NextcloudAccount &toCompare) const {
     return toCompare.id() == id();
 }
 
 Capabilities* NextcloudAccount::capabilities() const {
-    return m_capabilities;
+    return m_capabilities.data();
 }

@@ -1,11 +1,14 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
 Image {
-    property string account;
-    property string user;
-    property int size: Theme.itemSizeExtraSmall
+    readonly property string objectName: "Avatar"
+
+    // underscored proprties for use within a Loader as Delegate
+    property string account: (typeof (_account) !== "undefined") ? _account : undefined
+    property string user: (typeof (_user) !== "undefined") ? _user : undefined
+    property int size: (typeof (_size) !== "undefined") ? _size : Theme.itemSizeExtraSmall
 
     source: "image://avatar/" + account + "/" + user + "/"
     height: size
