@@ -16,6 +16,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 
 * Legacy-type login with host, username and password. Please create an app password on Nextcloud and use it.
 * Multi-account support
+	- customizable indicator colors on conversations page, defaults to instance theme
 * List of all conversations, sorted by activity. It contains an unread counter, which is highlighted when an unread mention is present.
 	- Regular polling
 	- SailfishOS notifications, synced with Nextcloud
@@ -33,6 +34,7 @@ This is a complete list of features. What is not mentioned, does not work as of 
 	- file preview, download, open (externally)
 * Online only, nothing is stored on the device except:
 	- account data (host, login, token, user ID plus generated account id and name)
+	- customized indicator color (if set)
 	- last seen message id per conversation
 
 ## Please note
