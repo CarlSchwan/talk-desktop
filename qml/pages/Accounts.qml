@@ -76,6 +76,10 @@ Page {
                         pageStack.push(Qt.resolvedUrl("./LegacyAddAccount.qml"), {
                             "onSuccessToRooms": accountList.count === 1
                         })
+                    } else {
+                        pageStack.push(Qt.resolvedUrl("accounts/AccountSettings.qml"), {
+                            "accountIndex": AccountService.index(index, 0)
+                        })
                     }
                 }
                 menu: ContextMenu {

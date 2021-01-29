@@ -54,6 +54,7 @@ private slots:
     Room findRoomByTokenAndAccount(const QString token, const int accountId);
     void onAccountsChanged();
     void emitAfterActiveRoomChanged(QString token, int accountId);
+    void onAccountUpdated();
 
 private:
     Accounts* m_accountService = Accounts::getInstance();

@@ -16,7 +16,15 @@ public:
         AccountRole = Qt::UserRole + 2,
         LogoRole = Qt::UserRole + 3,
         InstanceNameRole = Qt::UserRole + 4,
+        ColorRole = Qt::UserRole + 5,
+        ColorModeRole = Qt::UserRole + 6,
     };
+    enum ColorMode {
+        InstanceColor,
+        OverriddenColor,
+    };
+    Q_ENUM(AccountRoles)
+    Q_ENUM(ColorMode)
     explicit Accounts(QObject *parent = nullptr);
     static Accounts* getInstance();
     NextcloudAccount* getAccountById(const int id);
@@ -25,6 +33,7 @@ public:
     // Basic functionality:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
     QHash<int, QByteArray> roleNames() const;
 
 public slots:

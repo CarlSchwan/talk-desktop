@@ -2,6 +2,17 @@
 <!DOCTYPE TS>
 <TS version="2.1">
 <context>
+    <name>AccountSettings</name>
+    <message>
+        <source>from instance theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>selected by you</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Accounts</name>
     <message>
         <source>Accounts</source>

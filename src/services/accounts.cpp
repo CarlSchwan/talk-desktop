@@ -61,7 +61,49 @@ QVariant Accounts::data(const QModelIndex &index, int role) const
         return QVariant("");
     }
 
+    if (role == ColorModeRole && index.row() < knownAccounts)
+    {
+        if (accounts.at(index.row())->colorOverride().isValid()) {
+            return QVariant(Accounts::OverriddenColor);
+        }
+        return QVariant(Accounts::InstanceColor);
+    } else if (role == LogoRole && index.row() == knownAccounts){
+        return QVariant(Accounts::InstanceColor);
+    }
+
+    if (role == ColorRole && index.row() < knownAccounts)
+    {
+        if (accounts.at(index.row())->colorOverride().isValid()) {
+            return QVariant(accounts.at(index.row())->colorOverride());
+        }
+        return QVariant(accounts.at(index.row())->capabilities()->primaryColor());
+    } else if (role == LogoRole && index.row() == knownAccounts) {
+        return QVariant(QColor("#006295"));
+    }
+
     return QVariant();
+}
+
+bool Accounts::setData(const QModelIndex &index, const QVariant &value, int role) {
+    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
+
+    if (role == ColorRole && index.row() < accounts.count())
+    {
+        accounts.at(index.row())->setColorOverride(value.value<QColor>());
+
+        QSettings accountSettings("Nextcloud", "Accounts");
+        accountSettings.beginGroup("account_" + QString::number(accounts.at(index.row())->id()));
+        accounts.at(index.row())->toSettings(accountSettings);
+        accountSettings.endGroup();
+        accountSettings.sync();
+
+        QVector<int> changedRole;
+        changedRole.append(role);
+        dataChanged(index, index, changedRole);
+        return true;
+    }
+
+    return false;
 }
 
 QHash<int, QByteArray> Accounts::roleNames() const {
@@ -70,6 +112,8 @@ QHash<int, QByteArray> Accounts::roleNames() const {
     roles[AccountRole] = "account";
     roles[LogoRole] = "instanceLogo";
     roles[InstanceNameRole] = "instanceName";
+    roles[ColorRole] = "color";
+    roles[ColorModeRole] = "colorMode";
     return roles;
 }
 

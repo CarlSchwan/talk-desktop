@@ -51,6 +51,7 @@ DISTFILES += qml/lib/API.js \
     qml/components/FilePreview.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
+    qml/pages/accounts/AccountSettings.qml \
     qml/pages/chat/participants.qml \
     rpm/harbour-nextcloud-talk.changes.in \
     rpm/harbour-nextcloud-talk.changes.run.in \

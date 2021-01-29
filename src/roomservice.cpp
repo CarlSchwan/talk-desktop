@@ -18,6 +18,7 @@ RoomService::RoomService(QObject *parent)
 {
     connect(m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
     connect(m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
+    connect(m_accountService, &QAbstractItemModel::dataChanged, this, &RoomService::onAccountUpdated);
 }
 
 int RoomService::rowCount(const QModelIndex &parent) const
@@ -60,6 +61,9 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
 
     if (role == ColorRole)
     {
+        if (m_rooms[index.row()].account().colorOverride().isValid()) {
+            return QVariant(m_rooms[index.row()].account().colorOverride());
+        }
         return QVariant(m_rooms[index.row()].account().capabilities()->primaryColor());
     }
 
@@ -454,4 +458,10 @@ void RoomService::onAccountsChanged() {
     m_rooms.clear();
     endResetModel();
     loadRooms();
+}
+
+void RoomService::onAccountUpdated() {
+    qDebug() << "RoomService acting on Account update";
+    beginResetModel();
+    endResetModel();
 }
