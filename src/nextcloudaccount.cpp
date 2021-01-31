@@ -64,6 +64,8 @@ void NextcloudAccount::toSettings(QSettings &settings) const
     settings.setValue("user_id", m_user_id);
     if(m_colorOverride.isValid()) {
         settings.setValue("colorOverride", m_colorOverride);
+    } else {
+        settings.setValue("colorOverride", "");
     }
 }
 
