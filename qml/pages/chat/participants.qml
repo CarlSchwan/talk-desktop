@@ -64,19 +64,21 @@ Page {
                 Label {
                     id: name
                     text: {
+                        // ◉ 25C9 Fisheye
+                        // ◎ 25CE Bullseye
                         if ( isOnline ) {
-                        // TODO: Away/Busy/Custom status
-                        //      ◉ 25C9 Fisheye
-                        //      ◎ 25CE Bullseye
-                        //      if (presence === 2) {
-                        //          Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceAway))
-                        //      } else if (presence === 3) {
-                        //          Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceBusy))
-                        //      } else
-                                Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceAvailable))
-                        //      }
+                            switch (presence) {
+                                case 2: // away
+                                    return Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceAway));
+                                    break;
+                                case 3: // busy
+                                    return Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceBusy));
+                                    break;
+                                default: // seems to be online
+                                    return Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceAvailable));
+                            }
                         } else {
-                                Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceOffline))
+                           return  Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceOffline))
                         }
                     }
                     // presenceAvailalble is too bright/ugly for styling the whole text:

@@ -24,12 +24,13 @@ public:
         NameRole = Qt::UserRole + 2,
         TypeRole = Qt::UserRole + 3,
         StatusRole = Qt::UserRole + 4,
+        PresenceRole = Qt::UserRole + 5,
     };
 
     struct Participant
     {
         Participant() {}
-        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false)
+        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false, int presence = 0)
         {
             this->userId = userId;
             this->displayName = displayName;
@@ -37,6 +38,7 @@ public:
             this->ping = ping;
             this->sessionId = sessionId;
             this->inCall = inCall;
+            this->presence = presence;
         }
 
         QString userId;
@@ -45,6 +47,7 @@ public:
         int ping;
         QString sessionId;
         int inCall = 0;
+        int presence; // 0 default/unknown/offline, 1 online, 2 away, 3 busy/dnd
         int _checkId;
 
         bool operator==(const Participant& toCompare) const

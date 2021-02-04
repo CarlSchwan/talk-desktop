@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QNetworkRequest>
+#include <QUrlQuery>
 #include <QMetaMethod>
 #include "participants.h"
 #include "requestfactory.h"
@@ -39,6 +40,8 @@ QVariant Participants::data(const QModelIndex &index, int role) const
         return QVariant(m_participants[index.row()].type);
     case StatusRole:
         return QVariant(m_participants[index.row()].sessionId != "0");
+    case PresenceRole:
+        return QVariant(m_participants[index.row()].presence );
     default:
         return QVariant();
     }
@@ -51,6 +54,7 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[NameRole] = "displayName";
     roles[TypeRole] = "participantType";
     roles[StatusRole] = "isOnline";
+    roles[PresenceRole] = "presence";
     return roles;
 }
 
@@ -71,7 +75,10 @@ void Participants::pullParticipants(QString token, int accountId)
     QUrl endpoint = QUrl(m_activeAccount->host());
     QString apiV = m_activeAccount->capabilities()->hasConversationV2() ? "v2" : "v1";
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + token + "/participants");
-    endpoint.setQuery("format=json");
+    QUrlQuery q(endpoint);
+    q.addQueryItem("format", "json");
+    q.addQueryItem("includeStatus", "true");
+    endpoint.setQuery(q);
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, m_activeAccount);
     m_reply = m_nam.get(request);
@@ -117,6 +124,17 @@ void Participants::participantsPulled(QNetworkReply *reply)
             participantData.value("lastPing").toInt(),
             participantData.value("sessionId").toString()
         );
+        if(participantData.contains("status")) {
+            // TODO: look up what exactly can be in 'status'. this seems to work so far.
+            model.presence = 1;
+            if (participantData.value("status").toString().contains("Away", Qt::CaseInsensitive))
+              model.presence = 2;
+            if (participantData.value("status").toString().contains("Busy", Qt::CaseInsensitive) || \
+                participantData.value("status").toString().contains("Do not disturb", Qt::CaseInsensitive) )
+              model.presence = 3;
+        } else {
+            model.presence = 0;
+        }
         if(participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
         }
