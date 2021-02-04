@@ -5,98 +5,98 @@
     <name>AccountSettings</name>
     <message>
         <source>from instance theme</source>
-        <translation type="unfinished"></translation>
+        <translation>nach dem Farbschema der Instanz</translation>
     </message>
     <message>
-        <source>selected by you</source>
-        <translation type="unfinished"></translation>
+        <source>selbst auswählen</source>
+        <translation></translation>
     </message>
 </context>
 <context>
     <name>Accounts</name>
     <message>
         <source>Accounts</source>
-        <translation type="unfinished"></translation>
+        <translation>Konten</translation>
     </message>
     <message>
         <source>Delete account</source>
-        <translation type="unfinished"></translation>
+        <translation>Konto löschen</translation>
     </message>
 </context>
 <context>
     <name>LegacyAddAccount</name>
     <message>
         <source>Add account</source>
-        <translation type="unfinished"></translation>
+        <translation>Neues Konto hinzufügen</translation>
     </message>
     <message>
         <source>Enter a Nextcloud host</source>
-        <translation type="unfinished"></translation>
+        <translation>Gib einen Server an</translation>
     </message>
     <message>
         <source>Verify Host</source>
-        <translation type="unfinished"></translation>
+        <translation>Überprüfe den Server</translation>
     </message>
     <message>
         <source>Enter login name</source>
-        <translation type="unfinished"></translation>
+        <translation>Gib deinen Benutzernamen an</translation>
     </message>
     <message>
         <source>Enter app password</source>
-        <translation type="unfinished"></translation>
+        <translation>Gib dein App-Passwort an</translation>
     </message>
     <message>
         <source>Verify Credentials</source>
-        <translation type="unfinished"></translation>
+        <translation>Überprüfe die Anmeldedaten</translation>
     </message>
 </context>
 <context>
     <name>participants</name>
     <message>
         <source>Participants</source>
-        <translation type="unfinished"></translation>
+        <translation>Teilnehmer</translation>
     </message>
     <message>
         <source>Moderator</source>
-        <translation type="unfinished"></translation>
+        <translation>Moderator</translation>
     </message>
     <message>
         <source>Guest</source>
-        <translation type="unfinished"></translation>
+        <translation>Gast</translation>
     </message>
 </context>
 <context>
     <name>room</name>
     <message>
         <source>shared</source>
-        <translation type="unfinished"></translation>
+        <translation>teilte</translation>
     </message>
     <message>
         <source>Reply</source>
-        <translation type="unfinished"></translation>
+        <translation>Antworten</translation>
     </message>
     <message>
         <source>Copy text</source>
-        <translation type="unfinished"></translation>
+        <translation>Text kopieren</translation>
     </message>
     <message>
         <source>Mention</source>
-        <translation type="unfinished"></translation>
+        <translation>Erwähne</translation>
     </message>
 </context>
 <context>
     <name>rooms</name>
     <message>
         <source>Accounts</source>
-        <translation type="unfinished"></translation>
+        <translation>Konten</translation>
     </message>
     <message>
         <source>Last update: </source>
-        <translation type="unfinished"></translation>
+        <translation>Zuletzt aktualisiert:</translation>
     </message>
     <message>
         <source>Conversations</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterhaltungen</translation>
     </message>
 </context>
 </TS>
