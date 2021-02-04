@@ -8,8 +8,8 @@
         <translation>nach dem Farbschema der Instanz</translation>
     </message>
     <message>
-        <source>selbst auswählen</source>
-        <translation></translation>
+        <source>selected by you</source>
+        <translation>selbst auswählen</translation>
     </message>
 </context>
 <context>
