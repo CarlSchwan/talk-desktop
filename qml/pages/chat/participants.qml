@@ -63,8 +63,24 @@ Page {
                 }
                 Label {
                     id: name
-                    text: displayName
-                    font.weight: isOnline ? Font.Bold : Font.Normal
+                    text: {
+                        if ( isOnline ) {
+                        // TODO: Away/Busy/Custom status
+                        //      ◉ 25C9 Fisheye
+                        //      ◎ 25CE Bullseye
+                        //      if (presence === 2) {
+                        //          Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceAway))
+                        //      } else if (presence === 3) {
+                        //          Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceBusy))
+                        //      } else
+                                Theme.highlightText("\u25C9 " + displayName, "\u25C9", Theme.presenceColor(Theme.PresenceAvailable))
+                        //      }
+                        } else {
+                                Theme.highlightText("\u25CE " + displayName, "\u25CE", Theme.presenceColor(Theme.PresenceOffline))
+                        }
+                    }
+                    // presenceAvailalble is too bright/ugly for styling the whole text:
+                    color: isOnline ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
                     leftPadding: avatar.visible ? Theme.paddingMedium : 0
                     verticalAlignment: "AlignVCenter"
                     height: Theme.itemSizeExtraSmall
@@ -84,6 +100,7 @@ Page {
                     font.italic: true
                     leftPadding: Theme.paddingMedium
                     font.weight: Font.Light
+                    color: Theme.secondaryColor
                     verticalAlignment: "AlignVCenter"
                     height: Theme.itemSizeExtraSmall
                 }
