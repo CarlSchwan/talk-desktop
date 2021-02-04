@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -9,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="86"
-   height="86"
+   width="500"
+   height="500"
    id="svg2"
    version="1.1"
-   inkscape:version="0.92.4 5da689c313, 2019-01-14"
-   sodipodi:docname="cover.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
+   sodipodi:docname="cover500.svg"
    inkscape:export-xdpi="193.35001"
    inkscape:export-ydpi="193.35001">
   <defs
@@ -38,26 +36,29 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="7.9999999"
-     inkscape:cx="48.493628"
-     inkscape:cy="39.498091"
+     inkscape:zoom="0.9732996"
+     inkscape:cx="-182.21137"
+     inkscape:cy="279.7133"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1007"
-     inkscape:window-x="0"
-     inkscape:window-y="36"
+     inkscape:window-width="3840"
+     inkscape:window-height="1137"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:snap-bbox="true"
-     inkscape:snap-global="true">
+     inkscape:snap-global="true"
+     inkscape:document-rotation="0">
     <inkscape:grid
        type="xygrid"
        id="grid2985"
        empspacing="5"
        visible="true"
        enabled="true"
-       snapvisiblegridlinesonly="true" />
+       snapvisiblegridlinesonly="true"
+       originx="207"
+       originy="207" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -67,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -76,11 +77,11 @@
      id="layer2"
      inkscape:label="Ebene"
      style="display:inline"
-     transform="translate(0,-4)">
+     transform="translate(207,203)">
     <path
        id="path4841"
-       d="m 42.996452,18.63417 a 28.361164,28.361569 0 0 0 -28.36076,28.36238 28.361164,28.361569 0 0 0 28.36076,28.361568 28.361164,28.361569 0 0 0 14.712,-4.149248 c 3.485692,1.385136 11.293328,5.494512 13.151576,3.719492 1.9418,-1.854396 -2.279696,-10.5822 -3.291764,-13.825424 A 28.361164,28.361569 0 0 0 71.356884,46.996306 28.361164,28.361569 0 0 0 42.996532,18.635142 Z m 0.0032,10.782776 a 17.58568,17.586085 0 0 1 17.58572,17.586088 17.58568,17.586085 0 0 1 -17.58568,17.584868 17.58568,17.586085 0 0 1 -17.58568,-17.584868 17.58568,17.586085 0 0 1 17.58568,-17.586088 z"
+       d="M 42.97498,-153 A 199.97783,199.96996 0 0 0 -157,46.975674 199.97783,199.96996 0 0 0 42.97498,246.94563 a 199.97783,199.96996 0 0 0 103.736,-29.25526 c 24.57802,9.76623 79.63055,38.74036 92.73328,26.22516 13.69185,-13.07485 -16.0744,-74.6123 -23.21061,-97.47943 A 199.97783,199.96996 0 0 0 242.94765,46.973954 199.97783,199.96996 0 0 0 42.975544,-152.99314 Z m 0.02256,76.026508 A 123.99865,123.99486 0 0 1 166.99648,47.021391 123.99865,123.99486 0 0 1 42.997826,171.00767 123.99865,123.99486 0 0 1 -81.000825,47.021391 123.99865,123.99486 0 0 1 42.997826,-76.973492 Z"
        inkscape:connector-curvature="0"
-       style="stroke-width:0.56727999;opacity:0.2;fill:#ffffff;fill-opacity:1" />
+       style="opacity:0.2;fill:#ffffff;fill-opacity:1;stroke-width:3.99985" />
   </g>
 </svg>
