@@ -95,6 +95,10 @@ Page {
 
     function handleMessageParameters(parameters, message) {
         Object.keys(parameters).forEach(function(key) {
+            // system message "You added {user}"
+            if(key === 'user') {
+                message = message.replace('{' + key + '}', parameters[key].name)
+            }
             if(key.substring(0, 8) === 'mention-') {
                 var insertSnippet = createMentionSnippet(parameters[key]);
                 message = message.replace('{' + key + '}', insertSnippet)
