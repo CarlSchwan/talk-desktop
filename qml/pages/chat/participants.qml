@@ -50,7 +50,6 @@ Page {
                 console.log(avatar.accountId)
                 console.log(avatar.userId)
             }
-
             Row {
                 anchors {
                     left: parent.left
@@ -62,7 +61,7 @@ Page {
                     source: "image://theme/icon-s-clear-opaque-background"
                     sourceSize.height: avatar.height + Theme.paddingSmall
                     sourceSize.width: avatar.width + Theme.paddingSmall
-                    opacity: isOnline ? 0.8 : 0.25
+                    opacity: presence != 0 ? 0.8 : 0.25
                     BusyIndicator {
                         size: presenceUnderlay.size - Theme.paddingSmall * 2
                         anchors.centerIn: presenceUnderlay
@@ -72,19 +71,22 @@ Page {
                     ColorOverlay {
                         anchors.fill: presenceUnderlay
                         source: presenceUnderlay
-                        opacity: isOnline ? 0.8 : 0.25
+                        opacity: presence != 0 ? 0.8 : 0.25
                         color: {
-                            if ( isOnline ) {
-                                switch (presence) {
-                                case 2: // away
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 1.0);
-                                case 3: // busy
+                            if ( presence != 0 ) {
+                                if (presence === 1) { // online
+                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
+                                } else if (presence === 2) { // away
+                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
+                                } else if (presence === 3) { // busy
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
-                                default: // seems to be online
+                                } else if (presence === 4) { // invisible
+                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
+                                } else { // seems to be online, unknown presence
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
                                 }
                             } else {
-                                return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline));
+                                return Theme.rgba(Theme.presenceColor(Theme.ePresenceOffline), 1.0);
                             }
                         }
                     }
@@ -100,9 +102,8 @@ Page {
                         running: !participants.visible
                     }
                 }
-                Column {
-                    id: nameColumn
-                    spacing: Theme.paddingSmall
+                SilicaItem {
+                    id: userinfo
                     anchors {
                         left: presenceUnderlay.right
                         margins: Theme.paddingSmall
@@ -121,16 +122,16 @@ Page {
                         }
                         visible: type.text != ''
                         font.weight: Font.Light
-                        font.pixelSize: Theme.Theme.fontSizeExtraSmall
+                        font.pixelSize: Theme.fontSizeTiny
                         color: Theme.secondaryHighlightColor
                         anchors.bottom: name.top
                     }
                     Label {
                         id: name
                         text: displayName
-                        anchors.verticalCenter: nameColumn.verticalCenter
+                        anchors.verticalCenter: userinfo.verticalCenter
                         // presenceAvailable is too bright/ugly for styling the whole text:
-                        color: isOnline ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                        color: presence != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
                     }
                     Label {
                         id: statusmessage
@@ -147,7 +148,7 @@ Page {
                         }
                         visible: statusmessage.text != ''
                         font.italic: true
-                        font.pixelSize: Theme.Theme.fontSizeSmall
+                        font.pixelSize: Theme.fontSizeSmall
                         color: Theme.secondaryColor
                         anchors.top: name.bottom
                     }
