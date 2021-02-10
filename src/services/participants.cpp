@@ -124,16 +124,21 @@ void Participants::participantsPulled(QNetworkReply *reply)
             participantData.value("lastPing").toInt(),
             participantData.value("sessionId").toString()
         );
+        // https://github.com/nextcloud/server/blob/master/lib/public/UserStatus/IUserStatus.php#L42-L66
         if(participantData.contains("status")) {
-            // TODO: look up what exactly can be in 'status'. this seems to work so far.
-            model.presence = 1;
-            if (participantData.value("status").toString().contains("Away", Qt::CaseInsensitive))
-              model.presence = 2;
-            if (participantData.value("status").toString().contains("Busy", Qt::CaseInsensitive) || \
-                participantData.value("status").toString().contains("Do not disturb", Qt::CaseInsensitive) )
-              model.presence = 3;
+            if (participantData.value("status").toString().contains("offline"))
+              model.presence = status_offline;
+            if (participantData.value("status").toString().contains("online"))
+              model.presence = status_online;
+            if (participantData.value("status").toString().contains("away"))
+              model.presence = status_away;
+            if (participantData.value("status").toString().contains("dnd"))
+              model.presence = status_dnd;
+            if (participantData.value("status").toString().contains("invisible"))
+              model.presence = status_invisible;
         } else {
-            model.presence = 0;
+            qDebug() << "didn't get proper presence status!";
+            model.presence = status_offline;
         }
         if(participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
