@@ -61,7 +61,7 @@ Page {
                     source: "image://theme/icon-s-clear-opaque-background"
                     sourceSize.height: avatar.height + Theme.paddingSmall
                     sourceSize.width: avatar.width + Theme.paddingSmall
-                    opacity: presence != 0 ? 0.8 : 0.25
+                    opacity: PresenceStatus != 0 ? 0.8 : 0.25
                     BusyIndicator {
                         size: presenceUnderlay.size - Theme.paddingSmall * 2
                         anchors.centerIn: presenceUnderlay
@@ -71,22 +71,22 @@ Page {
                     ColorOverlay {
                         anchors.fill: presenceUnderlay
                         source: presenceUnderlay
-                        opacity: presence != 0 ? 0.8 : 0.25
+                        opacity: PresenceStatus != 0 ? 0.8 : 0.25
                         color: {
-                            if ( presence != 0 ) {
-                                if (presence === 1) { // online
+                            if ( PresenceStatus != 0 ) {
+                                if (PresenceStatus === PresenceStatus.StatusOnline) {
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                } else if (presence === 2) { // away
+                                } else if (PresenceStatus === PresenceStatus.StatusAway) {
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
-                                } else if (presence === 3) { // busy
+                                } else if (PresenceStatus === PresenceStatus.StatusDnD) {
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
-                                } else if (presence === 4) { // invisible
+                                } else if (PresenceStatus === PresenceStatus.StatusInvisible) {
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
                                 } else { // seems to be online, unknown presence
                                     return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
                                 }
                             } else {
-                                return Theme.rgba(Theme.presenceColor(Theme.ePresenceOffline), 1.0);
+                                return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 1.0);
                             }
                         }
                     }
@@ -131,16 +131,16 @@ Page {
                         text: displayName
                         anchors.verticalCenter: userinfo.verticalCenter
                         // presenceAvailable is too bright/ugly for styling the whole text:
-                        color: presence != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                        color: PresenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
                     }
                     Label {
                         id: statusmessage
                         text: {
-                            if (presence === 2) {
+                            if (PresenceStatus === PresenceStatus.StatusAway) {
                                 return "... is away";
                                 //TODO: implement awayMessage reading
                                 //return awayMessage;
-                            } else if (presence === 3) {
+                            } else if (PresenceStatus === PresenceStatus.StatusDnD) {
                                 return "do not disturb";
                             } else {
                                 return "";

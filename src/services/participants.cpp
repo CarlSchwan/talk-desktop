@@ -54,9 +54,10 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[NameRole] = "displayName";
     roles[TypeRole] = "participantType";
     roles[StatusRole] = "isOnline";
-    roles[PresenceRole] = "presence";
+    roles[PresenceRole] = "PresenceStatus";
     return roles;
 }
+
 
 void Participants::pullParticipants(QString token, int accountId)
 {
@@ -112,6 +113,14 @@ void Participants::participantsPulled(QNetworkReply *reply)
         return;
     }
 
+    // https://github.com/nextcloud/server/blob/master/lib/public/UserStatus/IUserStatus.php#L42-L66
+    QHash<QString, Participants::PresenceStatus> statusMap;
+    statusMap["offline"]   = Participants::PresenceStatus::StatusOffline;
+    statusMap["online"]    = Participants::PresenceStatus::StatusOnline;
+    statusMap["away"]      = Participants::PresenceStatus::StatusAway;
+    statusMap["dnd"]       = Participants::PresenceStatus::StatusDnD;
+    statusMap["invisible"] = Participants::PresenceStatus::StatusInvisible;
+
     int checkId = std::time(0);
 
     QJsonArray data = root.find("data").value().toArray();
@@ -124,22 +133,13 @@ void Participants::participantsPulled(QNetworkReply *reply)
             participantData.value("lastPing").toInt(),
             participantData.value("sessionId").toString()
         );
-        // https://github.com/nextcloud/server/blob/master/lib/public/UserStatus/IUserStatus.php#L42-L66
-        if(participantData.contains("status")) {
-            if (participantData.value("status").toString().contains("offline"))
-              model.presence = status_offline;
-            if (participantData.value("status").toString().contains("online"))
-              model.presence = status_online;
-            if (participantData.value("status").toString().contains("away"))
-              model.presence = status_away;
-            if (participantData.value("status").toString().contains("dnd"))
-              model.presence = status_dnd;
-            if (participantData.value("status").toString().contains("invisible"))
-              model.presence = status_invisible;
+
+        if (participantData.contains("status")) {
+            model.presence = statusMap.value(participantData.value("status").toString(), Participants::PresenceStatus::StatusOnline);
         } else {
-            qDebug() << "didn't get proper presence status!";
-            model.presence = status_offline;
+            model.presence = Participants::PresenceStatus::StatusOffline;
         }
+
         if(participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
         }

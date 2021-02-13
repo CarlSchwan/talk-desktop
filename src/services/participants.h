@@ -27,12 +27,21 @@ public:
         PresenceRole = Qt::UserRole + 5,
     };
 
-    enum presence_t { status_offline = 0, status_online = 1, status_away, status_dnd, status_invisible };
+    //QHash<int, QByteArray> statusMap() const;
+    enum PresenceStatus { 
+         StatusOffline = 0,
+         StatusOnline = 1,
+         StatusAway,
+         StatusDnD,
+         StatusInvisible,
+    };
+
+    Q_ENUM(PresenceStatus);
 
     struct Participant
     {
         Participant() {}
-        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false, presence_t presence = status_offline )
+        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false, PresenceStatus presence = StatusOffline )
         {
             this->userId = userId;
             this->displayName = displayName;
@@ -49,7 +58,7 @@ public:
         int ping;
         QString sessionId;
         int inCall = 0;
-        presence_t presence;
+        PresenceStatus presence;
         int _checkId;
 
         bool operator==(const Participant& toCompare) const
@@ -73,7 +82,7 @@ private:
 
     int findParticipant(QString userId);
     void removeParticipants(int checkId);
-    presence_t presence;
+    PresenceStatus presence;
 };
 
 #endif // PARTICIPANTS_H
