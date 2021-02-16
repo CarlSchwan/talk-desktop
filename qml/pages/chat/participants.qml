@@ -58,7 +58,23 @@ Page {
                 }
                 Image {
                     id: presenceUnderlay
-                    source: "image://theme/icon-s-clear-opaque-background"
+                    source: {
+                            if ( PresenceStatus != 0 ) {
+                                if (PresenceStatus === PresenceStatus.StatusOnline) {
+                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
+                                } else if (PresenceStatus === PresenceStatus.StatusAway) {
+                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
+                                } else if (PresenceStatus === PresenceStatus.StatusDnD) {
+                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
+                                } else if (PresenceStatus === PresenceStatus.StatusInvisible) {
+                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
+                                } else { // seems to be online, unknown presence
+                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
+                                }
+                            } else {
+                                return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 1.0);
+                            }
+                    }
                     sourceSize.height: avatar.height + Theme.paddingSmall
                     sourceSize.width: avatar.width + Theme.paddingSmall
                     opacity: PresenceStatus != 0 ? 0.8 : 0.25
@@ -68,28 +84,6 @@ Page {
                         running: avatar.status != Image.Ready
                     }
 
-                    ColorOverlay {
-                        anchors.fill: presenceUnderlay
-                        source: presenceUnderlay
-                        opacity: PresenceStatus != 0 ? 0.8 : 0.25
-                        color: {
-                            if ( PresenceStatus != 0 ) {
-                                if (PresenceStatus === PresenceStatus.StatusOnline) {
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                } else if (PresenceStatus === PresenceStatus.StatusAway) {
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
-                                } else if (PresenceStatus === PresenceStatus.StatusDnD) {
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
-                                } else if (PresenceStatus === PresenceStatus.StatusInvisible) {
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
-                                } else { // seems to be online, unknown presence
-                                    return Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                }
-                            } else {
-                                return Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 1.0);
-                            }
-                        }
-                    }
                 }
                 Avatar {
                     anchors.centerIn: presenceUnderlay
