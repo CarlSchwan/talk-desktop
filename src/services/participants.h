@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include "accounts.h"
+#include "../constants/PresenceStatusClass.h"
 
 class Participants : public QAbstractListModel
 {
@@ -27,21 +28,10 @@ public:
         PresenceRole = Qt::UserRole + 5,
     };
 
-    //QHash<int, QByteArray> statusMap() const;
-    enum PresenceStatus { 
-         StatusOffline = 0,
-         StatusOnline = 1,
-         StatusAway,
-         StatusDnD,
-         StatusInvisible,
-    };
-
-    Q_ENUM(PresenceStatus);
-
     struct Participant
     {
         Participant() {}
-        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false, PresenceStatus presence = StatusOffline )
+        Participant(QString userId, QString displayName, int type, int ping, QString sessionId, bool inCall = false, PresenceStatus presence = PresenceStatus::Offline)
         {
             this->userId = userId;
             this->displayName = displayName;

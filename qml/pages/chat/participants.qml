@@ -59,14 +59,14 @@ Page {
                 Image {
                     id: presenceUnderlay
                     source: {
-                            if ( PresenceStatus != 0 ) {
-                                if (PresenceStatus === PresenceStatus.StatusOnline) {
+                            if (presenceStatus != 0 ) {
+                                if (presenceStatus === PresenceStatus.Online) {
                                     return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                } else if (PresenceStatus === PresenceStatus.StatusAway) {
+                                } else if (presenceStatus === PresenceStatus.Away) {
                                     return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
-                                } else if (PresenceStatus === PresenceStatus.StatusDnD) {
+                                } else if (presenceStatus === PresenceStatus.DND) {
                                     return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
-                                } else if (PresenceStatus === PresenceStatus.StatusInvisible) {
+                                } else if (presenceStatus === PresenceStatus.Invisible) {
                                     return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
                                 } else { // seems to be online, unknown presence
                                     return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
@@ -77,7 +77,7 @@ Page {
                     }
                     sourceSize.height: avatar.height + Theme.paddingSmall
                     sourceSize.width: avatar.width + Theme.paddingSmall
-                    opacity: PresenceStatus != 0 ? 0.8 : 0.25
+                    opacity: presenceStatus != 0 ? 0.8 : 0.25
                     BusyIndicator {
                         size: presenceUnderlay.size - Theme.paddingSmall * 2
                         anchors.centerIn: presenceUnderlay
@@ -125,16 +125,16 @@ Page {
                         text: displayName
                         anchors.verticalCenter: userinfo.verticalCenter
                         // presenceAvailable is too bright/ugly for styling the whole text:
-                        color: PresenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                        color: presenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
                     }
                     Label {
                         id: statusmessage
                         text: {
-                            if (PresenceStatus === PresenceStatus.StatusAway) {
+                            if (presenceStatus === PresenceStatus.Away) {
                                 return "... is away";
                                 //TODO: implement awayMessage reading
                                 //return awayMessage;
-                            } else if (PresenceStatus === PresenceStatus.StatusDnD) {
+                            } else if (presenceStatus === PresenceStatus.DND) {
                                 return "do not disturb";
                             } else {
                                 return "";

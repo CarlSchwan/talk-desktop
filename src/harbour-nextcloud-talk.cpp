@@ -11,6 +11,7 @@
 #include "roomservice.h"
 #include "nextcloudaccount.h"
 #include "constants/ConversationTypeClass.h"
+#include "constants/PresenceStatusClass.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> v(SailfishApp::createView());
 
     qmlRegisterUncreatableType<ConversationTypeClass>("harbour.nextcloud.talk", 1, 0, "ConversationType", "Enum type");
+    qmlRegisterUncreatableType<PresenceStatusClass>("harbour.nextcloud.talk", 1, 0, "PresenceStatus", "Enum type");
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");

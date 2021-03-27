@@ -78,6 +78,7 @@ TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
     src/constants/ConversationTypeClass.h \
+    src/constants/PresenceStatusClass.h \
     src/db.h \
     src/nextcloudaccount.h \
     src/discovery.h \
