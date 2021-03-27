@@ -121,7 +121,7 @@ void Participants::participantsPulled(QNetworkReply *reply)
     statusMap["dnd"]       = PresenceStatus::DND;
     statusMap["invisible"] = PresenceStatus::Invisible;
 
-    int checkId = std::time(0);
+    int checkId = std::time(nullptr);
 
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
