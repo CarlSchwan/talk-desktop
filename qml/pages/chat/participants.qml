@@ -38,6 +38,10 @@ Page {
         }
 
         delegate: BackgroundItem {
+            height: Math.max(avatarWrapper.height, userInfoWrapper.height) + Theme.paddingMedium
+            width: parent.width - Theme.horizontalPageMargin * 2
+            x: Theme.horizontalPageMargin
+
             onClicked: {
                 var separator = "";
                 if(textField.length > 0 && textField.text.substring(textField.length -1) !== " ") {
@@ -50,12 +54,12 @@ Page {
                 console.log(avatar.accountId)
                 console.log(avatar.userId)
             }
-            Row {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    margins: Theme.paddingMedium
-                }
+
+            SilicaItem {
+                id: avatarWrapper
+                width: presenceUnderlay.implicitWidth
+                height: presenceUnderlay.implicitHeight
+
                 Image {
                     id: presenceUnderlay
                     source: {
@@ -79,7 +83,7 @@ Page {
                     sourceSize.width: avatar.width + Theme.paddingSmall
                     opacity: presenceStatus != 0 ? 0.8 : 0.25
                     BusyIndicator {
-                        size: presenceUnderlay.size - Theme.paddingSmall * 2
+                        size: presenceUnderlay.implicitWidth - Theme.paddingSmall * 2
                         anchors.centerIn: presenceUnderlay
                         running: avatar.status != Image.Ready
                     }
@@ -90,62 +94,67 @@ Page {
                     id: avatar
                     account: accountId
                     user: userId
+                    size: Theme.itemSizeSmall
                     BusyIndicator {
                         size: avatar.size - Theme.paddingSmall * 2
                         anchors.centerIn: avatar
                         running: !participants.visible
                     }
                 }
-                SilicaItem {
-                    id: userinfo
-                    anchors {
-                        left: presenceUnderlay.right
-                        margins: Theme.paddingSmall
-                        verticalCenter:  presenceUnderlay.verticalCenter
+            }
+
+            SilicaItem {
+                id: userInfoWrapper
+                anchors {
+                    left: avatarWrapper.right
+                    margins: Theme.paddingSmall
+                    verticalCenter:  avatarWrapper.verticalCenter
+                }
+                height: type.implicitHeight + name.implicitHeight + statusmessage.implicitHeight
+
+                Label {
+                    id: type
+                    text: {
+                        // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
+                        if(participantType === 1 || participantType === 2) {
+                            return qsTr("Moderator");
+                        } else if(participantType === 4) {
+                            return qsTr("Guest");
+                        }
+                        return "";
                     }
-                    Label {
-                        id: type
-                        text: {
-                            // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
-                            if(participantType === 1 || participantType === 2) {
-                                return qsTr("Moderator");
-                            } else if(participantType === 4) {
-                                return qsTr("Guest");
-                            }
+                    visible: type.text != ''
+                    font.weight: Font.Light
+                    font.pixelSize: Theme.fontSizeTiny
+                    color: Theme.secondaryHighlightColor
+                    anchors.bottom: name.top
+                }
+
+                Label {
+                    id: name
+                    text: displayName
+                    anchors.verticalCenter: userInfoWrapper.verticalCenter
+                    // presenceAvailable is too bright/ugly for styling the whole text:
+                    color: presenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                }
+                Label {
+                    id: statusmessage
+                    text: {
+                        if (presenceStatus === PresenceStatus.Away) {
+                            return "... is away";
+                            //TODO: implement awayMessage reading
+                            //return awayMessage;
+                        } else if (presenceStatus === PresenceStatus.DND) {
+                            return "do not disturb";
+                        } else {
                             return "";
                         }
-                        visible: type.text != ''
-                        font.weight: Font.Light
-                        font.pixelSize: Theme.fontSizeTiny
-                        color: Theme.secondaryHighlightColor
-                        anchors.bottom: name.top
                     }
-                    Label {
-                        id: name
-                        text: displayName
-                        anchors.verticalCenter: userinfo.verticalCenter
-                        // presenceAvailable is too bright/ugly for styling the whole text:
-                        color: presenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
-                    }
-                    Label {
-                        id: statusmessage
-                        text: {
-                            if (presenceStatus === PresenceStatus.Away) {
-                                return "... is away";
-                                //TODO: implement awayMessage reading
-                                //return awayMessage;
-                            } else if (presenceStatus === PresenceStatus.DND) {
-                                return "do not disturb";
-                            } else {
-                                return "";
-                            }
-                        }
-                        visible: statusmessage.text != ''
-                        font.italic: true
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.secondaryColor
-                        anchors.top: name.bottom
-                    }
+                    visible: text != ''
+                    font.italic: true
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryColor
+                    anchors.top: name.bottom
                 }
             }
         }
