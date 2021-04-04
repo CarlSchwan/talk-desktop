@@ -50,15 +50,13 @@ Page {
 
                 textField.text = textField.text + separator + "@" + userId;
                 pageStack.navigateBack(PageStackAction.Animated);
-                console.log(avatar.source)
-                console.log(avatar.accountId)
-                console.log(avatar.userId)
             }
 
             SilicaItem {
                 id: avatarWrapper
                 width: presenceUnderlay.implicitWidth
                 height: presenceUnderlay.implicitHeight
+                anchors.verticalCenter: parent.verticalCenter
 
                 Image {
                     id: presenceUnderlay
@@ -107,38 +105,48 @@ Page {
                 id: userInfoWrapper
                 anchors {
                     left: avatarWrapper.right
-                    margins: Theme.paddingSmall
-                    verticalCenter:  avatarWrapper.verticalCenter
+                    leftMargin: Theme.paddingMedium
+                    verticalCenter: parent.verticalCenter
                 }
-                height: type.implicitHeight + name.implicitHeight + statusmessage.implicitHeight
+                height: type.height + name.height + statusmessage.height
+                width: parent.width - avatarWrapper.width - Theme.paddingMedium
 
                 Label {
                     id: type
+                    height: visible ? implicitHeight : 0
+                    width: parent.width
+                    visible: type.text != ''
+
                     text: {
                         // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
                         if(participantType === 1 || participantType === 2) {
-                            return qsTr("Moderator");
+                            return qsTr("moderator");
                         } else if(participantType === 4) {
-                            return qsTr("Guest");
+                            return qsTr("guest");
                         }
                         return "";
                     }
-                    visible: type.text != ''
                     font.weight: Font.Light
                     font.pixelSize: Theme.fontSizeTiny
-                    color: Theme.secondaryHighlightColor
-                    anchors.bottom: name.top
+                    color: Theme.secondaryColor
+                    truncationMode: TruncationMode.Fade
                 }
-
                 Label {
                     id: name
+                    anchors.top: type.bottom
+                    width: parent.width
+
                     text: displayName
-                    anchors.verticalCenter: userInfoWrapper.verticalCenter
-                    // presenceAvailable is too bright/ugly for styling the whole text:
-                    color: presenceStatus != 0 ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                    color: isOnline ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
+                    truncationMode: TruncationMode.Fade
                 }
                 Label {
                     id: statusmessage
+                    anchors.top: name.bottom
+                    height: visible ? implicitHeight : 0
+                    width: parent.width
+                    visible: text != ''
+
                     text: {
                         if (presenceStatus === PresenceStatus.Away) {
                             return "... is away";
@@ -150,11 +158,9 @@ Page {
                             return "";
                         }
                     }
-                    visible: text != ''
-                    font.italic: true
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.secondaryColor
-                    anchors.top: name.bottom
+                    truncationMode: TruncationMode.Fade
                 }
             }
         }

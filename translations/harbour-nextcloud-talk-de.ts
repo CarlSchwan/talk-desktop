@@ -57,12 +57,12 @@
         <translation>Teilnehmer</translation>
     </message>
     <message>
-        <source>Moderator</source>
-        <translation>Moderator</translation>
+        <source>moderator</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Guest</source>
-        <translation>Gast</translation>
+        <source>guest</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
