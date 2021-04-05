@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.5
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
 import "../../components/"
@@ -55,7 +55,8 @@ Page {
                 id: avatarWrapper
                 width: avatar.implicitWidth + userStatusIcon.width
                 height: avatar.implicitHeight
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.top: parent.top
+                anchors.topMargin: Theme.paddingLarge
 
                 Avatar {
                     anchors.centerIn: parent
@@ -100,8 +101,12 @@ Page {
                     leftMargin: Theme.paddingMedium
                     verticalCenter: parent.verticalCenter
                 }
-                height: type.height + name.height + statusmessage.height
+                height: type.height + name.height + statusMessageLabel.height
                 width: parent.width - avatarWrapper.width - Theme.paddingMedium
+
+                function checkFolding() {
+                    unfoldButton.visible = name.isTooLong || statusMessageLabel.isTooLong
+                }
 
                 Label {
                     id: type
@@ -124,36 +129,98 @@ Page {
                     truncationMode: TruncationMode.Fade
                 }
                 Label {
+                    property bool isTooLong: false
+
                     id: name
                     anchors.top: type.bottom
-                    width: parent.width
+                    width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
 
                     text: displayName
                     color: isOnline ? Theme.primaryColor : Theme.presenceColor(Theme.PresenceOffline)
                     truncationMode: TruncationMode.Fade
+
+                    onTextChanged: {
+                        textMetrics.font = font
+                        textMetrics.font.pixelSize = Theme.fontSizeMedium // a smaller font is used otherwise 🤷
+                        textMetrics.text = text
+                        isTooLong = textMetrics.elidedText !== text
+                    }
+
+                    onIsTooLongChanged: {
+                        parent.checkFolding()
+                    }
                 }
                 Label {
-                    id: statusmessage
+                    property bool isTooLong: false
+
+                    id: statusMessageLabel
                     anchors.top: name.bottom
                     height: visible ? implicitHeight : 0
-                    width: parent.width
+                    width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
                     visible: text != ''
 
                     text: {
-                        if (presenceStatus === PresenceStatus.Away) {
-                            return "... is away";
-                            //TODO: implement awayMessage reading
-                            //return awayMessage;
-                        } else if (presenceStatus === PresenceStatus.DND) {
-                            return "do not disturb";
-                        } else {
-                            return "";
+                        // user provided message or icon
+                        var newText = "";
+                        if (statusIcon != "" || statusMessage != "") {
+                            newText = (statusIcon + " " + statusMessage).trim();
                         }
+                        // fallback: depending on announcable presence
+                        else if (presenceStatus === PresenceStatus.Away) {
+                            newText = qsTr("away");
+                        } else if (presenceStatus === PresenceStatus.DND) {
+                            newText = qsTr("do not disturb");
+                        }
+
+                        return newText
                     }
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.secondaryColor
                     truncationMode: TruncationMode.Fade
+
+                    onTextChanged: {
+                        textMetrics.text = text
+                        textMetrics.font = font
+                        isTooLong = textMetrics.elidedText !== text
+                    }
+
+                    onIsTooLongChanged: {
+                        parent.checkFolding()
+                    }
                 }
+
+                TextMetrics {
+                    id: textMetrics
+                    elideWidth: userInfoWrapper.width
+                    elide: Qt.ElideRight
+                }
+
+                IconButton {
+                    id: unfoldButton
+                    icon.source: "image://theme/icon-s-down"
+                    width: Theme.iconSizeSmall
+                    anchors.left: name.right
+                    anchors.top: name.top
+                    visible: false
+
+                    onClicked: {
+                        if(rotation === 0) {
+                            name.maximumLineCount = 5
+                            name.wrapMode = Text.Wrap
+                            statusMessageLabel.maximumLineCount = 5
+                            statusMessageLabel.wrapMode = Text.Wrap
+                            rotation = 180
+                        } else {
+                            name.maximumLineCount = 1
+                            name.wrapMode = Text.NoWrap
+                            statusMessageLabel.maximumLineCount = 1
+                            statusMessageLabel.wrapMode = Text.NoWrap
+                            rotation = 0
+                        }
+                    }
+                }
+
+
             }
         }
 

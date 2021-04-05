@@ -41,7 +41,11 @@ QVariant Participants::data(const QModelIndex &index, int role) const
     case StatusRole:
         return QVariant(m_participants[index.row()].sessionId != "0");
     case PresenceRole:
-        return QVariant(m_participants[index.row()].presence );
+        return QVariant(m_participants[index.row()].presence);
+    case StatusIconRole:
+        return QVariant(m_participants[index.row()].statusIcon);
+    case StatusMessageRole:
+        return QVariant(m_participants[index.row()].statusMessage);
     default:
         return QVariant();
     }
@@ -55,6 +59,8 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[TypeRole] = "participantType";
     roles[StatusRole] = "isOnline";
     roles[PresenceRole] = "presenceStatus";
+    roles[StatusIconRole] = "statusIcon";
+    roles[StatusMessageRole] = "statusMessage";
     return roles;
 }
 
@@ -137,10 +143,16 @@ void Participants::participantsPulled(QNetworkReply *reply)
         if (participantData.contains("status")) {
             model.presence = statusMap.value(participantData.value("status").toString(), PresenceStatus::Offline);
         }
-
         if(participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
         }
+        if(participantData.contains("statusIcon")) {
+            model.statusIcon = participantData.value("statusIcon").toString("");
+        }
+        if(participantData.contains("statusMessage")) {
+            model.statusMessage = participantData.value("statusMessage").toString("");
+        }
+
         model._checkId = checkId;
 
         int i = findParticipant(model.userId);
