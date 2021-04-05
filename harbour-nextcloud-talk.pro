@@ -49,6 +49,10 @@ DISTFILES += qml/lib/API.js \
     qml/components/ConversationIcon.qml \
     qml/components/DBusHandler.qml \
     qml/components/FilePreview.qml \
+    qml/components/UserStatus/NcIconAway.qml \
+    qml/components/UserStatus/NcIconBackground.qml \
+    qml/components/UserStatus/NcIconDnd.qml \
+    qml/components/UserStatus/NcIconOnline.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
     qml/pages/accounts/AccountSettings.qml \

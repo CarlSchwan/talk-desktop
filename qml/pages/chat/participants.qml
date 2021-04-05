@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import harbour.nextcloud.talk 1.0
 import "../../components/"
@@ -54,41 +53,12 @@ Page {
 
             SilicaItem {
                 id: avatarWrapper
-                width: presenceUnderlay.implicitWidth
-                height: presenceUnderlay.implicitHeight
+                width: avatar.implicitWidth + userStatusIcon.width
+                height: avatar.implicitHeight
                 anchors.verticalCenter: parent.verticalCenter
 
-                Image {
-                    id: presenceUnderlay
-                    source: {
-                            if (presenceStatus != 0 ) {
-                                if (presenceStatus === PresenceStatus.Online) {
-                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                } else if (presenceStatus === PresenceStatus.Away) {
-                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAway), 0.8);
-                                } else if (presenceStatus === PresenceStatus.DND) {
-                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceBusy), 1.0);
-                                } else if (presenceStatus === PresenceStatus.Invisible) {
-                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 0.8);
-                                } else { // seems to be online, unknown presence
-                                    return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceAvailable), 1.0);
-                                }
-                            } else {
-                                return "image://theme/icon-s-clear-opaque-background?" + Theme.rgba(Theme.presenceColor(Theme.PresenceOffline), 1.0);
-                            }
-                    }
-                    sourceSize.height: avatar.height + Theme.paddingSmall
-                    sourceSize.width: avatar.width + Theme.paddingSmall
-                    opacity: presenceStatus != 0 ? 0.8 : 0.25
-                    BusyIndicator {
-                        size: presenceUnderlay.implicitWidth - Theme.paddingSmall * 2
-                        anchors.centerIn: presenceUnderlay
-                        running: avatar.status != Image.Ready
-                    }
-
-                }
                 Avatar {
-                    anchors.centerIn: presenceUnderlay
+                    anchors.centerIn: parent
                     id: avatar
                     account: accountId
                     user: userId
@@ -97,6 +67,28 @@ Page {
                         size: avatar.size - Theme.paddingSmall * 2
                         anchors.centerIn: avatar
                         running: !participants.visible
+                    }
+                }
+                Loader {
+                    id: userStatusIcon
+                    width: avatar.size * 0.4
+                    height: avatar.size * 0.4
+
+                    y: avatar.y + avatar.height + Theme.paddingSmall - height
+                    x: avatar.x + avatar.width + Theme.paddingSmall - width
+
+                    source: {
+                        switch (presenceStatus) {
+                        case PresenceStatus.Online:
+                            return "../../components/UserStatus/NcIconOnline.qml"
+                        case PresenceStatus.Away:
+                            return "../../components/UserStatus/NcIconAway.qml"
+                        case PresenceStatus.DND:
+                            return "../../components/UserStatus/NcIconDnd.qml"
+                        default:
+                            // when none is set, nothing should be shown
+                            return ""
+                        }
                     }
                 }
             }
