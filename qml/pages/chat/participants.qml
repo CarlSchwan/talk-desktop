@@ -37,7 +37,7 @@ Page {
         }
 
         delegate: BackgroundItem {
-            height: Math.max(avatarWrapper.height, userInfoWrapper.height) + Theme.paddingMedium
+            height: Math.max(avatarWrapper.height, userInfoWrapper.height, userInfoWrapper.minHeight) + Theme.paddingMedium
             width: parent.width - Theme.horizontalPageMargin * 2
             x: Theme.horizontalPageMargin
 
@@ -103,6 +103,7 @@ Page {
                 }
                 height: type.height + name.height + statusMessageLabel.height
                 width: parent.width - avatarWrapper.width - Theme.paddingMedium
+                property int minHeight: type.implicitHeight + name.implicitHeight + statusMessageLabel.implicitHeight
 
                 function checkFolding() {
                     unfoldButton.visible = name.isTooLong || statusMessageLabel.isTooLong
