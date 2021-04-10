@@ -64,6 +64,7 @@ Page {
                     account: accountId
                     user: userId
                     size: Theme.itemSizeSmall
+                    opacity: isOnline ? 1 : 0.4
                     BusyIndicator {
                         size: avatar.size - Theme.paddingSmall * 2
                         anchors.centerIn: avatar
