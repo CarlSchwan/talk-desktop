@@ -197,7 +197,7 @@ Page {
 
                 IconButton {
                     id: unfoldButton
-                    icon.source: "image://theme/icon-s-down"
+                    icon.source: "image://theme/icon-m-change-type?" + Theme.secondaryColor
                     width: Theme.iconSizeSmall
                     anchors.left: name.right
                     anchors.top: name.top
