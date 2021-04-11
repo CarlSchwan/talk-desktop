@@ -28,6 +28,7 @@ public:
         PresenceRole = Qt::UserRole + 5,
         StatusIconRole = Qt::UserRole + 6,
         StatusMessageRole = Qt::UserRole + 7,
+        ModeratorRole = Qt::UserRole + 8,
     };
 
     struct Participant
@@ -71,6 +72,17 @@ public:
         {
             return userId == toCompare.userId;
         }
+
+        bool diverts(const Participant& toCompare) const
+        {
+            return userId != toCompare.userId
+                || displayName != toCompare.displayName
+                || type != toCompare.type
+                || sessionId != toCompare.sessionId
+                || presence != toCompare.presence
+                || statusIcon != toCompare.statusIcon
+                || statusMessage != toCompare.statusMessage;
+        }
     };
 
 public slots:
@@ -85,10 +97,11 @@ private:
     QNetworkAccessManager m_nam;
     QNetworkReply* m_reply;
     QVector<Participant> m_participants;
+    PresenceStatus presence;
 
     int findParticipant(QString userId);
-    void removeParticipants(int checkId);
-    PresenceStatus presence;
+    int removeParticipants(int checkId);
+    bool isModerator(const Participant participant) const;
 };
 
 #endif // PARTICIPANTS_H

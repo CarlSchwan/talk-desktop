@@ -118,10 +118,8 @@ Page {
 
                     text: {
                         // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
-                        if(participantType === 1 || participantType === 2) {
+                        if (isModerator) {
                             return qsTr("moderator");
-                        } else if(participantType === 4) {
-                            return qsTr("guest");
                         }
                         return "";
                     }

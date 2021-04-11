@@ -46,6 +46,8 @@ QVariant Participants::data(const QModelIndex &index, int role) const
         return QVariant(m_participants[index.row()].statusIcon);
     case StatusMessageRole:
         return QVariant(m_participants[index.row()].statusMessage);
+    case ModeratorRole:
+        return QVariant(isModerator(m_participants[index.row()]));
     default:
         return QVariant();
     }
@@ -61,6 +63,7 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[PresenceRole] = "presenceStatus";
     roles[StatusIconRole] = "statusIcon";
     roles[StatusMessageRole] = "statusMessage";
+    roles[ModeratorRole] = "isModerator";
     return roles;
 }
 
@@ -129,6 +132,8 @@ void Participants::participantsPulled(QNetworkReply *reply)
 
     int checkId = std::time(nullptr);
 
+    bool isDirty = m_participants.empty();
+
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
         QJsonObject participantData = value.toObject();
@@ -157,29 +162,54 @@ void Participants::participantsPulled(QNetworkReply *reply)
 
         int i = findParticipant(model.userId);
         if(i >= 0) {
-            m_participants.replace(i, model);
-            dataChanged(index(i), index(i));
+            if(model.diverts(m_participants.at(i))) {
+                m_participants.replace(i, model);
+                isDirty = true;
+            } else {
+                m_participants[i]._checkId = checkId;
+            }
         } else {
             beginInsertRows(QModelIndex(), m_participants.length(), m_participants.length());
             m_participants.append(model);
             endInsertRows();
         }
     }
-    removeParticipants(checkId);
+
+    isDirty = removeParticipants(checkId) > 0 || isDirty;
+
+    if (isDirty) {
+        std::sort(m_participants.begin(), m_participants.end(), [this](const Participant& a, const Participant b) {
+            // sort onliners on top
+            if((a.sessionId != "0") != (b.sessionId != "0")) {
+                return a.sessionId != "0";
+            }
+
+            // prefer moderators
+            if (isModerator(a) != isModerator(b)) {
+                return isModerator(a);
+            }
+
+            //return a.displayName < b.displayName;
+            return a.displayName.compare(b.displayName, Qt::CaseInsensitive) < 0;
+        });
+        dataChanged(index(0), index(m_participants.length() - 1));
+    }
 }
 
-void Participants::removeParticipants(int checkId)
+int Participants::removeParticipants(int checkId)
 {
+    int removed = 0;
+
     QVector<Participant>::const_iterator i;
     for(i = m_participants.begin(); i != m_participants.end(); i++) {
         if(i->_checkId != checkId) {
-            //int j = m_participants.indexOf(*i);
-            //beginRemoveRows(QModelIndex(), j, j);
-            //m_participants.removeAt(j);
-            //endRemoveRows();
             m_participants.removeOne(*i);
+            removed++;
+            // Potential crash when the all participants were removed
         }
     }
+
+    return removed;
 }
 
 int Participants::findParticipant(QString userId)
@@ -191,4 +221,9 @@ int Participants::findParticipant(QString userId)
         }
     }
     return -1;
+}
+
+bool Participants::isModerator(const Participant participant) const
+{
+    return participant.type == 1 || participant.type == 2 || participant.type == 6;
 }
