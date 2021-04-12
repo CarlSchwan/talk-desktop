@@ -30,6 +30,12 @@ Page {
 
     SilicaListView {
         anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - Theme.horizontalPageMargin * 3 // 3 instead of 2 because of x: of the delegate
+        spacing: Theme.paddingLarge
+
+        add:       Transition { NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 1000 } }
+        remove:    Transition { NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 1000 } }
 
         header: PageHeader {
             id: header
@@ -37,8 +43,8 @@ Page {
         }
 
         delegate: BackgroundItem {
-            height: Math.max(avatarWrapper.height, userInfoWrapper.height, userInfoWrapper.minHeight) + Theme.paddingMedium
-            width: parent.width - Theme.horizontalPageMargin * 2
+            contentHeight: Math.max(avatarWrapper.height, userInfoWrapper.height, userInfoWrapper.minHeight) + Theme.paddingMedium
+            width: ListView.view.width
             x: Theme.horizontalPageMargin
 
             onClicked: {
@@ -55,8 +61,11 @@ Page {
                 id: avatarWrapper
                 width: avatar.implicitWidth + userStatusIcon.width
                 height: avatar.implicitHeight
-                anchors.top: parent.top
-                anchors.topMargin: Theme.paddingLarge
+
+                // hack: assign once instead of binding.
+                // when userInfoWrapper increases height, this would jump around with a bind
+                // as long as userInfoWrapper.name binds to parent.verticalCenter this should keep the avatar center-aligned with the name.
+                anchors.verticalCenter: { return parent.verticalCenter }
 
                 Avatar {
                     anchors.centerIn: parent
@@ -65,6 +74,7 @@ Page {
                     user: userId
                     size: Theme.itemSizeSmall
                     opacity: isOnline ? 1 : 0.4
+                    Behavior on opacity { FadeAnimator { duration: 1000 } }
                     BusyIndicator {
                         size: avatar.size - Theme.paddingSmall * 2
                         anchors.centerIn: avatar
@@ -78,6 +88,9 @@ Page {
 
                     y: avatar.y + avatar.height + Theme.paddingSmall - height
                     x: avatar.x + avatar.width + Theme.paddingSmall - width
+
+                    opacity: visible ? 0.8 : 0
+                    Behavior on opacity { FadeAnimator { duration: 1000 } }
 
                     source: {
                         switch (presenceStatus) {
@@ -112,9 +125,9 @@ Page {
 
                 Label {
                     id: type
+                    anchors.bottom: name.top
                     height: visible ? implicitHeight : 0
                     width: parent.width
-                    visible: type.text != ''
 
                     text: {
                         // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
@@ -132,7 +145,7 @@ Page {
                     property bool isTooLong: false
 
                     id: name
-                    anchors.top: type.bottom
+                    anchors.verticalCenter: parent.verticalCenter
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
 
                     text: displayName
@@ -157,7 +170,6 @@ Page {
                     anchors.top: name.bottom
                     height: visible ? implicitHeight : 0
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
-                    visible: text != ''
 
                     text: {
                         // user provided message or icon
@@ -174,7 +186,7 @@ Page {
 
                         return newText
                     }
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.fontSizeTiny
                     color: Theme.secondaryColor
                     truncationMode: TruncationMode.Fade
 
@@ -202,6 +214,7 @@ Page {
                     anchors.left: name.right
                     anchors.top: name.top
                     visible: false
+                    Behavior on rotation { PropertyAnimation { } }
 
                     onClicked: {
                         if(rotation === 0) {

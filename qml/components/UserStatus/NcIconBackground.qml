@@ -5,7 +5,7 @@ SilicaItem {
     height: Theme.itemSizeExtraSmall
     width: Theme.itemSizeExtraSmall
 
-    property string backgroundColor: Theme.colorScheme === Theme.DarkOnLight ? '#ffffff' : '#000000'
+    property string backgroundColor: Theme.overlayBackgroundColor
 
     Rectangle {
         id: statusIconBackground
