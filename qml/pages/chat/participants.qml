@@ -76,9 +76,9 @@ Page {
                     opacity: isOnline ? 1 : 0.4
                     Behavior on opacity { FadeAnimator { duration: 1000 } }
                     BusyIndicator {
-                        size: avatar.size - Theme.paddingSmall * 2
-                        anchors.centerIn: avatar
-                        running: !participants.visible
+                        size: BusyIndicatorSize.Medium
+                        anchors.centerIn: parent
+                        running: parent.status !== Image.Ready
                     }
                 }
                 Loader {
