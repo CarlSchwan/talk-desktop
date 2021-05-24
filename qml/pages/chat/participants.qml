@@ -31,8 +31,10 @@ Page {
     SilicaListView {
         anchors.fill: parent
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - Theme.horizontalPageMargin * 3 // 3 instead of 2 because of x: of the delegate
-        spacing: Theme.paddingLarge
+        anchors.leftMargin: Theme.horizontalPageMargin
+        anchors.rightMargin: Theme.horizontalPageMargin
+        width: parent.width - Theme.horizontalPageMargin * 2
+        spacing: Theme.paddingMedium
 
         add:       Transition { NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 1000 } }
         remove:    Transition { NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 1000 } }
@@ -43,9 +45,8 @@ Page {
         }
 
         delegate: BackgroundItem {
-            contentHeight: Math.max(avatarWrapper.height, userInfoWrapper.height, userInfoWrapper.minHeight) + Theme.paddingMedium
-            width: ListView.view.width
-            x: Theme.horizontalPageMargin
+            height: Math.max(avatarWrapper.height, userInfoWrapper.height, userInfoWrapper.minHeight) + Theme.paddingMedium
+            width: parent.width
 
             onClicked: {
                 var separator = "";
@@ -59,16 +60,18 @@ Page {
 
             SilicaItem {
                 id: avatarWrapper
-                width: avatar.implicitWidth + userStatusIcon.width
-                height: avatar.implicitHeight
-
-                // hack: assign once instead of binding.
-                // when userInfoWrapper increases height, this would jump around with a bind
-                // as long as userInfoWrapper.name binds to parent.verticalCenter this should keep the avatar center-aligned with the name.
-                anchors.verticalCenter: { return parent.verticalCenter }
+                width: avatar.size + userStatusIcon.width
+                height: avatar.size
 
                 Avatar {
                     anchors.centerIn: parent
+                    anchors {
+                        top: parent.top
+                        topMargin: Theme.paddingMedium
+                        left: parent.left
+                        right: parent.right
+                    }
+
                     id: avatar
                     account: accountId
                     user: userId
@@ -113,7 +116,7 @@ Page {
                 anchors {
                     left: avatarWrapper.right
                     leftMargin: Theme.paddingMedium
-                    verticalCenter: parent.verticalCenter
+                    top: avatarWrapper.top
                 }
                 height: type.height + name.height + statusMessageLabel.height
                 width: parent.width - avatarWrapper.width - Theme.paddingMedium
@@ -125,27 +128,21 @@ Page {
 
                 Label {
                     id: type
-                    anchors.bottom: name.top
                     height: visible ? implicitHeight : 0
                     width: parent.width
 
-                    text: {
-                        // https://github.com/nextcloud/spreed/blob/master/lib/Participant.php
-                        if (isModerator) {
-                            return qsTr("moderator");
-                        }
-                        return "";
-                    }
+                    text: isModerator ? qsTr("moderator") : ""
                     font.weight: Font.Light
                     font.pixelSize: Theme.fontSizeTiny
                     color: Theme.secondaryColor
                     truncationMode: TruncationMode.Fade
+                    visible: text !== ""
                 }
                 Label {
                     property bool isTooLong: false
 
                     id: name
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.top: type.bottom
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
 
                     text: displayName
@@ -167,9 +164,9 @@ Page {
                     property bool isTooLong: false
 
                     id: statusMessageLabel
-                    anchors.top: name.bottom
                     height: visible ? implicitHeight : 0
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
+                    anchors.top: name.bottom
 
                     text: {
                         // user provided message or icon
@@ -186,7 +183,7 @@ Page {
 
                         return newText
                     }
-                    font.pixelSize: Theme.fontSizeTiny
+                    font.pixelSize: Theme.fontSizeSmall
                     color: Theme.secondaryColor
                     truncationMode: TruncationMode.Fade
 
