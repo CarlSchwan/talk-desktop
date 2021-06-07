@@ -409,13 +409,15 @@ Page {
             width: parent.width
 
             TextArea {
-                width: parent.width - sendIcon.width
                 id: sendMessage
+                width: parent.width - sendIcon.width
                 placeholderText: "Write something excellent"
+                wrapMode: TextEdit.WordWrap
                 EnterKey.enabled: text.length > 0
             }
             IconButton {
                 id: sendIcon
+                anchors.bottom: sendMessage.bottom
                 icon.source: "image://theme/icon-m-send"
                 opacity: sendMessage.text.length > 0 ? 1.0 : 0.0
                 Behavior on opacity { FadeAnimation {} }
