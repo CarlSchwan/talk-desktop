@@ -34,7 +34,7 @@ Page {
         anchors.leftMargin: Theme.horizontalPageMargin
         anchors.rightMargin: Theme.horizontalPageMargin
         width: parent.width - Theme.horizontalPageMargin * 2
-        spacing: Theme.paddingMedium
+        spacing: Theme.paddingSmall
 
         add:       Transition { NumberAnimation { property: "opacity"; from: 0; to: 1.0; duration: 1000 } }
         remove:    Transition { NumberAnimation { property: "opacity"; from: 1.0; to: 0; duration: 1000 } }
@@ -61,7 +61,7 @@ Page {
             SilicaItem {
                 id: avatarWrapper
                 width: avatar.size + userStatusIcon.width
-                height: avatar.size
+                height: Theme.itemSizeMedium
 
                 Avatar {
                     anchors.centerIn: parent
@@ -115,7 +115,7 @@ Page {
                 id: userInfoWrapper
                 anchors {
                     left: avatarWrapper.right
-                    leftMargin: Theme.paddingMedium
+                    leftMargin: Theme.paddingSmall
                     top: avatarWrapper.top
                 }
                 height: type.height + name.height + statusMessageLabel.height
@@ -131,6 +131,9 @@ Page {
                     height: visible ? implicitHeight : 0
                     width: parent.width
 
+                    anchors.top: parent.top
+                    anchors.topMargin: statusMessageLabel.visible ? 0 : statusMessageLabel.implicitHeight / 2
+
                     text: isModerator ? qsTr("moderator") : ""
                     font.weight: Font.Light
                     font.pixelSize: Theme.fontSizeTiny
@@ -143,6 +146,16 @@ Page {
 
                     id: name
                     anchors.top: type.bottom
+                    anchors.topMargin: {
+                        if (!type.visible && !statusMessageLabel.visible) {
+                            return type.implicitHeight
+                        } else if (!type.visible && statusMessageLabel.visible) {
+                            return type.implicitHeight / 2;
+                        } else {
+                            return 0
+                        }
+                    }
+
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
 
                     text: displayName
@@ -167,6 +180,7 @@ Page {
                     height: visible ? implicitHeight : 0
                     width: unfoldButton.visible ? parent.width - unfoldButton.width : parent.width
                     anchors.top: name.bottom
+                    visible: text !== ""
 
                     text: {
                         // user provided message or icon
