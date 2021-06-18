@@ -57,12 +57,16 @@
         <translation>Teilnehmer</translation>
     </message>
     <message>
-        <source>Moderator</source>
-        <translation>Moderator</translation>
+        <source>moderator</source>
+        <translation>moderator</translation>
     </message>
     <message>
-        <source>Guest</source>
-        <translation>Gast</translation>
+        <source>away</source>
+        <translation>abwesend</translation>
+    </message>
+    <message>
+        <source>do not disturb</source>
+        <translation>bitte nicht stören</translation>
     </message>
 </context>
 <context>

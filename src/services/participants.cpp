@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QNetworkRequest>
+#include <QUrlQuery>
 #include <QMetaMethod>
 #include "participants.h"
 #include "requestfactory.h"
@@ -39,6 +40,14 @@ QVariant Participants::data(const QModelIndex &index, int role) const
         return QVariant(m_participants[index.row()].type);
     case StatusRole:
         return QVariant(m_participants[index.row()].sessionId != "0");
+    case PresenceRole:
+        return QVariant(m_participants[index.row()].presence);
+    case StatusIconRole:
+        return QVariant(m_participants[index.row()].statusIcon);
+    case StatusMessageRole:
+        return QVariant(m_participants[index.row()].statusMessage);
+    case ModeratorRole:
+        return QVariant(isModerator(m_participants[index.row()]));
     default:
         return QVariant();
     }
@@ -51,8 +60,13 @@ QHash<int, QByteArray> Participants::roleNames() const
     roles[NameRole] = "displayName";
     roles[TypeRole] = "participantType";
     roles[StatusRole] = "isOnline";
+    roles[PresenceRole] = "presenceStatus";
+    roles[StatusIconRole] = "statusIcon";
+    roles[StatusMessageRole] = "statusMessage";
+    roles[ModeratorRole] = "isModerator";
     return roles;
 }
+
 
 void Participants::pullParticipants(QString token, int accountId)
 {
@@ -71,7 +85,10 @@ void Participants::pullParticipants(QString token, int accountId)
     QUrl endpoint = QUrl(m_activeAccount->host());
     QString apiV = m_activeAccount->capabilities()->hasConversationV2() ? "v2" : "v1";
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + token + "/participants");
-    endpoint.setQuery("format=json");
+    QUrlQuery q(endpoint);
+    q.addQueryItem("format", "json");
+    q.addQueryItem("includeStatus", "true");
+    endpoint.setQuery(q);
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, m_activeAccount);
     m_reply = m_nam.get(request);
@@ -105,7 +122,17 @@ void Participants::participantsPulled(QNetworkReply *reply)
         return;
     }
 
-    int checkId = std::time(0);
+    // https://github.com/nextcloud/server/blob/master/lib/public/UserStatus/IUserStatus.php#L42-L66
+    QHash<QString, PresenceStatus> statusMap;
+    statusMap["offline"]   = PresenceStatus::Offline;
+    statusMap["online"]    = PresenceStatus::Online;
+    statusMap["away"]      = PresenceStatus::Away;
+    statusMap["dnd"]       = PresenceStatus::DND;
+    statusMap["invisible"] = PresenceStatus::Invisible;
+
+    int checkId = std::time(nullptr);
+
+    bool isDirty = m_participants.empty();
 
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
@@ -117,36 +144,72 @@ void Participants::participantsPulled(QNetworkReply *reply)
             participantData.value("lastPing").toInt(),
             participantData.value("sessionId").toString()
         );
+
+        if (participantData.contains("status")) {
+            model.presence = statusMap.value(participantData.value("status").toString(), PresenceStatus::Offline);
+        }
         if(participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
         }
+        if(participantData.contains("statusIcon")) {
+            model.statusIcon = participantData.value("statusIcon").toString("");
+        }
+        if(participantData.contains("statusMessage")) {
+            model.statusMessage = participantData.value("statusMessage").toString("");
+        }
+
         model._checkId = checkId;
 
         int i = findParticipant(model.userId);
         if(i >= 0) {
-            m_participants.replace(i, model);
-            dataChanged(index(i), index(i));
+            if(model.diverts(m_participants.at(i))) {
+                m_participants.replace(i, model);
+                isDirty = true;
+            } else {
+                m_participants[i]._checkId = checkId;
+            }
         } else {
             beginInsertRows(QModelIndex(), m_participants.length(), m_participants.length());
             m_participants.append(model);
             endInsertRows();
         }
     }
-    removeParticipants(checkId);
+
+    isDirty = removeParticipants(checkId) > 0 || isDirty;
+
+    if (isDirty) {
+        std::sort(m_participants.begin(), m_participants.end(), [this](const Participant& a, const Participant b) {
+            // sort onliners on top
+            if((a.sessionId != "0") != (b.sessionId != "0")) {
+                return a.sessionId != "0";
+            }
+
+            // prefer moderators
+            if (isModerator(a) != isModerator(b)) {
+                return isModerator(a);
+            }
+
+            //return a.displayName < b.displayName;
+            return a.displayName.compare(b.displayName, Qt::CaseInsensitive) < 0;
+        });
+        dataChanged(index(0), index(m_participants.length() - 1));
+    }
 }
 
-void Participants::removeParticipants(int checkId)
+int Participants::removeParticipants(int checkId)
 {
+    int removed = 0;
+
     QVector<Participant>::const_iterator i;
     for(i = m_participants.begin(); i != m_participants.end(); i++) {
         if(i->_checkId != checkId) {
-            //int j = m_participants.indexOf(*i);
-            //beginRemoveRows(QModelIndex(), j, j);
-            //m_participants.removeAt(j);
-            //endRemoveRows();
             m_participants.removeOne(*i);
+            removed++;
+            // Potential crash when the all participants were removed
         }
     }
+
+    return removed;
 }
 
 int Participants::findParticipant(QString userId)
@@ -158,4 +221,9 @@ int Participants::findParticipant(QString userId)
         }
     }
     return -1;
+}
+
+bool Participants::isModerator(const Participant participant) const
+{
+    return participant.type == 1 || participant.type == 2 || participant.type == 6;
 }

@@ -49,6 +49,10 @@ DISTFILES += qml/lib/API.js \
     qml/components/ConversationIcon.qml \
     qml/components/DBusHandler.qml \
     qml/components/FilePreview.qml \
+    qml/components/UserStatus/NcIconAway.qml \
+    qml/components/UserStatus/NcIconBackground.qml \
+    qml/components/UserStatus/NcIconDnd.qml \
+    qml/components/UserStatus/NcIconOnline.qml \
     qml/harbour-nextcloud-talk.qml \
     qml/cover/CoverPage.qml \
     qml/pages/accounts/AccountSettings.qml \
@@ -78,6 +82,7 @@ TRANSLATIONS += translations/harbour-nextcloud-talk-de.ts
 
 HEADERS += \
     src/constants/ConversationTypeClass.h \
+    src/constants/PresenceStatusClass.h \
     src/db.h \
     src/nextcloudaccount.h \
     src/discovery.h \

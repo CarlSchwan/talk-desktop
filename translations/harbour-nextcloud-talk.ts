@@ -57,11 +57,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Moderator</source>
+        <source>moderator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Guest</source>
+        <source>away</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>do not disturb</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
