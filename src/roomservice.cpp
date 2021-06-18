@@ -148,7 +148,7 @@ void RoomService::loadRooms() {
         connect(&m_nam, &QNetworkAccessManager::finished, account->capabilities(), &Capabilities::checkTalkCapHash);
 
         QUrl endpoint = QUrl(account->host());
-        QString apiV = account->capabilities()->hasConversationV2() ? "v2" : "v1";
+        QString apiV = "v" + QString::number(account->capabilities()->getConversationApiLevel());
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
         endpoint.setQuery("format=json");
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);

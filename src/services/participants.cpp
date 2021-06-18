@@ -83,7 +83,7 @@ void Participants::pullParticipants(QString token, int accountId)
         m_reply->abort();
     }
     QUrl endpoint = QUrl(m_activeAccount->host());
-    QString apiV = m_activeAccount->capabilities()->hasConversationV2() ? "v2" : "v1";
+    QString apiV = "v" + QString::number(m_activeAccount->capabilities()->getConversationApiLevel());
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + token + "/participants");
     QUrlQuery q(endpoint);
     q.addQueryItem("format", "json");

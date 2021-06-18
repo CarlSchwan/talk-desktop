@@ -14,16 +14,25 @@ bool Capabilities::areAvailable() const {
     return m_available;
 }
 
-bool Capabilities::hasConversationV2() const {
-    if(!m_available) {
-        qDebug() << "capabilities have not been requested yet!";
-        return false;
-    }
-
-    return m_capabilities
+int Capabilities::getConversationApiLevel() const
+{
+    if (m_capabilities
             .find("spreed").value().toObject()
             .find("features").value().toArray()
-            .toVariantList().contains("conversation-v2");
+            .toVariantList().contains("conversation-v4"))
+    {
+        return 4;
+    }
+
+    if (m_capabilities
+            .find("spreed").value().toObject()
+            .find("features").value().toArray()
+            .toVariantList().contains("conversation-v2"))
+    {
+        return 2;
+    }
+
+    return 1;
 }
 
 QColor Capabilities::primaryColor() const {

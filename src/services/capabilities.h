@@ -16,7 +16,7 @@ public:
     bool areAvailable() const;
     void request();
     NextcloudAccount *m_account;
-    bool hasConversationV2() const;
+    int getConversationApiLevel() const;
     QColor primaryColor() const;
     QUrl logoUrl() const;
     QString name() const;
