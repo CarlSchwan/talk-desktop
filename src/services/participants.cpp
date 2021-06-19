@@ -137,12 +137,23 @@ void Participants::participantsPulled(QNetworkReply *reply)
     QJsonArray data = root.find("data").value().toArray();
     foreach(const QJsonValue& value, data) {
         QJsonObject participantData = value.toObject();
+
+        int apiLevel = m_activeAccount->capabilities()->getConversationApiLevel();
+
+        QString userId = apiLevel == 4 ? participantData.value("actorId").toString() : participantData.value("userId").toString();
+        // it is only used to indicate whether a participant is present in a room, so any string not "0" suffices
+        QString sessionId = apiLevel < 4
+                ? participantData.value("sessionId").toString()
+                : (participantData.value("sessionIds").toArray().empty()
+                   ? "0"
+                   : "yes");
+
         Participant model = Participant(
-            participantData.value("userId").toString(),
+            userId,
             participantData.value("displayName").toString(),
             participantData.value("participantType").toInt(),
             participantData.value("lastPing").toInt(),
-            participantData.value("sessionId").toString()
+            sessionId
         );
 
         if (participantData.contains("status")) {
