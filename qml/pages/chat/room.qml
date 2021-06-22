@@ -417,9 +417,11 @@ Page {
             }
             IconButton {
                 id: sendIcon
+                anchors.top: sendMessage.top
                 anchors.bottom: sendMessage.bottom
-                icon.source: "image://theme/icon-m-send"
-                opacity: sendMessage.text.length > 0 ? 1.0 : 0.0
+                icon.source: "image://theme/icon-m-send?" + sendMessage.color
+                Behavior on icon.source { FadeAnimation {} }
+                opacity: sendMessage.text.length > 0 ? 1.0 : 0.3
                 Behavior on opacity { FadeAnimation {} }
                 onClicked: {
                     roomService.sendMessage(sendMessage.text, replyToId);
