@@ -59,6 +59,7 @@ Page {
         message.timeString = new Date(message.timestamp * 1000).toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'})
         message.dateString = new Date(message.timestamp * 1000).toLocaleDateString(undefined, {day: '2-digit', motnh: '2-digit'})
         message.message = escapeTags(message.message)
+        message.message = message.message.replace(/\n/g, '<br/>')
         message.message = handleMessageParameters(message.messageParameters, message.message)
         if(message.message === "{file}") {
             message._type = "file"
