@@ -408,12 +408,22 @@ Page {
         Row {
             width: parent.width
 
-            TextField {
-                width: parent.width
+            TextArea {
                 id: sendMessage
+                width: parent.width - sendIcon.width
                 placeholderText: "Write something excellent"
+                wrapMode: TextEdit.WordWrap
                 EnterKey.enabled: text.length > 0
-                EnterKey.onClicked: {
+            }
+            IconButton {
+                id: sendIcon
+                anchors.top: sendMessage.top
+                anchors.bottom: sendMessage.bottom
+                icon.source: "image://theme/icon-m-send?" + sendMessage.color
+                Behavior on icon.source { FadeAnimation {} }
+                opacity: sendMessage.text.length > 0 ? 1.0 : 0.3
+                Behavior on opacity { FadeAnimation {} }
+                onClicked: {
                     roomService.sendMessage(sendMessage.text, replyToId);
                     // FIXME: only clear text after it was send
                     sendMessage.text = ""
