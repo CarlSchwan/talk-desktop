@@ -52,17 +52,17 @@ public slots:
     bool lastMessageIsSystemMessage() const;
     QString conversationName() const;
 
-    Room& setName(const QString name);
-    Room& setToken(const QString token);
-    Room& setType(const RoomType type);
-    Room& setAccount(const NextcloudAccount *account);
-    Room& setUnreadMessages(const int unread);
-    Room& setUnreadMention(const bool unreadMention);
-    Room& setHasPassword(const bool hasPassword);
-    Room& setFavorite(const bool isFavorite);
-    Room& setLastActivity(const int lastActivity);
-    Room& setLastMessage(const QString lastMessage, const QString lastAuthor, const uint timestamp, const bool isSystemMessage);
-    Room& setConversationName(const QString name);
+    Room* setName(const QString &name);
+    Room* setToken(const QString &token);
+    Room* setType(const RoomType type);
+    Room* setAccount(const NextcloudAccount *account);
+    Room* setUnreadMessages(const int unread);
+    Room* setUnreadMention(const bool unreadMention);
+    Room* setHasPassword(const bool hasPassword);
+    Room* setFavorite(const bool isFavorite);
+    Room* setLastActivity(const int lastActivity);
+    Room* setLastMessage(const QString &lastMessage, const QString &lastAuthor, const uint timestamp, const bool isSystemMessage);
+    Room* setConversationName(const QString &name);
 };
 
 #endif // ROOM_H

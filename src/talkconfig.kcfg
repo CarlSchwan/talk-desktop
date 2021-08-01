@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+                          http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name="neochatrc" />
+  <group name="General">
+    <entry name="CollapsedSections" type="IntList">
+      <label>Collapsed sections in the room list</label>
+    </entry>
+    <entry name="OpenRoom" type="String">
+      <label>Latest opened room</label>
+    </entry>
+    <entry name="ActiveConnection" type="String">
+      <label>Latest active connection</label>
+    </entry>
+    <entry name="ColorScheme" type="String">
+      <label>Color scheme</label>
+    </entry>
+    <entry name="Blur" type="bool">
+      <label>Make NeoChat blurry</label>
+      <default>false</default>
+    </entry>
+    <entry name="ShowNotifications" type="bool">
+      <label>Show notifications</label>
+      <default>true</default>
+    </entry>
+    <entry name="MergeRoomList" type="bool">
+      <label>Merge Room Lists</label>
+      <default>false</default>
+    </entry>
+    <entry name="ShowLeaveJoinEvent" type="bool">
+      <label>Show leave and join events in the timeline</label>
+      <default>true</default>
+    </entry>
+    <entry name="AllowQuickEdit" type="bool">
+      <label>Use s/text/replacement syntax to edit your last message.</label>
+      <default>false</default>
+    </entry>
+    <entry name="ShowLocalMessagesOnRight" type="bool">
+      <label>"Show your messages on the right</label>
+      <default>true</default>
+    </entry>
+    <entry name="RoomListPageWidth" type="int">
+      <default>-1</default>
+    </entry>
+  </group>
+  <group name="Timeline">
+    <entry name="ShowAvatarInTimeline" type="bool">
+      <label>Show avatar in the timeline</label>
+      <default>true</default>
+    </entry>
+    <entry name="CompactLayout" type="bool">
+      <label>Use a compact layout</label>
+      <default>false</default>
+    </entry>
+    <entry name="ShowRename" type="bool">
+      <label>Show rename events in the timeline</label>
+      <default>true</default>
+    </entry>
+    <entry name="ShowAvatarUpdate" type="bool">
+      <label>Show avatar update events in the timeline</label>
+      <default>true</default>
+    </entry>
+    <entry name="SystemTray" type="bool">
+      <label>Close NeoChat to system tray</label>
+      <default>true</default>
+    </entry>
+    <entry name="ShowFancyEffects" type="bool">
+      <label>Show Fancy Effects</label>
+      <default>true</default>
+    </entry>
+  </group>
+</kcfg>
+

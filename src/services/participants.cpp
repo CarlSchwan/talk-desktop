@@ -70,10 +70,8 @@ QHash<int, QByteArray> Participants::roleNames() const
 
 void Participants::pullParticipants(QString token, int accountId)
 {
-    try {
-        m_activeAccount = m_accountService->getAccountById(accountId);
-    } catch (QException &e) {
-        Q_UNUSED(e)
+    m_activeAccount = m_accountService->getAccountById(accountId);
+    if (!m_activeAccount) {
         qDebug() << "Failed to pull participants for room" << accountId;
         return;
     }

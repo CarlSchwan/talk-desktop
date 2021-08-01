@@ -1,5 +1,4 @@
 #include <qdebug.h>
-#include <QException>
 #include <QObject>
 #include <QSettings>
 #include "accounts.h"
@@ -158,11 +157,8 @@ void Accounts::deleteAccount(int accountId)
     Db db;
     db.deleteAccountEntries(accountId);
 
-    NextcloudAccount* acc;
-    try {
-        acc = getAccountById(accountId);
-    } catch (QException &e) {
-        Q_UNUSED(e)
+    NextcloudAccount* acc = getAccountById(accountId);
+    if (!acc) {
         qDebug() << "Could not find account in vector for removal" << accountId;
         dataChanged(index(0), index(m_accounts.length() - 1));
         return;
@@ -185,9 +181,7 @@ NextcloudAccount* Accounts::getAccountById(const int id) {
             return *i;
         }
     }
-    qDebug() << "No such account" << id;
-    QException e;
-    throw e;
+    return nullptr;
 }
 
 QVector<NextcloudAccount*> Accounts::getAccounts() {

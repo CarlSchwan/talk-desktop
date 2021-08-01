@@ -31,10 +31,8 @@ class AsyncImageResponse : public QQuickImageResponse
 
 QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const QString &id, const QSize &requestedSize)
 {
-    NextcloudAccount* account = nullptr;
-    try {
-        account = accountFromId(id);
-    } catch (...) {
+    NextcloudAccount* account = account = accountFromId(id);
+    if (!account) {
         return nullptr;
     }
     QString subject = id;

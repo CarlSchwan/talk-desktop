@@ -39,26 +39,26 @@ public:
 public slots:
     void loadRooms();
     void roomsLoadedFromAccount(QNetworkReply *reply);
-    Room getRoom(QString token, int accountId);
-    void startPolling(QString token, int accountId);
-    bool isPolling(QString token, int accountId);
+    Room *getRoom(const QString &token, int accountId) const;
+    void startPolling(const QString &token, int accountId);
+    bool isPolling(const QString &token, int accountId);
     void stopPolling();
-    void sendMessage(QString messageText, int replyToId);
+    void sendMessage(const QString &messageText, int replyToId);
 
 signals:
-    void newMessage(QString message);
+    void newMessage(const QString &message);
 
 private slots:
     void pollRoom();
     void roomPolled(QNetworkReply *reply);
-    Room findRoomByTokenAndAccount(const QString token, const int accountId);
+    Room *findRoomByTokenAndAccount(const QString &token, const int accountId) const;
     void onAccountsChanged();
-    void emitAfterActiveRoomChanged(QString token, int accountId);
+    void emitAfterActiveRoomChanged(const QString &token, int accountId);
     void onAccountUpdated();
 
 private:
     Accounts* m_accountService = Accounts::getInstance();
-    QVector<Room> m_rooms;
+    QVector<Room *> m_rooms;
     QVector<QNetworkReply*> m_rooms_requests;
     QNetworkAccessManager m_nam;
     QNetworkAccessManager namPosting;

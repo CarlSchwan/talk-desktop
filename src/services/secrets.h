@@ -3,9 +3,11 @@
 
 #include <QByteArray>
 #include <memory>
+#ifndef KDE_EDITION
 #include <Sailfish/Secrets/request.h>
 #include <Sailfish/Secrets/secretmanager.h>
 #include <Sailfish/Secrets/secret.h>
+#endif
 
 class Secrets
 {
@@ -16,14 +18,15 @@ public:
     bool unset(const QString &key);
 
 private:
+#ifndef KDE_EDITION
     std::unique_ptr<Sailfish::Secrets::SecretManager> m_manager{new Sailfish::Secrets::SecretManager()};
+    Sailfish::Secrets::Secret::Identifier createIdentifier(const QString &key);
+    bool checkResult(const Sailfish::Secrets::Request &req);
+    void ensureCollection();
     static const QString m_collectionName;
 
-    void ensureCollection();
     bool setupCollection();
-    bool checkResult(const Sailfish::Secrets::Request &req);
-    Sailfish::Secrets::Secret::Identifier createIdentifier(const QString &key);
-
+#endif
 };
 
 #endif // SECRETS_H

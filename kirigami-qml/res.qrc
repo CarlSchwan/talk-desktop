@@ -1,0 +1,9 @@
+<RCC>
+ <qresource prefix="/">
+  <file>main.qml</file>
+  <file>pages/Accounts.qml</file>
+  <file>pages/chat/rooms.qml</file>
+  <file>pages/chat/room.qml</file>
+  <file>pages/AddAccounts.qml</file>
+ </qresource>
+</RCC>

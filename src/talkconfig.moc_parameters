@@ -1,0 +1,8 @@
+-I/home/carl/project/kde/harbour-nextcloud-talk/src
+-I/home/carl/project/kde/harbour-nextcloud-talk/build/src
+-D_GNU_SOURCE
+-D_LARGEFILE64_SOURCE
+-DQT_NO_FOREACH
+-o
+/home/carl/project/kde/harbour-nextcloud-talk/build/src/talkconfig.moc
+/home/carl/project/kde/harbour-nextcloud-talk/build/src/talkconfig.h
