@@ -8,7 +8,7 @@ import QtGraphicalEffects 1.12
 
 import org.kde.kirigami 2.15 as Kirigami
 
-import harbour.nextcloud.talk 1.0 as Talk
+import harbour.nextcloud.talk 1.0
 
 QQC2.ItemDelegate {
     id: messageDelegate
@@ -48,16 +48,7 @@ QQC2.ItemDelegate {
         }
     }
 
-    height: sectionDelegate.height + Math.max(model.showAuthor ? avatar.height : 0, bubble.implicitHeight) + loader.height + (showAuthor ? Kirigami.Units.largeSpacing : 0)
-
-    SectionDelegate {
-        id: sectionDelegate
-        width: parent.width
-        anchors.left: avatar.left
-        anchors.leftMargin: Kirigami.Units.smallSpacing
-        visible: model.showSection
-        height: visible ? implicitHeight : 0
-    }
+    height: Math.max(model.showAuthor ? avatar.height : 0, bubble.implicitHeight) + (showAuthor ? Kirigami.Units.largeSpacing : Kirigami.Units.largeSpacing)
 
     Kirigami.Avatar {
         id: avatar
@@ -73,20 +64,21 @@ QQC2.ItemDelegate {
         }
 
         visible: model.showAuthor && Config.showAvatarInTimeline && !showUserMessageOnRight
-        name: model.actorId && model.accountId ?? model.actorDisplayName
-        source: visible && model.actorId && model.accountId ? ("image://avatar/" + model.accountId + "/" + model.actorId + "/") : ""
+        name: model.actorDisplayName
+        source: visible ? model.avatar : ""
         color: undefined
 
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                userDetailDialog.createObject(QQC2.ApplicationWindow.overlay, {
+                /*userDetailDialog.createObject(QQC2.ApplicationWindow.overlay, {
                     room: currentRoom,
                     user: author.object,
                     displayName: author.displayName,
                     avatarMediaId: author.avatarMediaId,
                     avatarUrl: author.avatarUrl
                 }).open();
+                */
             }
             cursorShape: Qt.PointingHandCursor
         }
@@ -161,14 +153,14 @@ QQC2.ItemDelegate {
                     anchors.right: timeLabel.left
                     anchors.rightMargin: Kirigami.Units.smallSpacing
 
-                    text: visible ? author.displayName : ""
+                    text: visible ? actorDisplayName : ""
                     font.weight: Font.Bold
-                    color: author.color
                     wrapMode: Text.Wrap
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
+                            /*
                             userDetailDialog.createObject(QQC2.ApplicationWindow.overlay, {
                                 room: currentRoom,
                                 user: author.object,
@@ -176,6 +168,7 @@ QQC2.ItemDelegate {
                                 avatarMediaId: author.avatarMediaId,
                                 avatarUrl: author.avatarUrl
                             }).open();
+                            */
                         }
                     }
                 }
@@ -207,7 +200,7 @@ QQC2.ItemDelegate {
         background: Kirigami.ShadowedRectangle {
             visible: cardBackground && !Config.compactLayout
             color: {
-                if (model.author.isLocalUser) {
+                if (model.isLocalUser) {
                     return Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, Kirigami.Theme.highlightColor, 0.15)
                 } else if (model.isHighlighted) {
                     return Kirigami.Theme.positiveBackgroundColor
@@ -221,20 +214,5 @@ QQC2.ItemDelegate {
             border.color: Kirigami.ColorUtils.tintWithAlpha(color, Kirigami.Theme.textColor, 0.15)
             border.width: Kirigami.Units.devicePixelRatio
         }
-    }
-
-    Loader {
-        id: loader
-        anchors {
-            left: bubble.left
-            right: parent.right
-            top: bubble.bottom
-            topMargin: active && !Config.compactLayout ? Kirigami.Units.smallSpacing : 0
-        }
-        height: active ? item.implicitHeight : 0
-        //Layout.bottomMargin: readMarker ? Kirigami.Units.smallSpacing : 0
-        active: eventType !== "state" && eventType !== "notice" && reaction != undefined && reaction.length > 0
-        visible: active
-        sourceComponent: ReactionDelegate { }
     }
 }

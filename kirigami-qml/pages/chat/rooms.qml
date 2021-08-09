@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
 // SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
-// SPDX-License-Identifier: GPL-3.9-or-later
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
@@ -29,7 +29,7 @@ Kirigami.ScrollablePage {
             Layout.bottomMargin: Kirigami.Units.smallSpacing
             Layout.fillHeight: true
             Layout.fillWidth: true
-            onTextChanged: sortFilterRoomListModel.filterText = text
+            onTextChanged: filterModel.filterText = text
             KeyNavigation.tab: roomList
         }
     }
@@ -65,9 +65,9 @@ Kirigami.ScrollablePage {
         repeat: true
         running: true
         triggeredOnStart: true
-        onTriggered: roomService.loadRooms()
+        onTriggered: RoomService.loadRooms()
     }
-    Component.onCompleted: roomService.loadRooms();
+    Component.onCompleted: RoomService.loadRooms();
 
     ListView {
         id: roomList
@@ -142,6 +142,7 @@ Kirigami.ScrollablePage {
                                 roomName: name,
                                 accountId: accountId,
                                 accountUserId: accountUserId,
+                                roomService: RoomService
                             });
                         } else {
                             const roomPage = applicationWindow().pageStack.get(1);
@@ -150,13 +151,15 @@ Kirigami.ScrollablePage {
                             roomPage.accountId = accountId;
                             roomPage.accountUserId = accountUserId;
                         }
+                        RoomService.startPolling(token, accountId);
                     }
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()
                 Keys.onReturnPressed: enterRoomAction.trigger()
                 bold: unreadCount > 0
                 label: name ?? ""
-                subtitle: lastMessageIsSystemMessage ? "" : lastMessageAuthor + " "
+                subtitle: lastMessageIsSystemMessage ? lastMessageText : lastMessageAuthor + ": " + lastMessageText
+                subtitleItem.maximumLineCount: 1
 
                 leading: Kirigami.Avatar {
                     source: conversationType === ConversationType.OneToOne ? "image://avatar/" + accountId + "/" + conversationName + "/" : ""
@@ -169,11 +172,9 @@ Kirigami.ScrollablePage {
             }
         }
 
-        model: RoomService {
-            id: roomService
-            onDataChanged: {
-                lastUpdate = new Date().toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'});
-            }
+        model: RoomListFilterModel {
+            id: filterModel
+            sourceModel: RoomService
         }
     }
 }

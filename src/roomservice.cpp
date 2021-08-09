@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "roomservice.h"
 #include <QDBusConnection>
 #include <QDBusMessage>
 #include <QMetaMethod>
 #include <QNetworkRequest>
+#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -11,9 +16,16 @@
 #include <qdebug.h>
 #include "services/requestfactory.h"
 #include "services/capabilities.h"
+#include <iterator>
+#include "messageeventmodel.h"
+#include "services/participants.h"
+
 
 RoomService::RoomService(QObject *parent)
     : QAbstractListModel(parent)
+    , m_nam(new QNetworkAccessManager(this))
+    , m_messageModel(new MessageEventModel(this))
+    , m_participants(new Participants(this))
 {
     connect(m_accountService, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
     connect(m_accountService, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
@@ -23,42 +35,42 @@ RoomService::RoomService(QObject *parent)
 int RoomService::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-   return m_rooms.length();
+    return m_rooms.size();
 }
 
 QVariant RoomService::data(const QModelIndex &index, int role) const
 {
-    Room *room = m_rooms[index.row()];
+    const Room &room = m_rooms[index.row()];
     switch (role) {
         case NameRole:
-            return room->name();
+            return room.name();
         case TokenRole:
-            return room->token();
+            return room.token();
         case AccountRole:
-            return room->account().id();
+            return room.account().id();
         case UserIdRole:
-            return room->account().userId();
+            return room.account().userId();
         case UnreadRole:
-            return room->unreadMessages();
+            return room.unreadMessages();
         case MentionedRole:
-            return room->unreadMention();
+            return room.unreadMention();
         case ColorRole:
-            if (room->account().colorOverride().isValid()) {
-                return room->account().colorOverride();
+            if (room.account().colorOverride().isValid()) {
+                return room.account().colorOverride();
             }
-            return room->account().capabilities()->primaryColor();
+            return room.account().capabilities()->primaryColor();
         case LastMessageTextRole:
-            return room->lastMessageText();
+            return room.lastMessageText();
         case LastMessageAuthorRole:
-            return room->lastMessageAuthor();
+            return room.lastMessageAuthor();
         case LastMessageTimestampRole:
-            return room->lastMessageTimestamp();
+            return room.lastMessageTimestamp();
         case LastMessageIsSystemMessageRole:
-            return room->lastMessageIsSystemMessage();
+            return room.lastMessageIsSystemMessage();
         case TypeRole:
-            return room->type();
+            return room.type();
         case ConversationNameRole:
-            return room->conversationName();
+            return room.conversationName();
     }
     return {};
 }
@@ -82,175 +94,77 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 }
 
 void RoomService::loadRooms() {
-    if(
-        isSignalConnected(QMetaMethod::fromSignal(&QNetworkAccessManager::finished))
-    ) {
-        foreach (QNetworkReply* reply, m_rooms_requests) {
-            reply->abort();
-        }
-        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
-        qDebug() << "client timeout for previous loadRooms request";
-    } else if (m_nam.networkAccessible() == QNetworkAccessManager::NotAccessible) {
-        qDebug() << "no network, waiting";
-        return;
-    }
-    m_pendingRequests = m_accountService->getAccounts().length();
-    if(m_pendingRequests > 0) {
-        connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
-    }
-    foreach (NextcloudAccount* account, m_accountService->getAccounts()) {
-        if(account->password().isEmpty()) {
-            m_pendingRequests--;
+    const auto accounts = m_accountService->getAccounts();
+    for (NextcloudAccount* account : accounts) {
+        if (account->password().isEmpty()) {
             continue;
-        } else if (!account->capabilities()->areAvailable()) {
+        }
+
+        if (!account->capabilities()->areAvailable()) {
             account->capabilities()->request();
-            m_pendingRequests--;
             continue;
         }
-        // room endpoint carries talk specific indicator whether capabilities have changed
-        connect(&m_nam, &QNetworkAccessManager::finished, account->capabilities(), &Capabilities::checkTalkCapHash);
 
         QUrl endpoint = QUrl(account->host());
-        QString apiV = "v" + QString::number(account->capabilities()->getConversationApiLevel());
+        const QString apiV = "v" + QString::number(account->capabilities()->getConversationApiLevel());
         endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
         endpoint.setQuery("format=json");
         QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
-        QNetworkReply* reply = m_nam.get(request);
-        m_rooms_requests.append(reply);
-        reply->setProperty("AccountID", account->id());
+        auto reply = m_nam->get(request);
+        QObject::connect(reply, &QNetworkReply::finished, [this, reply, account]() {
+            if (200 != reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)) {
+                qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) << reply->url();
+                return;
+            }
+
+            account->capabilities()->checkTalkCapHash(reply);
+            roomsLoadedFromAccount(reply, account);
+        });
     }
 }
 
-void RoomService::roomsLoadedFromAccount(QNetworkReply *reply) {
-    m_pendingRequests--;
-    if(m_pendingRequests == 0) {
-        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
-    }
-
-    if(m_rooms_requests.contains(reply)) {
-        m_rooms_requests.removeOne(reply);
-    }
-
-    switch (reply->error()) {
-        case QNetworkReply::NetworkSessionFailedError:
-            qDeleteAll(m_nam.findChildren<QNetworkReply *>());
-            disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomsLoadedFromAccount);
-            m_pendingRequests = 0;
-            return;
-        default:
-            break;
-    }
-
-    if(reply->error() != QNetworkReply::NoError
-            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
-    {
-        qDebug() << "network issue or unauthed, code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if(m_nam.networkAccessible() != QNetworkAccessManager::Accessible) {
-            qDebug() << "Network not accessible";
-        }
-
-        return;
-    }
-
-    const NextcloudAccount* currentAccount = nullptr;
-    int accounts = m_accountService->getAccounts().length();
-    for(int i = 0; i < accounts; i++) {
-        const NextcloudAccount* account = m_accountService->getAccounts().at(i);
-        if(account->host().authority() == reply->url().authority()) {
-            currentAccount = account;
-            break;
-        }
-    }
-    if(currentAccount == nullptr) {
-        qDebug() << "Coult not figure out account for this result set";
-        return;
-    }
-
-    QByteArray payload = reply->readAll();
-    QJsonDocument apiResult = QJsonDocument::fromJson(payload);
+void RoomService::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account) {
+    auto apiResult = QJsonDocument::fromJson(reply->readAll()).object()[QLatin1Literal("ocs")].toObject();
     qDebug() << apiResult;
-    QJsonObject q = apiResult.object();
-    QJsonObject root = q.find("ocs").value().toObject();
-    // qDebug() << "JSON" << payload;
-    QJsonObject meta = root.find("meta").value().toObject();
-    QJsonValue statuscode = meta.find("statuscode").value();
-    if(statuscode.toInt() != 200) {
-        qDebug() << "unexpected OCS code " << statuscode.toInt();
-        if(statuscode.toInt() == 0) {
-            qDebug() << "payload was " << payload;
-            qDebug() << "url was" << reply->url();
+
+    int statusCode = apiResult[QLatin1Literal("meta")].toObject()[QLatin1Literal("statuscode")].toInt();
+    if(statusCode != 200) {
+        qDebug() << "unexpected OCS code " << statusCode;
+        if(statusCode == 0) {
+            qDebug() << "Error:" << QJsonDocument(apiResult).toJson(QJsonDocument::Indented) << reply->url();
         }
         return;
     }
 
-    const QJsonArray data = root.find("data").value().toArray();
+    const QJsonArray data = apiResult["data"].toArray();
     for (const QJsonValue& value : data) {
         QJsonObject room = value.toObject();
-        Room *model = new Room;
-        model
-                ->setAccount(currentAccount)
-                ->setConversationName(room.value("name").toString())
-                ->setName(room.value("displayName").toString())
-                ->setFavorite(room.value("isFavorite").toBool())
-                ->setHasPassword(room.value("hasPassword").toBool())
-                ->setToken(room.value("token").toString())
-                ->setType(static_cast<Room::RoomType>(room.value("type").toInt()))
-                ->setUnreadMention(room.value("unreadMention").toBool())
-                ->setUnreadMessages(room.value("unreadMessages").toInt())
-                ->setLastActivity(room.value("lastActivity").toInt());
-
-        if(room.contains("lastMessage")) {
-            QJsonObject lastMessage = room.value("lastMessage").toObject();
-            QString message = lastMessage.value("message").toString();
-            QJsonObject parameters = lastMessage.value("messageParameters").toObject();
-
-            foreach(QString placeholder, parameters.keys())
-            {
-                QString name = parameters.value(placeholder).toObject().value("name").toString();
-                message.replace("{" + placeholder + "}", name, Qt::CaseSensitive);
-            }
-
-            model->setLastMessage(
-                message,
-                lastMessage.value("actorDisplayName").toString(),
-                lastMessage.value("timestamp").toVariant().toUInt(),
-                lastMessage.value("systemMessage").toString() != ""
-            );
-        }
-
-        Room *knownRoom = findRoomByTokenAndAccount(model->token(), model->account().id());
-        if (knownRoom) {
-            int i = m_rooms.indexOf(knownRoom);
-            m_rooms.replace(i, model);
+        auto position = findRoomByTokenAndAccount(room["token"].toString(), account->id());
+        if (position != m_rooms.cend()) {
+            m_rooms.erase(position);
+            m_rooms.emplace(position, account, room);
+            int pos = std::distance(m_rooms.cbegin(), position);
+            dataChanged(index(pos, 0), index(pos, 0), {});
         } else {
-            beginInsertRows(QModelIndex(), m_rooms.length(), m_rooms.length());
-            m_rooms.append(model);
+            beginInsertRows(QModelIndex(), m_rooms.size(), m_rooms.size());
+            m_rooms.emplace_back(account, room);
             endInsertRows();
         }
     }
-
-    std::sort(m_rooms.begin(), m_rooms.end(), [](const Room *a, const Room *b) {
-        return a->lastActivity() > b->lastActivity();
-    });
-    dataChanged(index(0), index(m_rooms.length() - 1));
-}
-
-Room *RoomService::getRoom(const QString &token, int accountId) const {
-    for (auto room : m_rooms) {
-        if(room->token() == token && room->account().id() == accountId) {
-            return room;
-        }
-    }
-    return nullptr;
 }
 
 void RoomService::startPolling(const QString &token, int accountId) {
     activeToken = token;
     activeAccountId = accountId;
+    m_messageModel->setAccountId(accountId);
     m_isPolling = true;
     m_lookIntoFuture = 0;
     pollRoom();
     emitAfterActiveRoomChanged(token, accountId);
+    m_messageModel->clear();
+    m_currentRoom = *findRoomByTokenAndAccount(token, accountId);
+    m_participants->setTokenAndAccountId(token, accountId);
+    Q_EMIT isLoadedChanged();
 }
 
 void RoomService::emitAfterActiveRoomChanged(const QString &token, int accountId) {
@@ -270,13 +184,17 @@ void RoomService::stopPolling() {
     m_isPolling = false;
 }
 
-Room *RoomService::findRoomByTokenAndAccount(const QString &token, const int accountId) const {
-    for (auto room : m_rooms) {
-        if(room->token() == token && room->account().id() == accountId) {
-            return room;
+std::vector<Room>::const_iterator RoomService::findRoomByTokenAndAccount(const QString &token, const int accountId) const {
+    auto it = m_rooms.cbegin();
+
+    while (it != m_rooms.cend()) {
+        const auto &room = *it;
+        if (room.token() == token && room.account().id() == accountId) {
+            return it;
         }
+        it++;
     }
-    return nullptr;
+    return it;
 }
 
 void RoomService::pollRoom() {
@@ -288,7 +206,6 @@ void RoomService::pollRoom() {
         qDebug() << "Failed to poll for room" << activeAccountId;
         return;
     }
-    connect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
     int lastKnownMessageId = m_db.lastKnownMessageId(activeAccountId, activeToken);
     QString includeLastKnown = m_lookIntoFuture == 0 ? "1" : "0";
     QUrl endpoint = QUrl(account->host());
@@ -298,14 +215,15 @@ void RoomService::pollRoom() {
                       "&includeLastKnown=" + includeLastKnown);
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, account);
-    m_nam.get(request);
+    auto reply = m_nam->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        roomPolled(reply);
+    });
 }
 
 void RoomService::roomPolled(QNetworkReply *reply) {
     qDebug() << "polling for new messages finished " << reply->error();
     qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &RoomService::roomPolled);
 
     if(!m_isPolling) {
         return;
@@ -381,10 +299,7 @@ void RoomService::roomPolled(QNetworkReply *reply) {
             continue;
         }
 
-        QJsonDocument doc = QJsonDocument::fromVariant(value.toVariant());
-        QString strJson(doc.toJson(QJsonDocument::Compact));
-        //qDebug() << strJson;
-        emit newMessage(strJson);
+        m_messageModel->addMessages(value.toObject());
     }
 
     pollRoom();
@@ -403,13 +318,12 @@ void RoomService::sendMessage(const QString &messageText, int replyToId) {
         payload += QString("&replyTo=" + QString::number(replyToId)).toUtf8();
     }
 
-    namPosting.post(request, payload);
+    m_nam->post(request, payload);
 }
 
 void RoomService::onAccountsChanged() {
     qDebug() << "RoomService acting on Accounts change";
     beginResetModel();
-    qDeleteAll(m_rooms);
     m_rooms.clear();
     endResetModel();
     loadRooms();
@@ -419,4 +333,44 @@ void RoomService::onAccountUpdated() {
     qDebug() << "RoomService acting on Account update";
     beginResetModel();
     endResetModel();
+}
+
+MessageEventModel *RoomService::messageModel() const
+{
+    return m_messageModel;
+}
+
+bool RoomService::isLoaded() const
+{
+    return m_isPolling;
+}
+
+QString RoomService::currentName() const
+{
+    return m_currentRoom ? m_currentRoom->name() : QString();
+}
+
+QString RoomService::currentAvatarUrl() const
+{
+    return QString(); // TODO
+}
+
+bool RoomService::currentIsFavorite() const
+{
+    return m_currentRoom ? m_currentRoom->isFavorite() : false;
+}
+
+void RoomService::setCurrentIsFavorite(bool isFavorite)
+{
+    // TODO
+}
+
+QString RoomService::currentDescription() const
+{
+    return QString(); // TODO
+}
+
+Participants *RoomService::participants() const
+{
+    return m_participants;
 }

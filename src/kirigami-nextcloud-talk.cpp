@@ -39,9 +39,11 @@
 #include "constants/ConversationTypeClass.h"
 #include "constants/PresenceStatusClass.h"
 #include "talkconfig.h"
+#include "roomlistfilter.h"
 #ifdef HAVE_COLORSCHEME
 #include "colorschemer.h"
 #endif
+#include "messageeventmodel.h"
 
 #ifdef Q_OS_ANDROID
 Q_DECL_EXPORT
@@ -91,8 +93,9 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<PresenceStatusClass>("harbour.nextcloud.talk", 1, 0, "PresenceStatus", "Enum type");
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
-    qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
+    qmlRegisterType<RoomListFilterModel>("harbour.nextcloud.talk", 1, 0, "RoomListFilterModel");
     qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
+    qmlRegisterType<MessageEventModel>("harbour.nextcloud.talk", 1, 0, "MessageEventModel");
 
     qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
 
@@ -102,6 +105,14 @@ int main(int argc, char *argv[])
             Q_UNUSED(js)
             eng->setObjectOwnership(Accounts::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
             return Accounts::getInstance();
+        }
+    );
+
+    qmlRegisterSingletonType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService",
+        [](QQmlEngine *eng, QJSEngine *js) -> QObject *
+        {
+            Q_UNUSED(js)
+            return new RoomService;
         }
     );
 

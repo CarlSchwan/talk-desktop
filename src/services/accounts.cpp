@@ -20,7 +20,7 @@ Accounts* Accounts::getInstance()
 int Accounts::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return getInstance()->getAccounts().count() + 1;
+    return getInstance()->getAccounts().count();
 }
 
 QVariant Accounts::data(const QModelIndex &index, int role) const
@@ -28,59 +28,30 @@ QVariant Accounts::data(const QModelIndex &index, int role) const
     QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
     int knownAccounts = accounts.count();
 
-    if (role == NameRole && index.row() == knownAccounts)
-    {
-        return QVariant("Add account");
-    }
-    else if (role == AccountRole && index.row() == knownAccounts)
-    {
-        return QVariant(-1);
-    }
-
-    if (role == NameRole)
-    {
-        return QVariant(accounts.at(index.row())->name());
-    }
-    else if (role == AccountRole && index.row() < knownAccounts)
-    {
-        return QVariant(accounts.at(index.row())->id());
-    }
-
-    if (role == LogoRole && index.row() < knownAccounts)
-    {
-        return QVariant(accounts.at(index.row())->capabilities()->logoUrl());
-    } else if (role == LogoRole && index.row() == knownAccounts){
-        return QVariant("image://theme/icon-m-add");
-    }
-
-    if (role == InstanceNameRole && index.row() < knownAccounts)
-    {
-        return QVariant(accounts.at(index.row())->capabilities()->name());
-    } else if (role == LogoRole && index.row() == knownAccounts){
-        return QVariant("");
-    }
-
-    if (role == ColorModeRole && index.row() < knownAccounts)
-    {
-        if (accounts.at(index.row())->colorOverride().isValid()) {
-            return QVariant(Accounts::OverriddenColor);
+    auto account = accounts.at(index.row());
+    switch (role) {
+    case NameRole:
+        return account->name();
+    case AccountRole:
+        return account->id();
+    case LogoRole:
+        return account->capabilities()->logoUrl();
+    case InstanceNameRole:
+        return account->capabilities()->name();
+    case ColorModeRole:
+        if (account->colorOverride().isValid()) {
+            return Accounts::OverriddenColor;
         }
-        return QVariant(Accounts::InstanceColor);
-    } else if (role == LogoRole && index.row() == knownAccounts){
-        return QVariant(Accounts::InstanceColor);
-    }
-
-    if (role == ColorRole && index.row() < knownAccounts)
-    {
-        if (accounts.at(index.row())->colorOverride().isValid()) {
-            return QVariant(accounts.at(index.row())->colorOverride());
+        return Accounts::InstanceColor;
+    case ColorRole:
+        if (account->colorOverride().isValid()) {
+            return account->capabilities()->primaryColor();
+        } else {
+            return QColor("#006295");
         }
-        return QVariant(accounts.at(index.row())->capabilities()->primaryColor());
-    } else if (role == LogoRole && index.row() == knownAccounts) {
-        return QVariant(QColor("#006295"));
     }
 
-    return QVariant();
+    return {};
 }
 
 bool Accounts::setData(const QModelIndex &index, const QVariant &value, int role) {
@@ -196,14 +167,14 @@ QVector<NextcloudAccount*> Accounts::readAccounts()
 {
     qDebug() << "reading accs";
     QSettings accountSettings("Nextcloud", "Accounts");
-    QStringList accountGroups = accountSettings.childGroups();
+    const QStringList accountGroups = accountSettings.childGroups();
 
     if(m_accounts.count() > 0) {
         m_accounts.clear();
     }
 
     bool dirty = false;
-    foreach(const QString &group, accountGroups) {
+    for (const QString &group : accountGroups) {
         accountSettings.beginGroup(group);
         NextcloudAccount* account = NextcloudAccount::fromSettings(accountSettings);
         if(account->password() != "") {

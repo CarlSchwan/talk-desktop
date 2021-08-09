@@ -22,13 +22,13 @@ public:
 
     enum ParticipantRoles {
         IdRole = Qt::UserRole + 1,
-        NameRole = Qt::UserRole + 2,
-        TypeRole = Qt::UserRole + 3,
-        StatusRole = Qt::UserRole + 4,
-        PresenceRole = Qt::UserRole + 5,
-        StatusIconRole = Qt::UserRole + 6,
-        StatusMessageRole = Qt::UserRole + 7,
-        ModeratorRole = Qt::UserRole + 8,
+        NameRole,
+        TypeRole,
+        StatusRole,
+        PresenceRole,
+        StatusIconRole,
+        StatusMessageRole,
+        ModeratorRole
     };
 
     struct Participant
@@ -42,8 +42,8 @@ public:
                 QString sessionId,
                 bool inCall = false,
                 PresenceStatus presence = PresenceStatus::Offline,
-                QString statusIcon = "",
-                QString statusMessage = ""
+                QString statusIcon = QString(),
+                QString statusMessage = QString()
         )
         {
             this->userId = userId;
@@ -85,8 +85,10 @@ public:
         }
     };
 
+    void setTokenAndAccountId(const QString &token, int accountId);
+
 public slots:
-    void pullParticipants(QString token, int accountId);
+    void pullParticipants();
 
 private slots:
     void participantsPulled(QNetworkReply *reply);
@@ -95,9 +97,11 @@ private:
     Accounts* m_accountService = Accounts::getInstance();
     NextcloudAccount* m_activeAccount;
     QNetworkAccessManager m_nam;
-    QNetworkReply* m_reply;
+    QNetworkReply* m_reply = nullptr;
     QVector<Participant> m_participants;
     PresenceStatus presence;
+    QString m_token;
+    int m_accountId;
 
     int findParticipant(QString userId);
     int removeParticipants(int checkId);

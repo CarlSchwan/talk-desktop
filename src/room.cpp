@@ -1,8 +1,37 @@
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "room.h"
 
-Room::Room()
+Room::Room(NextcloudAccount *account, const QJsonObject &obj)
+    : m_account(account)
+    , m_name(obj["name"].toString())
+    , m_token(obj["token"].toString())
+    , m_type(static_cast<Room::RoomType>(obj["type"].toInt()))
+    , m_unread(obj["unreadMessages"].toInt())
+    , m_unread_mention(obj["unreadMention"].toBool())
+    , m_hasPassword(obj["hasPassword"].toBool())
+    , m_isFavorite(obj["isFavorite"].toBool())
+    , m_lastActivity(obj["lastActivity"].toInt())
 {
+    if (obj.contains("lastMessage")) {
+        const QJsonObject lastMessage = obj.value("lastMessage").toObject();
+        QString message = lastMessage.value("message").toString();
+        const QJsonObject parameters = lastMessage.value("messageParameters").toObject();
 
+        for (const QString &placeholder: parameters.keys()) {
+            QString name = parameters.value(placeholder).toObject().value("name").toString();
+            message.replace("{" + placeholder + "}", name, Qt::CaseSensitive);
+        }
+
+        setLastMessage(
+            message,
+            lastMessage.value("actorDisplayName").toString(),
+            lastMessage.value("timestamp").toVariant().toUInt(),
+            lastMessage.value("systemMessage").toString() != ""
+        );
+    }
 }
 
 QString Room::name() const

@@ -11,6 +11,8 @@ add_executable(talk
     nextcloudaccount.cpp
     room.cpp
     roomservice.cpp
+    roomlistfilter.cpp
+    messageeventmodel.cpp
     services/accounts.cpp
     services/capabilities.cpp
     services/download.cpp

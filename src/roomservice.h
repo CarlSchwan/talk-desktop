@@ -1,45 +1,80 @@
-#ifndef ROOMSERVICE_H
-#define ROOMSERVICE_H
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <QAbstractListModel>
-#include <QException>
-#include <QNetworkAccessManager>
+#include <vector>
+#include <optional>
 #include "db.h"
-#include "nextcloudaccount.h"
 #include "room.h"
 #include "services/accounts.h"
+
+class MessageEventModel;
+class QNetworkAccessManager;
+class QNetworkReply;
+class Accounts;
+class NextcloudAccount;
+class Participants;
 
 class RoomService : public QAbstractListModel
 {
     Q_OBJECT
+
+    Q_PROPERTY(bool isLoaded READ isLoaded NOTIFY isLoadedChanged)
+
+    /// Model of message of the current room
+    Q_PROPERTY(MessageEventModel *messageModel READ messageModel CONSTANT)
+
+    /// This property holds the name of the currently selected room.
+    Q_PROPERTY(QString currentName READ currentName NOTIFY roomChanged)
+
+    /// This property holds whether the current room is a favorite.
+    Q_PROPERTY(bool currentIsFavorite READ currentIsFavorite WRITE setCurrentIsFavorite NOTIFY roomChanged)
+
+    /// This property holds the url of the room avatar.
+    Q_PROPERTY(QString currentAvatarUrl READ currentAvatarUrl NOTIFY roomChanged)
+
+    /// This property holds the description of the room.
+    Q_PROPERTY(QString currentDescription READ currentDescription NOTIFY roomChanged)
+
+    Q_PROPERTY(Participants *participants READ participants CONSTANT)
 public:
     enum RoomRoles {
         NameRole = Qt::UserRole + 1,
-        TokenRole = Qt::UserRole + 2,
-        AccountRole = Qt::UserRole + 3,
-        UnreadRole = Qt::UserRole + 4,
-        MentionedRole = Qt::UserRole + 5,
-        UserIdRole = Qt::UserRole + 6,
-        ColorRole = Qt::UserRole + 7,
-        LastMessageTextRole = Qt::UserRole + 8,
-        LastMessageAuthorRole = Qt::UserRole + 9,
-        LastMessageTimestampRole = Qt::UserRole + 10,
-        LastMessageIsSystemMessageRole = Qt::UserRole + 11,
-        TypeRole = Qt::UserRole + 12,
-        ConversationNameRole = Qt::UserRole + 13,
+        TokenRole,
+        AccountRole,
+        UnreadRole,
+        MentionedRole,
+        UserIdRole,
+        ColorRole,
+        LastMessageTextRole,
+        LastMessageAuthorRole,
+        LastMessageTimestampRole,
+        LastMessageIsSystemMessageRole,
+        TypeRole,
+        ConversationNameRole,
     };
 
     explicit RoomService(QObject *parent = nullptr);
 
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
 
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    QHash<int, QByteArray> roleNames() const;
+    MessageEventModel *messageModel() const;
+    bool isLoaded() const;
+    QString currentName() const;
+    QString currentAvatarUrl() const;
+    QString currentDescription() const;
+    bool currentIsFavorite() const;
+    void setCurrentIsFavorite(bool isFavorite);
+    Participants *participants() const;
 
 public slots:
     void loadRooms();
-    void roomsLoadedFromAccount(QNetworkReply *reply);
-    Room *getRoom(const QString &token, int accountId) const;
+    void roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account);
     void startPolling(const QString &token, int accountId);
     bool isPolling(const QString &token, int accountId);
     void stopPolling();
@@ -47,27 +82,29 @@ public slots:
 
 signals:
     void newMessage(const QString &message);
+    void roomChanged();
+    void isLoadedChanged();
 
 private slots:
     void pollRoom();
     void roomPolled(QNetworkReply *reply);
-    Room *findRoomByTokenAndAccount(const QString &token, const int accountId) const;
+    std::vector<Room>::const_iterator findRoomByTokenAndAccount(const QString &token, int accountId) const;
     void onAccountsChanged();
     void emitAfterActiveRoomChanged(const QString &token, int accountId);
     void onAccountUpdated();
 
 private:
-    Accounts* m_accountService = Accounts::getInstance();
-    QVector<Room *> m_rooms;
+    Accounts *m_accountService = Accounts::getInstance();
+    std::vector<Room> m_rooms;
     QVector<QNetworkReply*> m_rooms_requests;
-    QNetworkAccessManager m_nam;
-    QNetworkAccessManager namPosting;
+    QNetworkAccessManager *m_nam = nullptr;
     int m_pendingRequests = 0;
     QString activeToken;
     int activeAccountId;
     bool m_isPolling = false;
     Db m_db;
     int m_lookIntoFuture = 0;
+    MessageEventModel *m_messageModel = nullptr;
+    std::optional<Room> m_currentRoom;
+    Participants *m_participants;
 };
-
-#endif // ROOMSERVICE_H

@@ -68,21 +68,20 @@ QHash<int, QByteArray> Participants::roleNames() const
 }
 
 
-void Participants::pullParticipants(QString token, int accountId)
+void Participants::pullParticipants()
 {
-    m_activeAccount = m_accountService->getAccountById(accountId);
-    if (!m_activeAccount) {
-        qDebug() << "Failed to pull participants for room" << accountId;
-        return;
-    }
-    if(!isSignalConnected(QMetaMethod::fromSignal(&QNetworkAccessManager::finished))) {
-        connect(&m_nam, &QNetworkAccessManager::finished, this, &Participants::participantsPulled);
-    } else {
+    if (m_reply) {
         m_reply->abort();
+        m_reply = nullptr;
+    }
+    m_activeAccount = m_accountService->getAccountById(m_accountId);
+    if (!m_activeAccount) {
+        qDebug() << "Failed to pull participants for room" << m_accountId;
+        return;
     }
     QUrl endpoint = QUrl(m_activeAccount->host());
     QString apiV = "v" + QString::number(m_activeAccount->capabilities()->getConversationApiLevel());
-    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + token + "/participants");
+    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV+ "/room/" + m_token + "/participants");
     QUrlQuery q(endpoint);
     q.addQueryItem("format", "json");
     q.addQueryItem("includeStatus", "true");
@@ -90,6 +89,9 @@ void Participants::pullParticipants(QString token, int accountId)
 
     QNetworkRequest request = RequestFactory::getRequest(endpoint, m_activeAccount);
     m_reply = m_nam.get(request);
+    connect(m_reply, &QNetworkReply::finished, this, [this]() {
+        participantsPulled(m_reply);
+    });
 }
 
 void Participants::participantsPulled(QNetworkReply *reply)
@@ -235,4 +237,10 @@ int Participants::findParticipant(QString userId)
 bool Participants::isModerator(const Participant participant) const
 {
     return participant.type == 1 || participant.type == 2 || participant.type == 6;
+}
+
+void Participants::setTokenAndAccountId(const QString &token, int accountId)
+{
+    m_token = token;
+    m_accountId = accountId;
 }

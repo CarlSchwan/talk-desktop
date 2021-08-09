@@ -9,13 +9,11 @@ class AsyncImageResponse : public QQuickImageResponse
     public:
         AsyncImageResponse(QNetworkRequest request, QThreadPool *pool)
         {
-            connect(&m_qnam, &QNetworkAccessManager::finished, this, &AsyncImageResponse::imageReceived);
-            m_qnam.get(request);
-        }
-
-        void imageReceived(QNetworkReply *reply) {
-            m_image.loadFromData(reply->readAll());
-            emit finished();
+            auto reply = m_qnam.get(request);
+            connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+                m_image.loadFromData(reply->readAll());
+                emit finished();
+            });
         }
 
         QQuickTextureFactory *textureFactory() const override
@@ -47,5 +45,8 @@ NextcloudAccount* AbstractNextcloudImageProvider::accountFromId(const QString &i
     const int accountId = id.left(id.indexOf('/')).toInt();
     Accounts* accountService = Accounts::getInstance();
     NextcloudAccount* account = accountService->getAccountById(accountId);
+    if (!account) {
+        qDebug() << "No account found for id" << id << accountService->getAccounts();
+    }
     return account;
 }

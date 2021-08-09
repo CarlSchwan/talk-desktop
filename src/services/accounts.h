@@ -13,11 +13,11 @@ class Accounts : public QAbstractListModel
 public:
     enum AccountRoles {
         NameRole = Qt::UserRole + 1,
-        AccountRole = Qt::UserRole + 2,
-        LogoRole = Qt::UserRole + 3,
-        InstanceNameRole = Qt::UserRole + 4,
-        ColorRole = Qt::UserRole + 5,
-        ColorModeRole = Qt::UserRole + 6,
+        AccountRole,
+        LogoRole,
+        InstanceNameRole,
+        ColorRole,
+        ColorModeRole,
     };
     enum ColorMode {
         InstanceColor,
@@ -31,10 +31,10 @@ public:
     QVector<NextcloudAccount*> getAccounts();
 
     // Basic functionality:
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-    QHash<int, QByteArray> roleNames() const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    QHash<int, QByteArray> roleNames() const override;
 
 public slots:
     void addAccount(QString url, QString loginName, QString token, QString userId);

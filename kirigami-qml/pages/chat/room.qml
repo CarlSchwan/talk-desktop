@@ -7,11 +7,14 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
 import org.kde.kirigami 2.15 as Kirigami
 import harbour.nextcloud.talk 1.0
+import '../../components/'
 
 Kirigami.ScrollablePage {
     id: room
 
     title: roomName
+
+    required property var roomService
 
     property string token;
     property string roomName;
@@ -179,9 +182,18 @@ Kirigami.ScrollablePage {
 
     ListView {
         id: chat
-        delegate: QQC2.ItemDelegate {
-            text: actorDisplayName + ': ' + message
+        delegate: TimelineContainer {
+            id: messageContainer
+            width: ListView.view.width
+            isLoaded: true
+            innerObject: TextDelegate {
+                Layout.fillWidth: Config.compactLayout
+                Layout.maximumWidth: messageContainer.bubbleMaxWidth
+                Layout.rightMargin: Kirigami.Units.largeSpacing
+                Layout.leftMargin: Config.showAvatarInTimeline ? Kirigami.Units.largeSpacing : 0
+            }
         }
+        model: room.roomService.messageModel
         /*delegate: ListItem {
 
             height: author.contentHeight
@@ -420,20 +432,5 @@ Kirigami.ScrollablePage {
             }
         }
         */
-    }
-
-    RoomService {
-        id: roomService
-    }
-
-    Connections {
-        target: roomService
-        onNewMessage: {
-            message = prepareMessage(JSON.parse(message))
-            updateLastOfActor(message)
-            updateFirstOfActor(message)
-            delete message.messageParameters // Otherwise QML runs into type problems sometimes (VariantMap vs List) in next step
-            messages.append(message)
-        }
     }
 }

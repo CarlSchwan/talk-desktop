@@ -1,9 +1,14 @@
 <RCC>
  <qresource prefix="/">
   <file>main.qml</file>
+  <file>RoomDrawer.qml</file>
   <file>pages/Accounts.qml</file>
   <file>pages/chat/rooms.qml</file>
   <file>pages/chat/room.qml</file>
   <file>pages/AddAccounts.qml</file>
+  <file>pages/AccountsPage.qml</file>
+  <file>pages/SettingsPage.qml</file>
+  <file>components/TextDelegate.qml</file>
+  <file>components/TimelineContainer.qml</file>
  </qresource>
 </RCC>
