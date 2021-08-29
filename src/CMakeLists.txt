@@ -13,6 +13,9 @@ add_executable(talk
     roomservice.cpp
     roomlistfilter.cpp
     messageeventmodel.cpp
+    chatboxhelper.cpp
+    clipboard.cpp
+    emojimodel.cpp
     services/accounts.cpp
     services/capabilities.cpp
     services/download.cpp

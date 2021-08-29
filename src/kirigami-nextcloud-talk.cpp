@@ -34,12 +34,15 @@
 #include "services/download.h"
 #include "services/participants.h"
 #include "discovery.h"
+#include "clipboard.h"
 #include "roomservice.h"
 #include "nextcloudaccount.h"
 #include "constants/ConversationTypeClass.h"
 #include "constants/PresenceStatusClass.h"
 #include "talkconfig.h"
+#include "emojimodel.h"
 #include "roomlistfilter.h"
+#include "chatboxhelper.h"
 #ifdef HAVE_COLORSCHEME
 #include "colorschemer.h"
 #endif
@@ -98,6 +101,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<MessageEventModel>("harbour.nextcloud.talk", 1, 0, "MessageEventModel");
 
     qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
+    ChatBoxHelper chatBoxHelper;
+    qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "ChatBoxHelper", &chatBoxHelper);
+    Clipboard clipboard;
+    qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "Clipboard", &clipboard);
 
     qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *
@@ -107,6 +114,12 @@ int main(int argc, char *argv[])
             return Accounts::getInstance();
         }
     );
+
+    qmlRegisterSingletonType<EmojiModel>("harbour.nextcloud.talk", 1, 0, "EmojiModel", [](QQmlEngine *engine2, QJSEngine *scriptEngine) -> QObject * {
+        Q_UNUSED(scriptEngine);
+        Q_UNUSED(engine2);
+        return new EmojiModel();
+    });
 
     qmlRegisterSingletonType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *

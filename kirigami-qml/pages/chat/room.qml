@@ -5,9 +5,11 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
+import QtQuick.Dialogs 1.3
 import org.kde.kirigami 2.15 as Kirigami
 import harbour.nextcloud.talk 1.0
 import '../../components/'
+import '../../ChatBox'
 
 Kirigami.ScrollablePage {
     id: room
@@ -22,15 +24,6 @@ Kirigami.ScrollablePage {
     property string accountUserId;
     property int replyToId: -1;
     property string replyToMsg: "";
-    readonly property string messageStyleSheet:
-        "<style>" +
-            "a:link { color: " + Theme.highlightColor + "; }" +
-            ".highlight { color: " + Theme.highlightColor + "; }" +
-        "</style>";
-    readonly property string messageMention:
-        "<strong class='{CLASS}'>{MENTION}</strong>";
-    readonly property string messageRepliedTo:
-        "{RTOMSG} ({RTOACTOR})";
 
     /*onStatusChanged: {
         if(status === PageStatus.Activating) {
@@ -194,6 +187,109 @@ Kirigami.ScrollablePage {
             }
         }
         model: room.roomService.messageModel
+        Component.onCompleted: positionViewAtBeginning()
+
+        QQC2.RoundButton {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Kirigami.Units.largeSpacing + messageListView.headerItem.height
+            anchors.rightMargin: Kirigami.Units.largeSpacing
+            implicitWidth: Kirigami.Units.gridUnit * 2
+            implicitHeight: Kirigami.Units.gridUnit * 2
+
+            id: goMarkAsReadFab
+
+            visible: !messageListView.atYEnd
+            action: Kirigami.Action {
+                onTriggered: {
+                    goToLastMessage();
+                    currentRoom.markAllMessagesAsRead();
+                }
+                icon.name: "go-down"
+            }
+
+            QQC2.ToolTip {
+                text: i18n("Jump to latest message")
+            }
+        }
+
+        DropArea {
+            id: dropAreaFile
+            anchors.fill: parent
+            onDropped: ChatBoxHelper.attachmentPath = drop.urls[0]
+        }
+
+        QQC2.Pane {
+            visible: dropAreaFile.containsDrag
+            anchors {
+                fill: parent
+                margins: Kirigami.Units.gridUnit
+            }
+
+            Kirigami.PlaceholderMessage {
+                anchors.centerIn: parent
+                width: parent.width - (Kirigami.Units.largeSpacing * 4)
+                text: i18n("Drag items here to share them")
+            }
+        }
+
+        QQC2.Popup {
+            anchors.centerIn: parent
+
+            id: attachDialog
+
+            padding: 16
+
+            contentItem: RowLayout {
+                QQC2.ToolButton {
+                    Layout.preferredWidth: 160
+                    Layout.fillHeight: true
+
+                    icon.name: 'mail-attachment'
+
+                    text: i18n("Choose local file")
+
+                    onClicked: {
+                        attachDialog.close()
+
+                        var fileDialog = openFileDialog.createObject(QQC2.ApplicationWindow.overlay)
+
+                        fileDialog.chosen.connect(function(path) {
+                            if (!path) return
+
+                            ChatBoxHelper.attachmentPath = path;
+                        })
+
+                        fileDialog.open()
+                    }
+                }
+
+                Kirigami.Separator {}
+
+                QQC2.ToolButton {
+                    Layout.preferredWidth: 160
+                    Layout.fillHeight: true
+
+                    padding: 16
+
+                    icon.name: 'insert-image'
+                    text: i18n("Clipboard image")
+                    onClicked: {
+                        const localPath = Platform.StandardPaths.writableLocation(Platform.StandardPaths.CacheLocation) + "/screenshots/" + (new Date()).getTime() + ".png"
+                        if (!Clipboard.saveImage(localPath)) {
+                            return;
+                        }
+                        ChatBoxHelper.attachmentPath = localPath;
+                        attachDialog.close();
+                    }
+                }
+            }
+        }
+        Component {
+            id: openFileDialog
+
+            FileDialog {}
+        }
         /*delegate: ListItem {
 
             height: author.contentHeight
@@ -432,5 +528,32 @@ Kirigami.ScrollablePage {
             }
         }
         */
+    }
+    footer: ChatBox {
+        id: chatBox
+        visible: !invitation.visible && !(messageListView.count === 0 && !currentRoom.allHistoryLoaded)
+        onMessageSent: {
+            if (!messageListView.atYEnd) {
+                goToLastMessage();
+            }
+        }
+        onEditLastUserMessage: {
+            const targetMessage = messageEventModel.getLastLocalUserMessageEventId();
+            if (targetMessage) {
+                ChatBoxHelper.edit(targetMessage["body"], targetMessage["body"], targetMessage["event_id"]);
+                chatBox.focusInputField();
+            }
+        }
+        onReplyPreviousUserMessage: {
+            const replyResponse = messageEventModel.getLatestMessageFromIndex(0);
+            if (replyResponse && replyResponse["event_id"]) {
+                ChatBoxHelper.replyToMessage(replyResponse["event_id"], replyResponse["event"], replyResponse["sender_id"]);
+            }
+        }
+    }
+
+    function goToLastMessage() {
+        // scroll to the very end, i.e to messageListView.YEnd
+        messageListView.positionViewAtIndex(0, ListView.End)
     }
 }

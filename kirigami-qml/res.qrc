@@ -8,7 +8,13 @@
   <file>pages/AddAccounts.qml</file>
   <file>pages/AccountsPage.qml</file>
   <file>pages/SettingsPage.qml</file>
+  <file>ChatBox/AttachmentPane.qml</file>
+  <file>ChatBox/ChatBar.qml</file>
+  <file>ChatBox/ChatBox.qml</file>
+  <file>ChatBox/CompletionMenu.qml</file>
+  <file>ChatBox/ReplyPane.qml</file>
   <file>components/TextDelegate.qml</file>
   <file>components/TimelineContainer.qml</file>
+  <file>components/EmojiPicker.qml</file>
  </qresource>
 </RCC>

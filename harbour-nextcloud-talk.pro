@@ -15,6 +15,7 @@ TARGET = harbour-nextcloud-talk
 CONFIG += sailfishapp
 PKGCONFIG += nemonotifications-qt5 sailfishsecrets
 QT += sql dbus
+QMAKE_CXXFLAGS += -std=c++17
 
 notificationcategories.files=$$PWD/notificationcategories/*.conf
 notificationcategories.path=/usr/share/lipstick/notificationcategories
