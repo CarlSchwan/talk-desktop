@@ -1,13 +1,20 @@
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-FileCopyrightText: 2021 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "capabilities.h"
 #include "requestfactory.h"
+#include "../nextcloudaccount.h"
 
 #include <QMetaMethod>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
-Capabilities::Capabilities(NextcloudAccount *account) {
-    m_account = account;
+Capabilities::Capabilities(NextcloudAccount *account)
+    : QObject(account)
+    , m_account(account)
+{
 }
 
 bool Capabilities::areAvailable() const {
@@ -37,7 +44,7 @@ int Capabilities::getConversationApiLevel() const
 
 QColor Capabilities::primaryColor() const {
     QColor color;
-    if(!m_available) {
+    if (!m_available) {
         qDebug() << "capabilities have not been requested yet!";
         return color;
     }
@@ -46,8 +53,7 @@ QColor Capabilities::primaryColor() const {
                         .find("theming").value().toObject()
                         .find("color").value().toString());
 
-    if (!color.isValid())
-    {
+    if (!color.isValid()) {
         // fallback to Nextcloud-blue when no color is provided
         color.setNamedColor("#0082c9");
     }
@@ -79,51 +85,31 @@ QString Capabilities::name() const {
 }
 
 void Capabilities::request() {
-    if(m_reply && m_reply->isRunning()) {
-        return;
-    }
-    connect(&m_nam, SIGNAL(finished(QNetworkReply*)), SLOT(requestFinished(QNetworkReply*)));
-
     QUrl endpoint = QUrl(m_account->host());
     endpoint.setQuery("format=json");
     endpoint.setPath(endpoint.path() + "/ocs/v2.php/cloud/capabilities");
 
-    QNetworkRequest request = RequestFactory::getRequest(endpoint, m_account);
-    m_reply = m_nam.get(request);
-    connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(handleError(QNetworkReply::NetworkError)));
-}
-
-void Capabilities::requestFinished(QNetworkReply *reply) {
-    disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
-
-    if(reply->error() != QNetworkReply::NoError
-            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
-    {
-        qDebug() << "network issue or unauthed, code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        if(m_nam.networkAccessible() != QNetworkAccessManager::Accessible) {
-            qDebug() << "Network not accessible";
-        }
-        disconnect(&m_nam, &QNetworkAccessManager::finished, this, &Capabilities::requestFinished);
-        return;
-    }
-
-    QByteArray payload = reply->readAll();
-    QJsonDocument apiResult = QJsonDocument::fromJson(payload);
-    QJsonObject q = apiResult.object();
-    QJsonObject root = q.find("ocs").value().toObject();
-    QJsonObject data = root.find("data").value().toObject();
-    m_capabilities = data.find("capabilities").value().toObject();
-    m_available = true;
+    m_account->get(endpoint, [this](QNetworkReply *reply) -> void {
+        const QByteArray payload = reply->readAll();
+        const QJsonDocument apiResult = QJsonDocument::fromJson(payload);
+        const QJsonObject q = apiResult.object();
+        const QJsonObject root = q.find("ocs").value().toObject();
+        const QJsonObject data = root.find("data").value().toObject();
+        m_capabilities = data.find("capabilities").value().toObject();
+        m_available = true;
+    });
 }
 
 void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
     if(reply->property("AccountID") != this->m_account->id()) {
         return;
     }
-    QByteArray newHash = reply->rawHeader("X-Nextcloud-Talk-Hash");
-    if(m_talkCapHash == newHash) {
+    const QByteArray newHash = reply->rawHeader("X-Nextcloud-Talk-Hash");
+    if (m_talkCapHash == newHash) {
         return;
-    } else if (m_talkCapHash == "") {
+    }
+
+    if (m_talkCapHash.isEmpty()) {
         m_talkCapHash = newHash;
         return;
     }

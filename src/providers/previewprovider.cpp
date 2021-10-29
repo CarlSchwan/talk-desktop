@@ -1,21 +1,25 @@
 #include "previewprovider.h"
 #include <QNetworkRequest>
+#include <QUrlQuery>
 #include "../services/accounts.h"
 #include "../services/requestfactory.h"
 
-PreviewProvider::PreviewProvider() : AbstractNextcloudImageProvider()
+PreviewProvider::PreviewProvider()
+    : AbstractNextcloudImageProvider()
 {
-
 }
 
 QNetworkRequest PreviewProvider::getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize)
 {
+    const QUrlQuery urlQuery({
+        {QStringLiteral("fileId"), subject},
+        {QStringLiteral("x"), QString::number(requestedSize.width())},
+        {QStringLiteral("y"), QString::number(requestedSize.height())}
+    });
+
     QUrl endpoint = QUrl(account->host());
     endpoint.setPath(endpoint.path() + "/core/preview");
-    endpoint.setQuery("fileId=" + subject
-                      + "&x=" + QString::number(requestedSize.width())
-                      + "&y=" + QString::number(requestedSize.height())
-                      );
+    endpoint.setQuery(urlQuery);
 
-    return RequestFactory::getRequest(endpoint, account);
+    return account->setupRequest(endpoint);
 }

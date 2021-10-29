@@ -17,7 +17,6 @@ Kirigami.ApplicationWindow {
 
     contextDrawer: RoomDrawer {
         id: contextDrawer
-        contentItem.implicitWidth: columnWidth
         edge: Qt.application.layoutDirection == Qt.RightToLeft ? Qt.LeftEdge : Qt.RightEdge
         modal: !root.wideScreen || !enabled
         onEnabledChanged: drawerOpen = enabled && !modal
@@ -125,7 +124,6 @@ Kirigami.ApplicationWindow {
     }
 
     Component.onCompleted: {
-        AccountService.loadAccounts();
         if (AccountService.rowCount() === 0) {
             pageStack.push("qrc:/pages/AddAccounts.qml")
         } else {

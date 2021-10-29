@@ -1,22 +1,21 @@
-#ifndef DB_H
-#define DB_H
+#pragma once
 
 #include <QObject>
 #include <QSqlDatabase>
 
-class Db : public QObject
+class NextcloudAccount;
+
+class Db
 {
-    Q_OBJECT
 public:
-    Db();
-    int lastKnownMessageId(int accountId, QString token, bool silent = false);
-    bool setLastKnownMessageId(int accountId, QString token, int messageId);
-    bool deleteAccountEntries(int accountId);
+    explicit Db();
+
+    int lastKnownMessageId(NextcloudAccount *account, const QString &roomToken, bool silent = false);
+    bool setLastKnownMessageId(NextcloudAccount *account, const QString &roomToken, int messageId);
+    bool deleteAccountEntries(NextcloudAccount *account);
 
 private:
-    void initDb(QString dbPath);
+    void initDb(const QString &dbPath);
 
     QSqlDatabase m_db;
 };
-
-#endif // DB_H

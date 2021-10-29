@@ -1,5 +1,4 @@
-#ifndef DOWNLOAD_H
-#define DOWNLOAD_H
+#pragma once
 
 #include <QObject>
 #include <QQmlEngine>
@@ -21,39 +20,52 @@ public:
     }
 
 public slots:
-    void getFile(QString path, int accountId);
-    bool fileExists(QString path, int accountId);
-    QString filePath(QString path, int accountId);
+    void getFile(const QString &path, int accountId);
+    bool fileExists(const QString &path, int accountId);
+    QString filePath(const QString &path, int accountId);
 
 signals:
-    void fileDownloaded(QString localFile);
+    void fileDownloaded(const QString &localFile);
 
 private slots:
     void downloadFinished(QNetworkReply *reply);
 
 private:
-    struct NcDownload
+    class NcDownload
     {
+    public:
         NcDownload() {}
-        NcDownload (QString target, QNetworkReply *nwReply) {
-            this->target = target;
-            this->nwReply = nwReply;
+        NcDownload(const QString &target, QNetworkReply *nwReply)
+            : m_target(target)
+            , m_nwReply(nwReply)
+        {}
+
+        NcDownload(QNetworkReply *nwReply)
+            : m_target(QString())
+            , m_nwReply(nwReply)
+        {}
+
+        QString target() const
+        {
+            return m_target;
         }
-        NcDownload (QNetworkReply *nwReply) {
-            this->target = "";
-            this->nwReply = nwReply;
+
+        QNetworkReply *nwReply() const
+        {
+            return m_nwReply;
         }
-        QString target;
-        QNetworkReply *nwReply;
 
         bool operator==(const NcDownload &toCompare) const {
-            return nwReply == toCompare.nwReply;
+            return m_nwReply == toCompare.nwReply();
         }
+
+    private:
+        QString m_target;
+        QNetworkReply *m_nwReply;
     };
+
     QNetworkAccessManager m_nam;
     QVector<NcDownload> m_currentDownloads;
     bool saveToDisk(const QString &filename, QIODevice *data);
-    QString buildPath(QString path, NextcloudAccount account);
+    QString buildPath(const QString &path, NextcloudAccount *account);
 };
-
-#endif // DOWNLOAD_H

@@ -41,7 +41,7 @@ Kirigami.Page {
                     Kirigami.Action {
                         text: i18n("General")
                         icon.name: "org.kde.neochat"
-                        onTriggered: pageSettingStack.push("qrc:/imports/NeoChat/Settings/GeneralSettingsPage.qml")
+                        onTriggered: pageSettingStack.push("qrc:/pages/GeneralSettingsPage.qml")
                     },
                     Kirigami.Action {
                         text: i18n("Appearance")

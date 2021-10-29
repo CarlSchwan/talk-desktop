@@ -28,6 +28,7 @@ add_executable(talk
     providers/previewprovider.cpp
     constants/ConversationTypeClass.cpp
     constants/PresenceStatusClass.cpp
+    constants/systemmessagetype.cpp
     colorschemer.cpp
     ../kirigami-qml/res.qrc
 )

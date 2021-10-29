@@ -106,12 +106,12 @@ int main(int argc, char *argv[])
     Clipboard clipboard;
     qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "Clipboard", &clipboard);
 
-    qmlRegisterSingletonType<Accounts>("harbour.nextcloud.talk", 1, 0, "AccountService",
+    qmlRegisterSingletonType<AccountModel>("harbour.nextcloud.talk", 1, 0, "AccountService",
         [](QQmlEngine *eng, QJSEngine *js) -> QObject *
         {
             Q_UNUSED(js)
-            eng->setObjectOwnership(Accounts::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
-            return Accounts::getInstance();
+            eng->setObjectOwnership(AccountModel::getInstance(), QQmlEngine::ObjectOwnership::CppOwnership);
+            return AccountModel::getInstance();
         }
     );
 

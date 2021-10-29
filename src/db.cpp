@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QStandardPaths>
+#include "nextcloudaccount.h"
 
 Db::Db()
 {
@@ -36,14 +37,14 @@ Db::Db()
     initDb(dbPath);
 }
 
-int Db::lastKnownMessageId(int accountId, QString token, bool silent) {
+int Db::lastKnownMessageId(NextcloudAccount *account, const QString &token, bool silent) {
     QSqlQuery query(m_db);
     query.prepare(
         "SELECT messageId FROM lastKnownMessageMarkers "
         "WHERE accountId=:accountId "
             "AND token=:token"
     );
-    query.bindValue(":accountId", accountId);
+    query.bindValue(":accountId", account->host().toString() + account->userId());
     query.bindValue(":token", token);
     query.exec();
     if(!query.first()) {
@@ -53,20 +54,19 @@ int Db::lastKnownMessageId(int accountId, QString token, bool silent) {
         }
         return 0;
     }
-    int id = query.value(0).toInt();
-    return id;
+    return query.value(0).toInt();
 }
 
-bool Db::setLastKnownMessageId(int accountId, QString token, int messageId) {
+bool Db::setLastKnownMessageId(NextcloudAccount *account, const QString &token, int messageId) {
     QSqlQuery query(m_db);
     query.prepare(
         "INSERT OR REPLACE INTO lastKnownMessageMarkers "
         "VALUES(:accountId, :token, :messageId);"
     );
-    query.bindValue(":accountId", accountId);
+    query.bindValue(":accountId", account->host().toString() + account->userId());
     query.bindValue(":token", token);
     query.bindValue(":messageId", messageId);
-    bool result = query.exec();
+    const bool result = query.exec();
     if(!result) {
         qCritical() << "Failed to save last known message id "
                     << "Query " << query.boundValues()
@@ -75,12 +75,12 @@ bool Db::setLastKnownMessageId(int accountId, QString token, int messageId) {
     return result;
 }
 
-bool Db::deleteAccountEntries(int accountId)
+bool Db::deleteAccountEntries(NextcloudAccount *account)
 {
     QSqlQuery query;
     query.prepare("DELETE FROM lastKnownMessageMarkers WHERE accountId = :accountId;");
-    query.bindValue(":accountId", accountId);
-    bool result = query.exec();
+    query.bindValue(":accountId", account->host().toString() + account->userId());
+    const bool result = query.exec();
     if(!result) {
         qWarning() << "Failed to delete entries for of an account"
                     << "Query " << query.boundValues()
@@ -89,7 +89,7 @@ bool Db::deleteAccountEntries(int accountId)
     return result;
 }
 
-void Db::initDb(QString dbPath) {
+void Db::initDb(const QString &dbPath) {
     if(!m_db.transaction()) {
         qCritical() << "Cannot start transaction"
                     << dbPath

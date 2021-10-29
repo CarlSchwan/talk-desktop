@@ -5,44 +5,41 @@
 #include "capabilities.h"
 #include "../db.h"
 
-Accounts::Accounts(QObject *parent)
+AccountModel::AccountModel(QObject *parent)
     : QAbstractListModel(parent)
 {
-    Q_UNUSED(parent)
+    load();
 }
 
-Accounts* Accounts::getInstance()
+AccountModel* AccountModel::getInstance()
 {
-    static Accounts* instance = new Accounts();
+    static AccountModel* instance = new AccountModel();
     return instance;
 }
 
-int Accounts::rowCount(const QModelIndex &parent) const
+int AccountModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    return getInstance()->getAccounts().count();
+    return m_accounts.count();
 }
 
-QVariant Accounts::data(const QModelIndex &index, int role) const
+QVariant AccountModel::data(const QModelIndex &index, int role) const
 {
-    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
-    int knownAccounts = accounts.count();
+    const int knownAccounts = m_accounts.count();
 
-    auto account = accounts.at(index.row());
+    auto account = m_accounts.at(index.row());
     switch (role) {
     case NameRole:
         return account->name();
-    case AccountRole:
-        return account->id();
     case LogoRole:
         return account->capabilities()->logoUrl();
     case InstanceNameRole:
         return account->capabilities()->name();
     case ColorModeRole:
         if (account->colorOverride().isValid()) {
-            return Accounts::OverriddenColor;
+            return AccountModel::OverriddenColor;
         }
-        return Accounts::InstanceColor;
+        return AccountModel::InstanceColor;
     case ColorRole:
         if (account->colorOverride().isValid()) {
             return account->capabilities()->primaryColor();
@@ -54,16 +51,13 @@ QVariant Accounts::data(const QModelIndex &index, int role) const
     return {};
 }
 
-bool Accounts::setData(const QModelIndex &index, const QVariant &value, int role) {
-    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
+bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+    if (role == ColorRole && index.isValid()) {
+        m_accounts.at(index.row())->setColorOverride(value.value<QColor>());
 
-    if (role == ColorRole && index.row() < accounts.count())
-    {
-        accounts.at(index.row())->setColorOverride(value.value<QColor>());
-
-        QSettings accountSettings("Nextcloud", "Accounts");
-        accountSettings.beginGroup("account_" + QString::number(accounts.at(index.row())->id()));
-        accounts.at(index.row())->toSettings(accountSettings);
+        QSettings accountSettings(QStringLiteral("Nextcloud"), QStringLiteral("Accounts"));
+        accountSettings.beginGroup(QStringLiteral("account_") + QString::number(m_accounts.at(index.row())->id()));
+        m_accounts.at(index.row())->toSettings(accountSettings);
         accountSettings.endGroup();
         accountSettings.sync();
 
@@ -76,48 +70,46 @@ bool Accounts::setData(const QModelIndex &index, const QVariant &value, int role
     return false;
 }
 
-QHash<int, QByteArray> Accounts::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[NameRole] = "name";
-    roles[AccountRole] = "account";
-    roles[LogoRole] = "instanceLogo";
-    roles[InstanceNameRole] = "instanceName";
-    roles[ColorRole] = "color";
-    roles[ColorModeRole] = "colorMode";
-    return roles;
+QHash<int, QByteArray> AccountModel::roleNames() const {
+    return {
+        {NameRole, QByteArrayLiteral("name")},
+        {AccountRole, QByteArrayLiteral("account")},
+        {LogoRole, QByteArrayLiteral("instanceLogo")},
+        {InstanceNameRole, QByteArrayLiteral("instanceName")},
+        {ColorRole, QByteArrayLiteral("color")},
+        {ColorModeRole, QByteArrayLiteral("colorMode")}
+    };
 }
 
-QString getSecretsKey(const NextcloudAccount* account) {
+QString getSecretsKey(const NextcloudAccount *account) {
     return account->name() + " (" + QString::number(account->id()) +")";
 }
 
-void Accounts::addAccount(QString url, QString loginName, QString token, QString userId)
+void AccountModel::addAccount(const QString &url, const QString &loginName, const QString &token, const QString &userId)
 {
-    loadAccounts();
+    qDebug() << "add" << url << loginName << token << userId;
+    const int id = ++m_maxId;
+    const QUrl host(url);
+    const QString name(loginName + QChar('@') + host.host() + host.path());
 
-    int id = ++max_id;
-    QUrl host(url);
-    QString name(loginName + "@" + host.host() + host.path());
+    auto account = new NextcloudAccount(name, host, loginName, token, userId, this);
+    QSettings accountSettings(QStringLiteral("Nextcloud"), QStringLiteral("Accounts"));
 
-    NextcloudAccount* account = new NextcloudAccount(id, name, host, loginName, token, userId);
-    QSettings accountSettings("Nextcloud", "Accounts");
-
-    beginResetModel();
-    accountSettings.beginGroup("account_" + QString::number(id));
+    accountSettings.beginGroup(QStringLiteral("account_") + QString::number(id));
     account->toSettings(accountSettings);
     accountSettings.endGroup();
     accountSettings.sync();
     m_secrets.set(getSecretsKey(account), token.toUtf8());
-    qDebug() << "account saved, status " << accountSettings.status();
 
-    m_accounts.clear();
-    endResetModel();
+    beginInsertRows({}, m_accounts.count(), m_accounts.count());
+    m_accounts.append(account);
+    endInsertRows();
 }
 
-void Accounts::deleteAccount(int accountId)
+void AccountModel::deleteAccount(int accountId)
 {
     QSettings accountSettings("Nextcloud", "Accounts");
-    NextcloudAccount* account = getAccountById(accountId);
+    auto account = getAccountById(accountId);
     accountSettings.beginGroup("account_" + QString::number(accountId));
     accountSettings.remove("");
     accountSettings.endGroup();
@@ -126,7 +118,7 @@ void Accounts::deleteAccount(int accountId)
     qDebug() << "account deleted, status " << accountSettings.status();
 
     Db db;
-    db.deleteAccountEntries(accountId);
+    db.deleteAccountEntries(account);
 
     NextcloudAccount* acc = getAccountById(accountId);
     if (!acc) {
@@ -137,47 +129,26 @@ void Accounts::deleteAccount(int accountId)
 
     int intIndex = m_accounts.indexOf(acc);
     beginRemoveRows(QModelIndex(), intIndex, intIndex);
+    acc->deleteLater();
     m_accounts.remove(intIndex);
     endRemoveRows();
 }
 
-NextcloudAccount* Accounts::getAccountById(const int id) {
-    if(m_accounts.length() == 0) {
-        readAccounts();
-    }
-
-    QVector<NextcloudAccount*>::iterator i;
-    for(i = m_accounts.begin(); i != m_accounts.end(); i++) {
-        if((*i)->id() == id) {
-            return *i;
-        }
-    }
-    return nullptr;
-}
-
-QVector<NextcloudAccount*> Accounts::getAccounts() {
-    if(m_accounts.length() == 0) {
-        readAccounts();
-    }
-
+QVector<NextcloudAccount*> AccountModel::getAccounts() const
+{
     return m_accounts;
 }
 
-QVector<NextcloudAccount*> Accounts::readAccounts()
+void AccountModel::load()
 {
-    qDebug() << "reading accs";
     QSettings accountSettings("Nextcloud", "Accounts");
     const QStringList accountGroups = accountSettings.childGroups();
-
-    if(m_accounts.count() > 0) {
-        m_accounts.clear();
-    }
 
     bool dirty = false;
     for (const QString &group : accountGroups) {
         accountSettings.beginGroup(group);
-        NextcloudAccount* account = NextcloudAccount::fromSettings(accountSettings);
-        if(account->password() != "") {
+        auto account = NextcloudAccount::fromSettings(accountSettings, this);
+        if (account->password() != "") {
             // migration from pre-alpha7 where pwd was stored in plain text
             m_secrets.set(getSecretsKey(account), account->password().toUtf8());
             account->setPassword("");
@@ -185,29 +156,35 @@ QVector<NextcloudAccount*> Accounts::readAccounts()
             dirty = true;
         }
         account->setPassword(m_secrets.get(getSecretsKey(account)));
+        beginInsertRows({}, m_accounts.count(), m_accounts.count());
         m_accounts.append(account);
+        if (account->password() == "") {
+            deleteAccount(getAccountId(account));
+            continue;
+        }
+        if(account->id() > m_maxId) {
+            m_maxId = account->id();
+        }
+        endInsertRows();
         accountSettings.endGroup();
     }
-    if(dirty) {
+
+    if (dirty) {
         accountSettings.sync();
     }
-    qDebug() << "We have" << m_accounts.count() << "accounts";
-
-    return m_accounts;
 }
 
-void Accounts::loadAccounts()
+int AccountModel::getAccountId(NextcloudAccount *account) const
 {
-    beginResetModel();
-    QVector<NextcloudAccount*> accounts = getInstance()->getAccounts();
-
-    max_id = 0;
-    foreach (NextcloudAccount* account, accounts) {
-        if(account->id() > max_id) {
-            max_id = account->id();
+    for (int i = 0; i < m_accounts.count(); i++) {
+        if (m_accounts[i] == account) {
+            return i;
         }
     }
+    return -1;
+}
 
-    qDebug() << "loading accs done, max id is" << max_id;
-    endResetModel();
+NextcloudAccount *AccountModel::getAccountById(int accountId) const
+{
+    return m_accounts[accountId];
 }

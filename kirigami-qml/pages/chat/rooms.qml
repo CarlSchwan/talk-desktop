@@ -130,7 +130,7 @@ Kirigami.ScrollablePage {
                 id: roomListItem
                 topPadding: Kirigami.Units.largeSpacing
                 bottomPadding: Kirigami.Units.largeSpacing
-                highlighted: listView.currentIndex === index
+                //highlighted: listView.currentIndex === index
                 focus: true
                 icon: undefined
                 action: Kirigami.Action {
@@ -151,7 +151,7 @@ Kirigami.ScrollablePage {
                             roomPage.accountId = accountId;
                             roomPage.accountUserId = accountUserId;
                         }
-                        RoomService.startPolling(token, accountId);
+                        RoomService.select(index);
                     }
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()

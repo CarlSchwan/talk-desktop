@@ -94,7 +94,7 @@ private slots:
     void participantsPulled(QNetworkReply *reply);
 
 private:
-    Accounts* m_accountService = Accounts::getInstance();
+    AccountModel* m_accountService = AccountModel::getInstance();
     NextcloudAccount* m_activeAccount;
     QNetworkAccessManager m_nam;
     QNetworkReply* m_reply = nullptr;

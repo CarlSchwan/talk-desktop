@@ -8,6 +8,8 @@
   <file>pages/AddAccounts.qml</file>
   <file>pages/AccountsPage.qml</file>
   <file>pages/SettingsPage.qml</file>
+  <file>pages/AppearanceSettingsPage.qml</file>
+  <file>pages/GeneralSettingsPage.qml</file>
   <file>ChatBox/AttachmentPane.qml</file>
   <file>ChatBox/ChatBar.qml</file>
   <file>ChatBox/ChatBox.qml</file>
@@ -16,5 +18,7 @@
   <file>components/TextDelegate.qml</file>
   <file>components/TimelineContainer.qml</file>
   <file>components/EmojiPicker.qml</file>
+  <file>components/ThemeRadioButton.qml</file>
+  <file>components/ColorScheme.qml</file>
  </qresource>
 </RCC>

@@ -1,5 +1,5 @@
-#ifndef PRESENCESTATUSCLASS_H
-#define PRESENCESTATUSCLASS_H
+// SPDX-FileCopyrightText: 2020 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
 
 #pragma once
 
@@ -23,6 +23,4 @@ private:
     explicit PresenceStatusClass() {}
 };
 
-typedef PresenceStatusClass::Types PresenceStatus;
-
-#endif // PRESENCESTATUSCLASS_H
+using PresenceStatus = PresenceStatusClass::Types;

@@ -8,6 +8,7 @@ class AsyncImageResponse : public QQuickImageResponse
 {
     public:
         AsyncImageResponse(QNetworkRequest request, QThreadPool *pool)
+            : m_accountService(AccountModel::getInstance())
         {
             auto reply = m_qnam.get(request);
             connect(reply, &QNetworkReply::finished, this, [this, reply]() {
@@ -21,15 +22,15 @@ class AsyncImageResponse : public QQuickImageResponse
             return QQuickTextureFactory::textureFactoryForImage(m_image);
         }
 
-        QImage m_image;
     private:
+        QImage m_image;
         QNetworkAccessManager m_qnam;
-        Accounts* m_accountService = Accounts::getInstance();
+        AccountModel *m_accountService = nullptr;
 };
 
 QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const QString &id, const QSize &requestedSize)
 {
-    NextcloudAccount* account = account = accountFromId(id);
+    auto account = accountFromId(id);
     if (!account) {
         return nullptr;
     }
@@ -43,8 +44,8 @@ QQuickImageResponse *AbstractNextcloudImageProvider::requestImageResponse(const 
 NextcloudAccount* AbstractNextcloudImageProvider::accountFromId(const QString &id)
 {
     const int accountId = id.left(id.indexOf('/')).toInt();
-    Accounts* accountService = Accounts::getInstance();
-    NextcloudAccount* account = accountService->getAccountById(accountId);
+    const auto accountService = AccountModel::getInstance();
+    const auto account = accountService->getAccountById(accountId);
     if (!account) {
         qDebug() << "No account found for id" << id << accountService->getAccounts();
     }

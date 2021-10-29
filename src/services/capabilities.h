@@ -1,37 +1,32 @@
-#ifndef CAPABILITIES_H
-#define CAPABILITIES_H
+#pragma once
 
-#include "../nextcloudaccount.h"
 #include <QColor>
 #include <QObject>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QJsonObject>
+
+class NextcloudAccount;
 
 class Capabilities : public QObject
 {
     Q_OBJECT
+
 public:
-    Capabilities(NextcloudAccount *account);
+    explicit Capabilities(NextcloudAccount *account);
+    ~Capabilities() = default;
     bool areAvailable() const;
     void request();
-    NextcloudAccount *m_account;
     int getConversationApiLevel() const;
     QColor primaryColor() const;
     QUrl logoUrl() const;
     QString name() const;
 
+public Q_SLOTS:
+    void checkTalkCapHash(QNetworkReply *reply);
+
 private:
-    QNetworkAccessManager m_nam;
     bool m_available = false;
     QJsonObject m_capabilities;
-    QNetworkReply *m_reply = nullptr;
     QByteArray m_talkCapHash;
-
-public slots:
-    void requestFinished(QNetworkReply*);
-    void handleError(QNetworkReply::NetworkError code) { qDebug() << "Error:" << code; }
-    void checkTalkCapHash(QNetworkReply *reply);
+    NextcloudAccount *m_account;
 };
-
-#endif // CAPABILITIES_H

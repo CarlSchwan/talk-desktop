@@ -170,7 +170,7 @@ QString Room::conversationName() const
 
 
 bool Room::operator ==(const Room &toCompare) const {
-    return toCompare.account().id() == account().id()
+    return &toCompare.account() == m_account
             && toCompare.token() == token();
 }
 

@@ -7,7 +7,6 @@
 #include <QAbstractListModel>
 #include <vector>
 #include <optional>
-#include "db.h"
 #include "room.h"
 #include "services/accounts.h"
 
@@ -75,10 +74,7 @@ public:
 public slots:
     void loadRooms();
     void roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account);
-    void startPolling(const QString &token, int accountId);
-    bool isPolling(const QString &token, int accountId);
-    void stopPolling();
-    void sendMessage(const QString &messageText, int replyToId);
+    void select(int index);
 
 signals:
     void newMessage(const QString &message);
@@ -86,15 +82,12 @@ signals:
     void isLoadedChanged();
 
 private slots:
-    void pollRoom();
-    void roomPolled(QNetworkReply *reply);
-    std::vector<Room>::const_iterator findRoomByTokenAndAccount(const QString &token, int accountId) const;
+    std::vector<Room>::const_iterator findRoomByTokenAndAccount(const QString &token, NextcloudAccount *account) const;
     void onAccountsChanged();
-    void emitAfterActiveRoomChanged(const QString &token, int accountId);
     void onAccountUpdated();
 
 private:
-    Accounts *m_accountService = Accounts::getInstance();
+    AccountModel *m_accountModel = AccountModel::getInstance();
     std::vector<Room> m_rooms;
     QVector<QNetworkReply*> m_rooms_requests;
     QNetworkAccessManager *m_nam = nullptr;
@@ -102,7 +95,6 @@ private:
     QString activeToken;
     int activeAccountId;
     bool m_isPolling = false;
-    Db m_db;
     int m_lookIntoFuture = 0;
     MessageEventModel *m_messageModel = nullptr;
     std::optional<Room> m_currentRoom;

@@ -8,8 +8,8 @@ import QtQuick.Layouts 1.15
 
 import org.kde.kirigami 2.15 as Kirigami
 
-import org.kde.neochat 1.0
-import NeoChat.Settings 1.0
+import harbour.nextcloud.talk 1.0
+import '../components'
 
 Kirigami.ScrollablePage {
     ColumnLayout {
@@ -193,16 +193,6 @@ Kirigami.ScrollablePage {
                 visible: item !== null
                 Kirigami.FormData.label: item ? i18n("Theme:") : ""
                 source: "qrc:/imports/NeoChat/Settings/ColorScheme.qml"
-            }
-            QQC2.CheckBox {
-                visible: Controller.hasWindowSystem
-                text: i18n("Use transparent chat page")
-                enabled: !Config.compactLayout
-                checked: Config.blur
-                onToggled: {
-                    Config.blur = checked;
-                    Config.save();
-                }
             }
             QQC2.CheckBox {
                 text: i18n("Show your messages on the right")
