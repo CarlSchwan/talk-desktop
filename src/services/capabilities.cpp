@@ -84,23 +84,24 @@ QString Capabilities::name() const {
             .find("name").value().toString();
 }
 
-void Capabilities::request() {
+void Capabilities::request(std::function<void()> callback) {
     QUrl endpoint = QUrl(m_account->host());
-    endpoint.setQuery("format=json");
-    endpoint.setPath(endpoint.path() + "/ocs/v2.php/cloud/capabilities");
+    endpoint.setQuery(QStringLiteral("format=json"));
+    endpoint.setPath(endpoint.path() + QStringLiteral("/ocs/v2.php/cloud/capabilities"));
 
-    m_account->get(endpoint, [this](QNetworkReply *reply) -> void {
+    m_account->get(endpoint, [this, callback](QNetworkReply *reply) -> void {
         const QByteArray payload = reply->readAll();
         const QJsonDocument apiResult = QJsonDocument::fromJson(payload);
         const QJsonObject q = apiResult.object();
-        const QJsonObject root = q.find("ocs").value().toObject();
-        const QJsonObject data = root.find("data").value().toObject();
-        m_capabilities = data.find("capabilities").value().toObject();
+        const QJsonObject root = q.find(QStringLiteral("ocs")).value().toObject();
+        const QJsonObject data = root.find(QStringLiteral("data")).value().toObject();
+        m_capabilities = data.find(QStringLiteral("capabilities")).value().toObject();
         m_available = true;
+        callback();
     });
 }
 
-void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
+void Capabilities::checkTalkCapHash(QNetworkReply *reply, std::function<void()> callback) {
     if(reply->property("AccountID") != this->m_account->id()) {
         return;
     }
@@ -115,5 +116,5 @@ void Capabilities::checkTalkCapHash(QNetworkReply *reply) {
     }
     m_available = false;
     m_talkCapHash = newHash;
-    this->request();
+    this->request(callback);
 }

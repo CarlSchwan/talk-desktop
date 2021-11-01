@@ -26,6 +26,7 @@ class NextcloudAccount : public QObject
     NextcloudAccount(QObject *parent = nullptr);
 public:
     NextcloudAccount(
+        const int id,
         const QString &name,
         const QUrl &host,
         const QString &loginName,

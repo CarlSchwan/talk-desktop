@@ -61,7 +61,7 @@ Kirigami.ScrollablePage {
 
     Timer {
         id: roomPolling
-        interval: page.visible ? 5000 : 30000;
+        interval: applicationWindow().wideScreen ? 5000 : 30000;
         repeat: true
         running: true
         triggeredOnStart: true
@@ -77,6 +77,17 @@ Kirigami.ScrollablePage {
         currentIndex: -1 // we don't want any room highlighted by default
 
         delegate: page.collapsedMode ? collapsedModeListComponent : normalModeListComponent
+        
+        Kirigami.PlaceholderMessage {
+            id: loadingIndicator
+            visible: !RoomService.isLoaded
+            anchors.centerIn: parent
+            text: i18n("Loading...")
+            QQC2.BusyIndicator {
+                running: loadingIndicator.visible
+                Layout.alignment: Qt.AlignHCenter
+            }
+        }
 
         Component {
             id: collapsedModeListComponent
@@ -111,8 +122,17 @@ Kirigami.ScrollablePage {
                 height: ListView.view.width
 
                 contentItem: Kirigami.Avatar {
-                    source: conversationType === ConversationType.OneToOne ? "image://avatar/" + accountId + "/" + conversationName + "/" : ""
-                    name: model.name || i18n("No Name")
+                    source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
+                    iconName: switch (conversationType) {
+                    case ConversationType.Public:
+                        return 'link';
+                    case ConversationType.Group:
+                        return 'group';
+                    case ConversationType.Changelog:
+                        return 'documentinfo';
+                    }
+                    initialsMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
+                    imageMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
                     sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                     sourceSize.height: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                 }
@@ -137,32 +157,35 @@ Kirigami.ScrollablePage {
                     id: enterRoomAction
                     onTriggered: {
                         if (applicationWindow().pageStack.depth === 1) {
-                            applicationWindow().pageStack.push("qrc:/pages/chat/room.qml", {
-                                token: token,
-                                roomName: name,
-                                accountId: accountId,
-                                accountUserId: accountUserId,
-                                roomService: RoomService
+                            applicationWindow().pageStack.push('qrc:/pages/chat/room.qml', {
+                                title: name,
                             });
                         } else {
                             const roomPage = applicationWindow().pageStack.get(1);
-                            roomPage.token = token;
-                            roomPage.roomName = name;
-                            roomPage.accountId = accountId;
-                            roomPage.accountUserId = accountUserId;
+                            roomPage.title = name;
                         }
-                        RoomService.select(index);
+                        RoomService.select(filterModel.mapToSource(filterModel.index(index, 0)).row);
                     }
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()
                 Keys.onReturnPressed: enterRoomAction.trigger()
                 bold: unreadCount > 0
-                label: name ?? ""
-                subtitle: lastMessageIsSystemMessage ? lastMessageText : lastMessageAuthor + ": " + lastMessageText
+                label: model.name ?? ""
+                subtitle: lastMessageIsSystemMessage ? lastMessageText : `${lastMessageAuthor}: ${lastMessageText}`
                 subtitleItem.maximumLineCount: 1
 
                 leading: Kirigami.Avatar {
-                    source: conversationType === ConversationType.OneToOne ? "image://avatar/" + accountId + "/" + conversationName + "/" : ""
+                    source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
+                    iconName: switch (conversationType) {
+                    case ConversationType.Public:
+                        return 'link';
+                    case ConversationType.Group:
+                        return 'group';
+                    case ConversationType.Changelog:
+                        return 'documentinfo';
+                    }
+                    initialsMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
+                    imageMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
                     name: model.name || i18n("No Name")
                     implicitWidth: visible ? height : 0
                     visible: Config.showAvatarInTimeline

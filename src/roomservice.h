@@ -39,6 +39,8 @@ class RoomService : public QAbstractListModel
     Q_PROPERTY(QString currentDescription READ currentDescription NOTIFY roomChanged)
 
     Q_PROPERTY(Participants *participants READ participants CONSTANT)
+    
+    Q_PROPERTY(bool hasOpenRoom READ hasOpenRoom NOTIFY hasOpenRoomChanged)
 public:
     enum RoomRoles {
         NameRole = Qt::UserRole + 1,
@@ -70,16 +72,19 @@ public:
     bool currentIsFavorite() const;
     void setCurrentIsFavorite(bool isFavorite);
     Participants *participants() const;
+    bool hasOpenRoom() const;
 
 public slots:
     void loadRooms();
     void roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account);
     void select(int index);
+    void loadRoomFromAccount(NextcloudAccount *account);
 
 signals:
     void newMessage(const QString &message);
     void roomChanged();
     void isLoadedChanged();
+    void hasOpenRoomChanged();
 
 private slots:
     std::vector<Room>::const_iterator findRoomByTokenAndAccount(const QString &token, NextcloudAccount *account) const;
@@ -94,9 +99,10 @@ private:
     int m_pendingRequests = 0;
     QString activeToken;
     int activeAccountId;
-    bool m_isPolling = false;
+    bool m_isLoaded = false;
     int m_lookIntoFuture = 0;
     MessageEventModel *m_messageModel = nullptr;
     std::optional<Room> m_currentRoom;
     Participants *m_participants;
+    bool m_hasOpenRoom = false;
 };

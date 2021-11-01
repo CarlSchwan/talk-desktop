@@ -15,14 +15,14 @@ public:
     explicit Capabilities(NextcloudAccount *account);
     ~Capabilities() = default;
     bool areAvailable() const;
-    void request();
+    void request(std::function<void()> callback);
     int getConversationApiLevel() const;
     QColor primaryColor() const;
     QUrl logoUrl() const;
     QString name() const;
 
 public Q_SLOTS:
-    void checkTalkCapHash(QNetworkReply *reply);
+    void checkTalkCapHash(QNetworkReply *reply, std::function<void()> callback);
 
 private:
     bool m_available = false;

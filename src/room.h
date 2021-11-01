@@ -23,6 +23,7 @@ public:
     const NextcloudAccount &account() const;
     QString name() const;
     QString token() const;
+    int lastReadMessage() const;
     RoomType type() const;
     int unreadMessages() const;
     bool unreadMention() const;
@@ -35,6 +36,7 @@ public:
     bool lastMessageIsSystemMessage() const;
     QString conversationName() const;
 
+    Room *setLastReadMessage(int lastReadMessage);
     Room *setName(const QString &name);
     Room *setToken(const QString &token);
     Room *setType(const RoomType type);
@@ -59,6 +61,7 @@ private:
     int m_lastActivity;
     QString m_lastMessageText;
     QString m_lastMessageAuthor;
+    int m_lastReadMessage;
     uint m_lastMessageTimestamp;
     bool m_lastMessageIsSystemMessage;
     QString m_conversationName;

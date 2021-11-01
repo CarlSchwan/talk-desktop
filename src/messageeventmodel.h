@@ -59,7 +59,7 @@ public:
 
     /// Called when a new message is fetched.
     void addMessages(const QJsonObject &message);
-    void setRoom(const QString &token, NextcloudAccount *account);
+    void setRoom(const QString &token, int lastReadMessage, NextcloudAccount *account);
 
     /// Called when the user change room.
     void clear();
@@ -82,6 +82,7 @@ private:
     std::deque<Message> m_messages; // deque allows fast insertion at the end and begining
     NextcloudAccount *m_account = nullptr;
     QString m_token;
+    int m_lastReadMessage;
     QString m_localUser;
     int m_lookIntoFuture = 0;
     Db m_db;

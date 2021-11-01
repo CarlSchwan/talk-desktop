@@ -12,9 +12,10 @@ NextcloudAccount::NextcloudAccount(QObject *parent)
 {
 }
 
-NextcloudAccount::NextcloudAccount(const QString &name, const QUrl &host,
+NextcloudAccount::NextcloudAccount(const int id, const QString &name, const QUrl &host,
         const QString &loginName, const QString &password, const QString &userId, QObject *parent)
     : QObject(parent)
+    , m_id(id)
     , m_name(name)
     , m_host(host)
     , m_loginName(loginName)

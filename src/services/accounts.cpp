@@ -25,9 +25,7 @@ int AccountModel::rowCount(const QModelIndex &parent) const
 
 QVariant AccountModel::data(const QModelIndex &index, int role) const
 {
-    const int knownAccounts = m_accounts.count();
-
-    auto account = m_accounts.at(index.row());
+    const auto account = m_accounts.at(index.row());
     switch (role) {
     case NameRole:
         return account->name();
@@ -87,12 +85,11 @@ QString getSecretsKey(const NextcloudAccount *account) {
 
 void AccountModel::addAccount(const QString &url, const QString &loginName, const QString &token, const QString &userId)
 {
-    qDebug() << "add" << url << loginName << token << userId;
     const int id = ++m_maxId;
     const QUrl host(url);
     const QString name(loginName + QChar('@') + host.host() + host.path());
 
-    auto account = new NextcloudAccount(name, host, loginName, token, userId, this);
+    auto account = new NextcloudAccount(id, name, host, loginName, token, userId, this);
     QSettings accountSettings(QStringLiteral("Nextcloud"), QStringLiteral("Accounts"));
 
     accountSettings.beginGroup(QStringLiteral("account_") + QString::number(id));
@@ -186,5 +183,10 @@ int AccountModel::getAccountId(NextcloudAccount *account) const
 
 NextcloudAccount *AccountModel::getAccountById(int accountId) const
 {
-    return m_accounts[accountId];
+    for (auto account : m_accounts) {
+        if (account->id() == accountId) {
+            return account;
+        }
+    }
+    return nullptr;
 }

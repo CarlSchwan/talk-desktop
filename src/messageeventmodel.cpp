@@ -122,14 +122,12 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
         case DateRole:
             return QDateTime::fromMSecsSinceEpoch(message.obj["timestamp"].toInt() * 1000);
         case AvatarRole:
-            return QStringLiteral("image://avatar/") + QString::number(AccountModel::getInstance()->getAccountId(m_account)) + "/" + message.obj["actorId"].toString() + "/";
+            return QLatin1String("image://avatar/") + QString::number(m_account->id()) + QLatin1Char('/') + message.obj["actorId"].toString() + QLatin1Char('/');
         case ShowAuthorRole: {
             if (index.row() == 0) {
                 return true;
             }
-            qDebug() << message.obj["actorId"] << index.row() - 1;
             const auto &lastMessage = m_messages[index.row() - 1];
-            qDebug() << lastMessage.obj["actorId"] << message.obj["actorId"];
             return lastMessage.obj["actorId"].toString() != message.obj["actorId"].toString();
         }
         case IsHiglightedRole:
@@ -138,6 +136,12 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
             return false; // TODO
         case EventTypeRole:
             return message.type;
+        case ImagePathRole:
+            if (message.type != SingleLinkImageMessage) {
+                return {};
+            }
+            const auto fileId = message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("id")].toString();
+            return QLatin1String("image://preview/") + QString::number(m_account->id()) + QLatin1Char('/') + fileId + QLatin1Char('/');
     }
 
     return {};
@@ -156,13 +160,14 @@ QHash<int, QByteArray> MessageEventModel::roleNames() const
     };
 }
 
-void MessageEventModel::setRoom(const QString &token, NextcloudAccount *account)
+void MessageEventModel::setRoom(const QString &token, int lastReadMessage, NextcloudAccount *account)
 {
     if (m_token == token && m_account == account) {
         return;
     }
     m_account = account;
     m_token = token;
+    m_lastReadMessage = lastReadMessage;
     m_lookIntoFuture = 0;
     clear();
 
@@ -189,8 +194,11 @@ void MessageEventModel::pollRoom()
         {QStringLiteral("format"), QStringLiteral("json")},
         {QStringLiteral("lookIntoFuture"), QString::number(m_lookIntoFuture)},
         {QStringLiteral("includeLastKnown"), includeLastKnown},
+        {QStringLiteral("lastKnownMessageId"), QString::number(m_lastReadMessage)},
     });
     endpoint.setQuery(urlQuery);
+    
+    qDebug() << endpoint;
 
     const auto token = m_token;
 
@@ -231,19 +239,19 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
         return;
     }
 
-    QByteArray payload = reply->readAll();
-    QJsonDocument apiResult = QJsonDocument::fromJson(payload);
-    QJsonObject q = apiResult.object();
-    QJsonObject root = q.find("ocs").value().toObject();
-    //qDebug() << "JSON" << payload;
-    QJsonObject meta = root.find("meta").value().toObject();
-    QJsonValue statuscode = meta.find("statuscode").value();
+    const QByteArray payload = reply->readAll();
+    const QJsonDocument apiResult = QJsonDocument::fromJson(payload);
+    const QJsonObject q = apiResult.object();
+    const QJsonObject root = q.find("ocs").value().toObject();
+    qDebug() << "JSON" << apiResult;
+    const QJsonObject meta = root.find("meta").value().toObject();
+    const QJsonValue statuscode = meta.find("statuscode").value();
     if(statuscode.toInt() != 200) {
         qDebug() << "unexpected OCS code " << statuscode.toInt() << "→ polling stopped";
         return;
     }
 
-    QJsonArray data = root.find("data").value().toArray();
+    const QJsonArray data = root.find("data").value().toArray();
     int start, end, step;
     if(m_lookIntoFuture == 0) {
         start = data.size() - 1;
@@ -261,9 +269,8 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
         const QJsonValue value = data.at(i);
         const QJsonObject messageData = value.toObject();
         const int msgId = messageData.value("id").toInt();
-        if(msgId > m_db.lastKnownMessageId(m_account, m_token)) {
-            // do not lower value when we fetched history
-            m_db.setLastKnownMessageId(m_account, m_token, msgId);
+        if(msgId > m_lastReadMessage) {
+             m_lastReadMessage = msgId;
         }
 
         const QString systemMessage = messageData.value("systemMessage").toString();

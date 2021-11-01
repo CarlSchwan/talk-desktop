@@ -14,6 +14,7 @@ Room::Room(NextcloudAccount *account, const QJsonObject &obj)
     , m_hasPassword(obj["hasPassword"].toBool())
     , m_isFavorite(obj["isFavorite"].toBool())
     , m_lastActivity(obj["lastActivity"].toInt())
+    , m_lastReadMessage(obj["lastReadMessage"].toInt())
 {
     if (obj.contains("lastMessage")) {
         const QJsonObject lastMessage = obj.value("lastMessage").toObject();
@@ -54,6 +55,17 @@ Room *Room::setToken(const QString &token)
 {
     m_token = token;
     return this;
+}
+
+Room* Room::setLastReadMessage(int lastReadMessage)
+{
+    m_lastReadMessage = lastReadMessage;
+    return this;
+}
+
+int Room::lastReadMessage() const
+{
+    return m_lastReadMessage;
 }
 
 Room::RoomType Room::type() const

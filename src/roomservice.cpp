@@ -24,7 +24,12 @@ RoomService::RoomService(QObject *parent)
     , m_messageModel(new MessageEventModel(this))
     , m_participants(new Participants(this))
 {
-    connect(m_accountModel, &QAbstractItemModel::modelReset, this, &RoomService::onAccountsChanged);
+    connect(m_accountModel, &QAbstractItemModel::columnsInserted, this, [this](const QModelIndex &parent, int first, int last) {
+        Q_UNUSED(parent)
+        Q_UNUSED(first)
+        Q_UNUSED(last)
+        onAccountsChanged();
+    });
     connect(m_accountModel, &QAbstractItemModel::rowsRemoved, this, &RoomService::onAccountsChanged);
     connect(m_accountModel, &QAbstractItemModel::dataChanged, this, &RoomService::onAccountUpdated);
 }
@@ -91,28 +96,37 @@ QHash<int, QByteArray> RoomService::roleNames() const {
 }
 
 void RoomService::loadRooms() {
+    qDebug() << "start loading rooms";
     const auto accounts = m_accountModel->getAccounts();
     for (NextcloudAccount *account : accounts) {
-        qDebug() << account << account->id() << account->password();
         if (account->password().isEmpty()) {
             continue;
         }
 
         if (!account->capabilities()->areAvailable()) {
-            account->capabilities()->request();
+            account->capabilities()->request([this, account]() {
+                loadRoomFromAccount(account);
+            });
             continue;
         }
-
-        QUrl endpoint = QUrl(account->host());
-        const QString apiV = "v" + QString::number(account->capabilities()->getConversationApiLevel());
-        endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
-        endpoint.setQuery("format=json");
-
-        account->get(endpoint, [this, account](QNetworkReply *reply) {
-            account->capabilities()->checkTalkCapHash(reply);
-            roomsLoadedFromAccount(reply, account);
-        });
+        loadRoomFromAccount(account);
     }
+}
+
+void RoomService::loadRoomFromAccount(NextcloudAccount *account)
+{
+    QUrl endpoint = QUrl(account->host());
+    const QString apiV = "v" + QString::number(account->capabilities()->getConversationApiLevel());
+    endpoint.setPath(endpoint.path() + "/ocs/v2.php/apps/spreed/api/" + apiV + "/room");
+    endpoint.setQuery("format=json");
+
+    account->get(endpoint, [this, account](QNetworkReply *reply) {
+        // room endpoint carries talk specific indicator whether capabilities have changed
+        account->capabilities()->checkTalkCapHash(reply, [this, account] {
+            loadRoomFromAccount(account);
+        });
+        roomsLoadedFromAccount(reply, account);
+    });
 }
 
 void RoomService::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account) {
@@ -141,6 +155,11 @@ void RoomService::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount 
             m_rooms.emplace_back(account, room);
             endInsertRows();
         }
+    }
+    
+    if (!m_isLoaded) {
+        m_isLoaded = true;
+        Q_EMIT isLoadedChanged();
     }
 }
 
@@ -179,7 +198,7 @@ MessageEventModel *RoomService::messageModel() const
 
 bool RoomService::isLoaded() const
 {
-    return m_isPolling;
+    return m_isLoaded;
 }
 
 QString RoomService::currentName() const
@@ -212,9 +231,18 @@ Participants *RoomService::participants() const
     return m_participants;
 }
 
+bool RoomService::hasOpenRoom() const
+{
+    return m_hasOpenRoom;
+}
+
 void RoomService::select(int index)
 {
+    if (m_hasOpenRoom == false) {
+        m_hasOpenRoom = true;
+        Q_EMIT hasOpenRoomChanged();
+    }
     Room &room = m_rooms[index];
     auto account = AccountModel::getInstance()->getAccountById(room.account().id());
-    m_messageModel->setRoom(room.token(), account);
+    m_messageModel->setRoom(room.token(), room.lastReadMessage(), account);
 }
