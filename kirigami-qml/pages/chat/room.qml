@@ -423,4 +423,5 @@ Kirigami.ScrollablePage {
         // scroll to the very end, i.e to messageListView.YEnd
         messageListView.positionViewAtIndex(0, ListView.End)
     }
+    background: Item {}
 }

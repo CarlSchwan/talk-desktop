@@ -126,6 +126,7 @@ Kirigami.ApplicationWindow {
     property bool startedWithAccountEditor: false
 
     Component.onCompleted: {
+        WindowEffects.setBlur(pageStack, Config.blur && !Config.compactLayout);
         if (AccountService.rowCount() === 0) {
             pageStack.push("qrc:/pages/AddAccounts.qml")
             startedWithAccountEditor = true;
@@ -133,6 +134,16 @@ Kirigami.ApplicationWindow {
             pageStack.push("qrc:/pages/chat/rooms.qml")
         }
     }
+    Connections {
+        target: Config
+        function onBlurChanged() {
+            WindowEffects.setBlur(pageStack, Config.blur && !Config.compactLayout);
+        }
+        function onCompactLayoutChanged() {
+            WindowEffects.setBlur(pageStack, Config.blur && !Config.compactLayout);
+        }
+    }
+
 
     Connections {
         target: AccountService
@@ -168,5 +179,12 @@ Kirigami.ApplicationWindow {
         } else {
             pageStack.layers.push(page, args);
         }
+    }
+    // blur effect
+    color: Config.blur && !Config.compactLayout ? "transparent" : Kirigami.Theme.backgroundColor
+
+    // we need to apply the translucency effect separately on top of the color
+    background: Rectangle {
+        color: Config.blur && !Config.compactLayout ? Qt.rgba(Kirigami.Theme.backgroundColor.r, Kirigami.Theme.backgroundColor.g, Kirigami.Theme.backgroundColor.b, 1 - Config.transparency) : "transparent"
     }
 }

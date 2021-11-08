@@ -202,6 +202,39 @@ Kirigami.ScrollablePage {
                     Config.save()
                 }
             }
+            QQC2.CheckBox {
+                visible: WindowEffects.hasWindowSystem
+                text: i18n("Use transparent chat page")
+                enabled: !Config.compactLayout && !Config.isBlurImmutable
+                checked: Config.blur
+                onToggled: {
+                    Config.blur = checked;
+                    Config.save();
+                }
+            }
+            RowLayout {
+                visible: WindowEffects.hasWindowSystem && Config.blur
+                enabled: !Config.isTransparancyImmutable
+                Kirigami.FormData.label: i18n("Transparency:")
+                QQC2.Slider {
+                    enabled: !Config.compactLayout && Config.blur
+                    from: 0
+                    to: 1
+                    stepSize: 0.05
+                    value: Config.transparency
+                    onMoved: {
+                        Config.transparency = value;
+                        Config.save();
+                    }
+
+                    HoverHandler { id: sliderHover }
+                    QQC2.ToolTip.visible: sliderHover.hovered && !enabled
+                    QQC2.ToolTip.text: i18n("Only enabled if the transparent chat page is enabled.")
+                }
+                QQC2.Label {
+                    text: Math.round(Config.transparency * 100) + "%"
+                }
+            }
         }
     }
 }

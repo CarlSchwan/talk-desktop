@@ -41,6 +41,7 @@
 #include "constants/PresenceStatusClass.h"
 #include "talkconfig.h"
 #include "emojimodel.h"
+#include "windoweffects.h"
 #include "roomlistfilter.h"
 #include "chatboxhelper.h"
 #ifdef HAVE_COLORSCHEME
@@ -103,6 +104,8 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
     ChatBoxHelper chatBoxHelper;
     qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "ChatBoxHelper", &chatBoxHelper);
+    WindowEffects windowEffects;
+    qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "WindowEffects", &windowEffects);
     Clipboard clipboard;
     qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "Clipboard", &clipboard);
 

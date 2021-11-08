@@ -16,6 +16,7 @@ add_executable(talk
     chatboxhelper.cpp
     clipboard.cpp
     emojimodel.cpp
+    windoweffects.cpp
     services/accounts.cpp
     services/capabilities.cpp
     services/download.cpp
