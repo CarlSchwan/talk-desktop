@@ -32,7 +32,7 @@ Kirigami.OverlayDrawer {
 
             Timer {
                 id: participantsPolling
-                interval: participants.visible ? 5000 : 30000;
+                interval: roomDrawer.drawerOpen ? 5000 : 30000;
                 repeat: true
                 running: true
                 triggeredOnStart: true
@@ -65,13 +65,13 @@ Kirigami.OverlayDrawer {
 
                     ToolButton {
                         Layout.alignment: Qt.AlignRight
-                        icon.name: room.isFavourite ? "rating" : "rating-unrated"
+                        icon.name: RoomService.isFavourite ? "rating" : "rating-unrated"
                         checkable: true
                         enabled: RoomService.isLoaded
-                        checked: RoomService.isFavourite
-                        onClicked: RoomService.isFavourite != RoomService.isFavourite
+                        checked: RoomService.currentIsFavourite
+                        onClicked: RoomService.currentIsFavourite != RoomService.currentIsFavourite
                         ToolTip {
-                            text: RoomService.isFavourite ? i18n("Remove room from favorites") : i18n("Make room favorite")
+                            text: RoomService.currentIsFavourite ? i18n("Remove room from favorites") : i18n("Make room favorite")
                         }
                     }
                     ToolButton {
@@ -109,6 +109,7 @@ Kirigami.OverlayDrawer {
 
                             name: RoomService.currentName
                             source: RoomService.currentAvatarUrl
+                            visible: RoomService.currentAvatarUrl.length !== 0
                         }
 
                         Kirigami.Heading {
@@ -192,7 +193,7 @@ Kirigami.OverlayDrawer {
                                 visible: Config.showAvatarInTimeline
                                 sourceSize.height: Kirigami.Units.gridUnit + Kirigami.Units.smallSpacing * 2.5
                                 sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.smallSpacing * 2.5
-                                source: ""
+                                source: model.avatar
                                 name: displayName
                             }
 

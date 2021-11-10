@@ -22,6 +22,7 @@ public:
 
     const NextcloudAccount &account() const;
     QString name() const;
+    QString description() const;
     QString token() const;
     int lastReadMessage() const;
     RoomType type() const;
@@ -38,6 +39,7 @@ public:
 
     Room *setLastReadMessage(int lastReadMessage);
     Room *setName(const QString &name);
+    Room *setDescription(const QString &description);
     Room *setToken(const QString &token);
     Room *setType(const RoomType type);
     Room *setAccount(const NextcloudAccount *account);
@@ -53,6 +55,7 @@ private:
     const NextcloudAccount *m_account = nullptr;
     QString m_name;
     QString m_token;
+    QString m_description;
     RoomType m_type;
     int m_unread = 0;
     bool m_unread_mention;

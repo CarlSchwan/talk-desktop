@@ -62,12 +62,11 @@ QQC2.ItemDelegate {
             left: parent.left
             leftMargin: Kirigami.Units.largeSpacing
         }
-   
+
         visible: model.showAuthor && Config.showAvatarInTimeline && !showUserMessageOnRight
         name: model.actorDisplayName
         source: visible ? model.avatar : ""
-        //color: undefined
-   
+
         MouseArea {
             anchors.fill: parent
             onClicked: {

@@ -16,6 +16,7 @@
 #include <iterator>
 #include "messageeventmodel.h"
 #include "services/participants.h"
+#include "constants/ConversationTypeClass.h"
 
 
 RoomService::RoomService(QObject *parent)
@@ -72,7 +73,7 @@ QVariant RoomService::data(const QModelIndex &index, int role) const
         case TypeRole:
             return room.type();
         case ConversationNameRole:
-            return room.conversationName();
+            return room.name();
     }
     return {};
 }
@@ -206,9 +207,18 @@ QString RoomService::currentName() const
     return m_currentRoom ? m_currentRoom->name() : QString();
 }
 
+QString RoomService::currentDescription() const
+{
+    qDebug() << "desc1" << (m_currentRoom ? m_currentRoom->description() : "empty");
+    return m_currentRoom ? m_currentRoom->description() : QString();
+}
+
 QString RoomService::currentAvatarUrl() const
 {
-    return QString(); // TODO
+    if (m_currentRoom->type() == ConversationType::OneToOne) {
+        return QStringLiteral("image://avatar/") + QString::number(m_currentRoom->account().id()) + QLatin1Char('/') + m_currentRoom->name() + QLatin1Char('/');
+    }
+    return QString(); // no avatar
 }
 
 bool RoomService::currentIsFavorite() const
@@ -219,11 +229,6 @@ bool RoomService::currentIsFavorite() const
 void RoomService::setCurrentIsFavorite(bool isFavorite)
 {
     // TODO
-}
-
-QString RoomService::currentDescription() const
-{
-    return QString(); // TODO
 }
 
 Participants *RoomService::participants() const
@@ -243,6 +248,8 @@ void RoomService::select(int index)
         Q_EMIT hasOpenRoomChanged();
     }
     Room &room = m_rooms[index];
+    m_currentRoom = room;
     auto account = AccountModel::getInstance()->getAccountById(room.account().id());
     m_messageModel->setRoom(room.token(), room.lastReadMessage(), account);
+    m_participants->setRoom(room.token(), account);
 }

@@ -42,7 +42,26 @@ public:
 
     // Base methods to interact with the Nextcloud server.
     QNetworkRequest setupRequest(const QUrl &url);
-    void get(const QUrl &url, std::function<void(QNetworkReply *)> callback);
+
+    void get(const QUrl &url);
+
+    template<typename F>
+    void get(const QUrl &url, F callback)
+    {
+        auto request = setupRequest(url);
+
+        QNetworkReply *reply = m_qnam->get(request);
+
+        connect(reply, &QNetworkReply::finished, this, [reply, callback, url] () {
+            if (200 != reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)) {
+                qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) << url;
+                // TODO handle errors
+                return;
+            }
+
+            callback(reply);
+        });
+    }
     void post(const QUrl &url, const QJsonDocument &doc, std::function<void(QNetworkReply *)> callback);
     void post(const QUrl &url, const QUrlQuery &formdata, std::function<void(QNetworkReply *)> callback);
 

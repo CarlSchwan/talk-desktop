@@ -20,6 +20,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void setRoom(const QString &token, NextcloudAccount *account);
+
     enum ParticipantRoles {
         IdRole = Qt::UserRole + 1,
         NameRole,
@@ -28,7 +30,8 @@ public:
         PresenceRole,
         StatusIconRole,
         StatusMessageRole,
-        ModeratorRole
+        ModeratorRole,
+        AvatarRole,
     };
 
     struct Participant
@@ -85,8 +88,6 @@ public:
         }
     };
 
-    void setTokenAndAccountId(const QString &token, int accountId);
-
 public slots:
     void pullParticipants();
 
@@ -94,18 +95,14 @@ private slots:
     void participantsPulled(QNetworkReply *reply);
 
 private:
-    AccountModel* m_accountService = AccountModel::getInstance();
     NextcloudAccount* m_activeAccount;
-    QNetworkAccessManager m_nam;
-    QNetworkReply* m_reply = nullptr;
     QVector<Participant> m_participants;
     PresenceStatus presence;
     QString m_token;
-    int m_accountId;
 
-    int findParticipant(QString userId);
+    int findParticipant(const QString &userId);
     int removeParticipants(int checkId);
-    bool isModerator(const Participant participant) const;
+    bool isModerator(const Participant &participant) const;
 };
 
 #endif // PARTICIPANTS_H

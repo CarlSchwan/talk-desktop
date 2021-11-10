@@ -29,6 +29,9 @@ class RoomService : public QAbstractListModel
     /// This property holds the name of the currently selected room.
     Q_PROPERTY(QString currentName READ currentName NOTIFY roomChanged)
 
+    /// This property holds the description of the currently selected room.
+    Q_PROPERTY(QString currentDescription READ currentDescription NOTIFY roomChanged)
+
     /// This property holds whether the current room is a favorite.
     Q_PROPERTY(bool currentIsFavorite READ currentIsFavorite WRITE setCurrentIsFavorite NOTIFY roomChanged)
 
@@ -39,7 +42,7 @@ class RoomService : public QAbstractListModel
     Q_PROPERTY(QString currentDescription READ currentDescription NOTIFY roomChanged)
 
     Q_PROPERTY(Participants *participants READ participants CONSTANT)
-    
+
     Q_PROPERTY(bool hasOpenRoom READ hasOpenRoom NOTIFY hasOpenRoomChanged)
 public:
     enum RoomRoles {

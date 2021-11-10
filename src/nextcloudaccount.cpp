@@ -192,23 +192,10 @@ QNetworkRequest NextcloudAccount::setupRequest(const QUrl &url)
     return request;
 }
 
-void NextcloudAccount::get(const QUrl &url, std::function<void(QNetworkReply *)> callback)
+void NextcloudAccount::get(const QUrl &url)
 {
     auto request = setupRequest(url);
-
-    QNetworkReply *reply = m_qnam->get(request);
-
-    if (callback != nullptr) {
-        connect(reply, &QNetworkReply::finished, this, [reply, callback, url] () {
-            if (200 != reply->attribute(QNetworkRequest::HttpStatusCodeAttribute)) {
-                qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) << url;
-                // TODO handle errors
-                return;
-            }
-
-            callback(reply);
-        });
-    }
+    m_qnam->get(request);
 }
 
 void NextcloudAccount::post(const QUrl &url, const QJsonDocument &doc, std::function<void(QNetworkReply *)> callback)
