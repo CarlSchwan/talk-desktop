@@ -53,7 +53,12 @@ a{
     wrapMode: Text.WordWrap
     textFormat: Text.RichText
 
-    Layout.fillWidth: true
+    property bool hasContextMenu: true
+    signal requestOpenMessageContext()
+
+    Layout.fillWidth: Config.compactLayout
+    Layout.rightMargin: Kirigami.Units.largeSpacing
+    Layout.leftMargin: Config.showAvatarInTimeline ? Kirigami.Units.largeSpacing : 0
 
     //onLinkActivated: RoomManager.openResource(link)
     onHoveredLinkChanged: if (hoveredLink.length > 0) {
@@ -63,11 +68,18 @@ a{
     }
 
     HoverHandler {
-        cursorShape: (parent.hoveredLink || !spoilerRevealed) ? Qt.PointingHandCursor : Qt.IBeamCursor
+        cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.IBeamCursor
     }
 
     TapHandler {
-        enabled: !parent.hoveredLink && !spoilerRevealed
-        onTapped: spoilerRevealed = true
+        acceptedButtons: Qt.RightButton
+        onTapped: openMessageContext(model, parent.selectedText)
+        enabled: hasContextMenu
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        onLongPressed: requestOpenMessageContext()
+        enabled: hasContextMenu
     }
 }

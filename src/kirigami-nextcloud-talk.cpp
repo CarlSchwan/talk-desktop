@@ -34,18 +34,18 @@
 #include "services/download.h"
 #include "services/participants.h"
 #include "discovery.h"
-#include "clipboard.h"
 #include "roomservice.h"
 #include "nextcloudaccount.h"
 #include "constants/ConversationTypeClass.h"
 #include "constants/PresenceStatusClass.h"
-#include "talkconfig.h"
-#include "emojimodel.h"
-#include "windoweffects.h"
 #include "roomlistfilter.h"
-#include "chatboxhelper.h"
+#include "talkconfig.h"
+#include "desktop/emojimodel.h"
+#include "desktop/windoweffects.h"
+#include "desktop/chatboxhelper.h"
+#include "desktop/clipboard.h"
 #ifdef HAVE_COLORSCHEME
-#include "colorschemer.h"
+#include "desktop/colorschemer.h"
 #endif
 #include "messageeventmodel.h"
 
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterUncreatableType<ConversationTypeClass>("harbour.nextcloud.talk", 1, 0, "ConversationType", "Enum type");
     qmlRegisterUncreatableType<PresenceStatusClass>("harbour.nextcloud.talk", 1, 0, "PresenceStatus", "Enum type");
+    qmlRegisterUncreatableType<MessageEventModel>("harbour.nextcloud.talk", 1, 0, "MessageEventModel", "Enum type");
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomListFilterModel>("harbour.nextcloud.talk", 1, 0, "RoomListFilterModel");

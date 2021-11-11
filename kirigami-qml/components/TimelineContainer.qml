@@ -57,8 +57,8 @@ QQC2.ItemDelegate {
         sourceSize.width: width
         sourceSize.height: width
         anchors {
-            top: sectionDelegate.bottom
-            topMargin: model.showAuthor ? Kirigami.Units.largeSpacing : 0
+            top: parent.top
+            topMargin: Kirigami.Units.largeSpacing
             left: parent.left
             leftMargin: Kirigami.Units.largeSpacing
         }

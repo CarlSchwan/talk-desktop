@@ -36,7 +36,7 @@ void MessageEventModel::addMessages(const QJsonObject &obj)
     const QJsonObject parameters = obj.value("messageParameters").toObject();
 
     for (const QString &placeholder: parameters.keys()) {
-        const auto subString = "{" + placeholder + "}";
+        const auto subString = QLatin1Char('{') + placeholder + QLatin1Char('}');
         if (placeholder == "user") {
             message.text = message.text.replace(message.text.indexOf(subString), subString.size(), parameters[placeholder].toObject()["name"].toString());
         } else if (placeholder.startsWith("mention-")) {
@@ -51,7 +51,7 @@ void MessageEventModel::addMessages(const QJsonObject &obj)
 
     if (message.text == "{file}") {
         message.type = SingleLinkImageMessage;
-        message.text = "File TODO";
+        message.text = "SingleLinkImageMessage";
     }
     endInsertRows();
 }
@@ -136,7 +136,12 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
             return false; // TODO
         case EventTypeRole:
             return message.type;
-        case ImagePathRole:
+        case ContentTypeRole:
+            if (message.type != SingleLinkImageMessage) {
+                return {};
+            }
+            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("mimetype")].toString();
+        case FilePreviewUrlRole:
             if (message.type != SingleLinkImageMessage) {
                 return {};
             }
@@ -156,7 +161,11 @@ QHash<int, QByteArray> MessageEventModel::roleNames() const
         {AvatarRole, QByteArrayLiteral("avatar")},
         {ShowAuthorRole, QByteArrayLiteral("showAuthor")},
         {IsHiglightedRole, QByteArrayLiteral("isHighlighted")},
-        {IsLocalUserRole, QByteArrayLiteral("isLocalUser")}
+        {IsLocalUserRole, QByteArrayLiteral("isLocalUser")},
+        {FilePreviewUrlRole, QByteArrayLiteral("filePreviewUrl")},
+        {FileUrlRole, QByteArrayLiteral("fileUrl")},
+        {ContentTypeRole, QByteArrayLiteral("contentType")},
+        {EventTypeRole, QByteArrayLiteral("eventType")}
     };
 }
 

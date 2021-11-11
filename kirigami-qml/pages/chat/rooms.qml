@@ -123,7 +123,7 @@ Kirigami.ScrollablePage {
 
                 contentItem: Kirigami.Avatar {
                     source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
-                    iconName: switch (conversationType) {
+                    iconSource: switch (conversationType) {
                     case ConversationType.Public:
                         return 'link';
                     case ConversationType.Group:
@@ -176,7 +176,7 @@ Kirigami.ScrollablePage {
 
                 leading: Kirigami.Avatar {
                     source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
-                    iconName: switch (conversationType) {
+                    iconSource: switch (conversationType) {
                     case ConversationType.Public:
                         return 'link';
                     case ConversationType.Group:

@@ -16,6 +16,7 @@
   <file>ChatBox/CompletionMenu.qml</file>
   <file>ChatBox/ReplyPane.qml</file>
   <file>components/TextDelegate.qml</file>
+  <file>components/ImageDelegate.qml</file>
   <file>components/TimelineContainer.qml</file>
   <file>components/EmojiPicker.qml</file>
   <file>components/ThemeRadioButton.qml</file>

@@ -6,6 +6,7 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Dialogs 1.3
+import Qt.labs.qmlmodels 1.0
 import org.kde.kirigami 2.15 as Kirigami
 import harbour.nextcloud.talk 1.0
 import '../../components/'
@@ -14,46 +15,119 @@ import '../../ChatBox'
 Kirigami.ScrollablePage {
     id: room
 
-    /*onStatusChanged: {
-        if(status === PageStatus.Activating) {
-            if(!roomService.isPolling(token, accountId)) {
-                // do not re-enable when returning from participants
-                roomService.startPolling(token, accountId)
-            }
-        } else if(status === PageStatus.Deactivating) {
-            if(pageStack.currentPage.pageName !== "Participants") {
-                roomService.stopPolling()
-            }
-        } else if(status === PageStatus.Inactive) {
-            if(pageStack.currentPage.pageName !== "Participants") {
-                messages.clear();
-            }
-            pageStack.popAttached()
-        } else if(status === PageStatus.Active) {
-            pageStack.pushAttached(Qt.resolvedUrl("./participants.qml"),
-                {
-                    token: room.token,
-                    accountId: room.accountId,
-                    textField: sendMessage
-                }
-            );
+    Item {
+        id: hoverActions
+        property var event: null
+        property bool showEdit: false // Not implemented yet on the server
+        property var bubble: null
+        property var hovered: bubble && bubble.hovered
+        property var visibleDelayed: (hovered || hoverHandler.hovered) && !Kirigami.Settings.isMobile
+        onVisibleDelayedChanged: if (visibleDelayed) {
+            visible = true;
+        } else {
+            // HACK: delay disapearing by 200ms, otherwise this can create some glitches
+            // See https://invent.kde.org/network/neochat/-/issues/333
+            hoverActionsTimer.restart();
         }
-    }*/
+        Timer {
+            id: hoverActionsTimer
+            interval: 200
+            onTriggered: hoverActions.visible = hoverActions.visibleDelayed;
+        }
+        x: bubble ? (bubble.x + Kirigami.Units.largeSpacing + Math.max(bubble.width - childWidth, 0) - (Config.compactLayout ? Kirigami.Units.gridUnit * 3 : 0)) : 0
+        y: bubble ? bubble.mapToItem(parent, 0, 0).y - hoverActions.childHeight + Kirigami.Units.smallSpacing: 0;
+        visible: false
+
+        property var updateFunction
+
+        property alias childWidth: hoverActionsRow.width
+        property alias childHeight: hoverActionsRow.height
+
+        RowLayout {
+            id: hoverActionsRow
+            z: 4
+            spacing: 0
+            HoverHandler {
+                id: hoverHandler
+                margin: Kirigami.Units.smallSpacing
+            }
+
+            QQC2.Button {
+                QQC2.ToolTip.text: i18n("Download")
+                QQC2.ToolTip.visible: hovered
+                icon.name: "edit-download"
+            }
+            QQC2.Button {
+                QQC2.ToolTip.text: i18n("Reply")
+                QQC2.ToolTip.visible: hovered
+                icon.name: "mail-replied-symbolic"
+                onClicked: {
+                    ChatBoxHelper.replyToMessage(hoverActions.event.eventId, hoverActions.event.message, hoverActions.event.author);
+                    chatBox.focusInputField();
+                }
+            }
+        }
+    }
 
     ListView {
         id: messageListView
-        delegate: TimelineContainer {
-            id: messageContainer
-            width: ListView.view.width
-            isLoaded: true
-            innerObject: TextDelegate {
-                Layout.fillWidth: Config.compactLayout
-                Layout.maximumWidth: messageContainer.bubbleMaxWidth
-                Layout.rightMargin: Kirigami.Units.largeSpacing
-                Layout.leftMargin: Config.showAvatarInTimeline ? Kirigami.Units.largeSpacing : 0
+        delegate: DelegateChooser {
+            id: timelineDelegateChooser
+            role: "eventType"
+
+            property bool delegateLoaded: true
+            ListView.onPooled: delegateLoaded = false
+            ListView.onReused: delegateLoaded = true
+
+            DelegateChoice {
+                roleValue: MessageEventModel.RegularTextMessage
+                delegate: TimelineContainer {
+                    id: messageContainer
+                    width: ListView.view.width
+                    hoverComponent: hoverActions
+                    isLoaded: true
+                    innerObject: TextDelegate {
+                        Layout.maximumWidth: messageContainer.bubbleMaxWidth
+                        onRequestOpenMessageContext: openMessageContext(model, parent.selectedText)
+                    }
+                }
+            }
+            DelegateChoice {
+                roleValue: MessageEventModel.SingleLinkImageMessage
+                delegate: TimelineContainer {
+                    id: imageContainer
+                    isLoaded: timelineDelegateChooser.delegateLoaded
+                    width: messageListView.width
+                    onReplyClicked: goToEvent(eventID)
+                    hoverComponent: hoverActions
+
+                    innerObject: ImageDelegate {
+                        Layout.preferredWidth: Kirigami.Units.gridUnit * 15
+                        Layout.maximumWidth: imageContainer.bubbleMaxWidth
+                        Layout.preferredHeight: info.h / info.w * width
+                        Layout.maximumHeight: Kirigami.Units.gridUnit * 20
+                        //TapHandler {
+                        //    acceptedButtons: Qt.RightButton
+                        //    onTapped: openFileContext(model, parent)
+                        //}
+                        //TapHandler {
+                        //    acceptedButtons: Qt.LeftButton
+                        //    onLongPressed: openFileContext(model, parent)
+                        //    onTapped: {
+                        //        fullScreenImage.createObject(parent, {
+                        //            filename: eventId,
+                        //            localPath: currentRoom.urlToDownload(eventId),
+                        //            blurhash: model.content.info["xyz.amorgan.blurhash"],
+                        //            imageWidth: content.info.w,
+                        //            imageHeight: content.info.h
+                        //        }).showFullScreen();
+                        //    }
+                        //}
+                    }
+                }
             }
         }
-        
+
         model: RoomService.messageModel
         Component.onCompleted: positionViewAtBeginning()
 
@@ -157,245 +231,8 @@ Kirigami.ScrollablePage {
             id: openFileDialog
             FileDialog {}
         }
-        /*delegate: ListItem {
-
-            height: author.contentHeight
-                    + repliedToAuthor.height
-                    + repliedToText.height
-                    + messageText.contentHeight
-                    + Theme.paddingLarge
-                    + ctxMenu.height
-                    + filePreview.height
-
-            Row {
-                spacing: Theme.paddingSmall
-
-                Avatar {
-                    id: avatar
-                    account: accountId
-                    user: actorId
-                    anchors.bottom: parent.bottom
-                    opacity: _lastOfActorGroup ? 100 : 0
-                }
-
-                Column {
-                    width: chat.width - avatar.width - Theme.paddingSmall
-                    spacing: Theme.paddingSmall
-
-                    Label {
-                        id: author
-                        text: {
-                            if(_firstOfActorGroup) {
-                                return timeString + " · " + actorDisplayName + " · " + dateString
-                            }
-                            return timeString
-                        }
-                        textFormat: Text.PlainText;
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        font.pixelSize: Theme.fontSizeTiny
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    }
-
-                    Row {
-                        visible: repliedTo.message !== ""
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        Rectangle {
-                            color: Theme.secondaryColor
-                            width: 2
-                            height: repliedToAuthor.height + repliedToText.height
-                        }
-                        Column {
-                            width: chat.width - avatar.width - Theme.paddingSmall - 2
-                            Label {
-                                id: repliedToAuthor
-                                width: parent.width
-                                text: repliedTo.author
-                                textFormat: Text.PlainText
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                }
-                                leftPadding: Theme.paddingSmall
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                wrapMode: "NoWrap"
-                                elide: "ElideMiddle"
-                                visible: repliedTo.author !== ""
-                                color: Theme.secondaryColor
-                                font.italic: true
-                                height: visible ? contentHeight : 0
-                            }
-                            Label {
-                                id: repliedToText
-                                text: repliedTo.message
-                                textFormat: Text.PlainText
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                }
-                                leftPadding: Theme.paddingSmall
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                wrapMode: "NoWrap"
-                                elide: "ElideMiddle"
-                                visible: repliedTo.message !== ""
-                                color: Theme.secondaryColor
-                                font.italic: true
-                                height: visible ? contentHeight : 0
-                            }
-                        }
-                    }
-                    Label {
-                        id: messageText
-                        text: room.messageStyleSheet + message
-                        textFormat: Text.RichText
-                        height: contentHeight
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        font.pixelSize: Theme.fontSizeSmall
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        onLinkActivated: Qt.openUrlExternally(link)
-                    }
-                    FilePreview {
-                        id: filePreview
-                        account: accountId
-                        fileId: (_type === "file" && _fileId) ? _fileId : -1
-                        filePath: (_type === "file" && _filePath) ? _filePath : ""
-                        visible: _type === "file"
-                        size: _type === "file" ? Theme.itemSizeHuge : 0
-                        height: _type === "file" ? Theme.itemSizeHuge : 0
-                    }
-                }
-
-            }
-
-            menu: ContextMenu {
-                id: ctxMenu;
-                container: chat
-                MenuItem {
-                    text: qsTr("Reply")
-                    visible: isReplyable ? true : false
-                    onClicked: {
-                        replyToId = _mid
-                        replyToMsg = stripTags(message)
-                        sendMessage.focus = true
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Mention")
-                    visible: actorType == "users"
-                    onClicked: {
-                        sendMessage.text = sendMessage.text + " @" + actorId;
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Copy text")
-                    onClicked: Clipboard.text = stripTags(message)
-                }
-
-            }
-        }
-
-        model: ListModel {
-            id: messages
-        }
-
-        VerticalScrollDecorator {
-            flickable: chat
-        }
-
-        onCountChanged: {
-            // when previous last item is fully visible scroll to end
-            var isLastVisible = (chat.currentItem.y + chat.currentItem.height) >= chat.contentY
-                && (chat.currentItem.y + chat.currentItem.height) <= (chat.contentY + height)
-            if(chat.currentIndex == 0 || isLastVisible) {
-                var newIndex = chat.count - 1;
-                chat.positionViewAtEnd();
-                chat.currentIndex = newIndex;
-            }
-        }
     }
 
-    Column {
-        id: sendMessagePart
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        width: parent.width
-
-        Row {
-            width: parent.width
-            visible: replyToId != -1
-            spacing: Theme.paddingSmall
-            height: Theme.iconSizeSmall
-
-            Separator {
-                width: Theme.horizontalPageMargin
-            }
-
-            Icon {
-                id: replyIndicator
-                source: "image://theme/icon-s-repost"
-                color: palette.secondaryHighlightColor
-            }
-
-            Label {
-                width: parent.width - Theme.horizontalPageMargin * 2 - Theme.iconSizeSmall - Theme.paddingSmall * 3 - replyToClear.width
-                id: replyTo
-                text: replyToMsg
-                font.pixelSize: Theme.fontSizeSmall
-                wrapMode: "NoWrap"
-                elide: "ElideMiddle"
-                color: Theme.secondaryHighlightColor
-                height: parent.height
-            }
-            IconButton {
-                height: Theme.iconSizeSmall
-                width: Theme.iconSizeSmall
-                id: replyToClear
-                icon.source: "image://theme/icon-s-clear-opaque-cross"
-                icon.color: palette.secondaryHighlightColor
-                onClicked: {
-                    replyToMsg = ""
-                    replyToId = -1
-                }
-            }
-        }
-
-        Row {
-            width: parent.width
-
-            TextArea {
-                id: sendMessage
-                width: parent.width - sendIcon.width
-                placeholderText: "Write something excellent"
-                wrapMode: TextEdit.WordWrap
-                EnterKey.enabled: text.length > 0
-            }
-            IconButton {
-                id: sendIcon
-                anchors.top: sendMessage.top
-                anchors.bottom: sendMessage.bottom
-                icon.source: "image://theme/icon-m-send?" + sendMessage.color
-                Behavior on icon.source { FadeAnimation {} }
-                opacity: sendMessage.text.length > 0 ? 1.0 : 0.3
-                Behavior on opacity { FadeAnimation {} }
-                onClicked: {
-                    roomService.sendMessage(sendMessage.text, replyToId);
-                    // FIXME: only clear text after it was send
-                    sendMessage.text = ""
-                    replyToId = -1
-                }
-            }
-        }
-        */
-    }
     footer: ChatBox {
         id: chatBox
         visible: !invitation.visible && !(messageListView.count === 0 && !currentRoom.allHistoryLoaded)

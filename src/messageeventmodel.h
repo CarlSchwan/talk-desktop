@@ -50,7 +50,9 @@ public:
         IsHiglightedRole,
         IsLocalUserRole,
         EventTypeRole,
-        ImagePathRole,
+        FilePreviewUrlRole,
+        FileUrlRole,
+        ContentTypeRole // minetype
     };
 
     QVariant data(const QModelIndex &index, int role) const override;

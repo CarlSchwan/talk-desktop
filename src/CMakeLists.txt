@@ -13,10 +13,10 @@ add_executable(talk
     roomservice.cpp
     roomlistfilter.cpp
     messageeventmodel.cpp
-    chatboxhelper.cpp
-    clipboard.cpp
-    emojimodel.cpp
-    windoweffects.cpp
+    desktop/chatboxhelper.cpp
+    desktop/clipboard.cpp
+    desktop/emojimodel.cpp
+    desktop/windoweffects.cpp
     services/accounts.cpp
     services/capabilities.cpp
     services/download.cpp
@@ -30,7 +30,6 @@ add_executable(talk
     constants/ConversationTypeClass.cpp
     constants/PresenceStatusClass.cpp
     constants/systemmessagetype.cpp
-    colorschemer.cpp
     ../kirigami-qml/res.qrc
 )
 
@@ -39,7 +38,7 @@ target_compile_definitions(talk PRIVATE KDE_EDITION)
 target_sources(talk PRIVATE ${NEOCHAT_ICON})
 
 if(NOT ANDROID)
-    target_sources(talk PRIVATE colorschemer.cpp)
+    target_sources(talk PRIVATE desktop/colorschemer.cpp)
     target_link_libraries(talk PRIVATE KF5::ConfigWidgets KF5::WindowSystem KF5::SonnetCore)
     target_compile_definitions(talk PRIVATE -DHAVE_COLORSCHEME)
     target_compile_definitions(talk PRIVATE -DHAVE_WINDOWSYSTEM)
