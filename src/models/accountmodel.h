@@ -1,10 +1,14 @@
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #pragma once
 
+#include "../nextcloudaccount.h"
+#include "../services/secrets.h"
 #include <QAbstractListModel>
 #include <QStringList>
 #include <QVector>
-#include "../nextcloudaccount.h"
-#include "secrets.h"
 
 class AccountModel : public QAbstractListModel
 {
@@ -24,8 +28,8 @@ public:
     };
     Q_ENUM(AccountRoles)
     Q_ENUM(ColorMode)
-    static AccountModel* getInstance();
-    QVector<NextcloudAccount*> getAccounts() const;
+    static AccountModel *getInstance();
+    QVector<NextcloudAccount *> getAccounts() const;
     int getAccountId(NextcloudAccount *account) const;
     NextcloudAccount *getAccountById(int accountId) const;
 
@@ -35,7 +39,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QHash<int, QByteArray> roleNames() const override;
 
-
 public Q_SLOTS:
     void load();
     void addAccount(const QString &url, const QString &loginName, const QString &token, const QString &userId);
@@ -43,7 +46,7 @@ public Q_SLOTS:
 
 private:
     explicit AccountModel(QObject *parent = nullptr);
-    QVector<NextcloudAccount*> m_accounts;
+    QVector<NextcloudAccount *> m_accounts;
     Secrets m_secrets;
     int m_maxId = 0;
 };

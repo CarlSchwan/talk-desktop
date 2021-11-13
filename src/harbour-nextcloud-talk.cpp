@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<PresenceStatusClass>("harbour.nextcloud.talk", 1, 0, "PresenceStatus", "Enum type");
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
-    qmlRegisterType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService");
-    qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
+    qmlRegisterType<RoomListModel>("harbour.nextcloud.talk", 1, 0, "RoomListModel");
+    qmlRegisterType<ParticipantModel>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
 
     qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
 

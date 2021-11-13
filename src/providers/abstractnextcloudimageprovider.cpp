@@ -1,8 +1,8 @@
 #include "abstractnextcloudimageprovider.h"
 
+#include "../models/accountmodel.h"
 #include <QException>
 #include <QNetworkReply>
-#include "../services/accounts.h"
 
 #include <QAtomicPointer>
 #include <QReadWriteLock>

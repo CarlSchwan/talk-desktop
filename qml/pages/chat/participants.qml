@@ -11,7 +11,7 @@ Page {
     property int accountId;
     property Item textField;
 
-    readonly property string pageName: "Participants";
+    readonly property string pageName: "ParticipantModel";
 
     ParticipantService {
         id: participantService
@@ -24,7 +24,7 @@ Page {
         running: true
         triggeredOnStart: true
         onTriggered: {
-            participantService.pullParticipants(participants.token, participants.accountId)
+            participantService.pullParticipantModel(participants.token, participants.accountId)
         }
     }
 
@@ -41,7 +41,7 @@ Page {
 
         header: PageHeader {
             id: header
-            title: qsTr("Participants")
+            title: qsTr("ParticipantModel")
         }
 
         delegate: BackgroundItem {

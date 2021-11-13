@@ -65,9 +65,9 @@ Kirigami.ScrollablePage {
         repeat: true
         running: true
         triggeredOnStart: true
-        onTriggered: RoomService.loadRooms()
+        onTriggered: RoomListModel.loadRooms()
     }
-    Component.onCompleted: RoomService.loadRooms();
+    Component.onCompleted: RoomListModel.loadRooms();
 
     ListView {
         id: roomList
@@ -80,7 +80,7 @@ Kirigami.ScrollablePage {
         
         Kirigami.PlaceholderMessage {
             id: loadingIndicator
-            visible: !RoomService.isLoaded
+            visible: !RoomListModel.isLoaded
             anchors.centerIn: parent
             text: i18n("Loading...")
             QQC2.BusyIndicator {
@@ -164,7 +164,7 @@ Kirigami.ScrollablePage {
                             const roomPage = applicationWindow().pageStack.get(1);
                             roomPage.title = name;
                         }
-                        RoomService.select(filterModel.mapToSource(filterModel.index(index, 0)).row);
+                        RoomListModel.select(filterModel.mapToSource(filterModel.index(index, 0)).row);
                     }
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()
@@ -197,7 +197,7 @@ Kirigami.ScrollablePage {
 
         model: RoomListFilterModel {
             id: filterModel
-            sourceModel: RoomService
+            sourceModel: RoomListModel
         }
     }
 }

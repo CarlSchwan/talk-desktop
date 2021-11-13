@@ -4,20 +4,19 @@
 
 #pragma once
 
+#include "../room.h"
+#include "accountmodel.h"
 #include <QAbstractListModel>
-#include <vector>
 #include <optional>
-#include "room.h"
-#include "services/accounts.h"
+#include <vector>
 
 class MessageEventModel;
 class QNetworkAccessManager;
 class QNetworkReply;
-class Accounts;
 class NextcloudAccount;
-class Participants;
+class ParticipantModel;
 
-class RoomService : public QAbstractListModel
+class RoomListModel : public QAbstractListModel
 {
     Q_OBJECT
 
@@ -41,7 +40,7 @@ class RoomService : public QAbstractListModel
     /// This property holds the description of the room.
     Q_PROPERTY(QString currentDescription READ currentDescription NOTIFY roomChanged)
 
-    Q_PROPERTY(Participants *participants READ participants CONSTANT)
+    Q_PROPERTY(ParticipantModel *participants READ participants CONSTANT)
 
     Q_PROPERTY(bool hasOpenRoom READ hasOpenRoom NOTIFY hasOpenRoomChanged)
 public:
@@ -61,7 +60,7 @@ public:
         ConversationNameRole,
     };
 
-    explicit RoomService(QObject *parent = nullptr);
+    explicit RoomListModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -74,7 +73,7 @@ public:
     QString currentDescription() const;
     bool currentIsFavorite() const;
     void setCurrentIsFavorite(bool isFavorite);
-    Participants *participants() const;
+    ParticipantModel *participants() const;
     bool hasOpenRoom() const;
 
 public slots:
@@ -97,7 +96,7 @@ private slots:
 private:
     AccountModel *m_accountModel = AccountModel::getInstance();
     std::vector<Room> m_rooms;
-    QVector<QNetworkReply*> m_rooms_requests;
+    QVector<QNetworkReply *> m_rooms_requests;
     QNetworkAccessManager *m_nam = nullptr;
     int m_pendingRequests = 0;
     QString activeToken;
@@ -106,6 +105,6 @@ private:
     int m_lookIntoFuture = 0;
     MessageEventModel *m_messageModel = nullptr;
     std::optional<Room> m_currentRoom;
-    Participants *m_participants;
+    ParticipantModel *m_participants;
     bool m_hasOpenRoom = false;
 };

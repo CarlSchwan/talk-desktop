@@ -36,7 +36,7 @@ Kirigami.OverlayDrawer {
                 repeat: true
                 running: true
                 triggeredOnStart: true
-                onTriggered: RoomService.participants.pullParticipants()
+                onTriggered: RoomListModel.participants.pullParticipantModel()
             }
 
             Kirigami.AbstractApplicationHeader {
@@ -65,13 +65,13 @@ Kirigami.OverlayDrawer {
 
                     ToolButton {
                         Layout.alignment: Qt.AlignRight
-                        icon.name: RoomService.isFavourite ? "rating" : "rating-unrated"
+                        icon.name: RoomListModel.isFavourite ? "rating" : "rating-unrated"
                         checkable: true
-                        enabled: RoomService.isLoaded
-                        checked: RoomService.currentIsFavourite
-                        onClicked: RoomService.currentIsFavourite != RoomService.currentIsFavourite
+                        enabled: RoomListModel.isLoaded
+                        checked: RoomListModel.currentIsFavourite
+                        onClicked: RoomListModel.currentIsFavourite != RoomListModel.currentIsFavourite
                         ToolTip {
-                            text: RoomService.currentIsFavourite ? i18n("Remove room from favorites") : i18n("Make room favorite")
+                            text: RoomListModel.currentIsFavourite ? i18n("Remove room from favorites") : i18n("Make room favorite")
                         }
                     }
                     ToolButton {
@@ -107,9 +107,9 @@ Kirigami.OverlayDrawer {
                             Layout.preferredWidth: Kirigami.Units.gridUnit * 3.5
                             Layout.preferredHeight: Kirigami.Units.gridUnit * 3.5
 
-                            name: RoomService.currentName
-                            source: RoomService.currentAvatarUrl
-                            visible: RoomService.currentAvatarUrl.length !== 0
+                            name: RoomListModel.currentName
+                            source: RoomListModel.currentAvatarUrl
+                            visible: RoomListModel.currentAvatarUrl.length !== 0
                         }
 
                         Kirigami.Heading {
@@ -117,7 +117,7 @@ Kirigami.OverlayDrawer {
                             Layout.fillWidth: true
                             font.bold: true
                             wrapMode: Label.Wrap
-                            text: RoomService.currentName
+                            text: RoomListModel.currentName
                         }
                     }
 
@@ -125,7 +125,7 @@ Kirigami.OverlayDrawer {
                         Layout.maximumWidth: Kirigami.Units.gridUnit * 13
                         Layout.preferredWidth: Kirigami.Units.gridUnit * 13
                         Layout.fillWidth: true
-                        text: RoomService.currentDescription ? RoomService.currentDescription.replace(replaceLinks, "<a href=\"$1\">$1</a>") : i18n("No Topic")
+                        text: RoomListModel.currentDescription ? RoomListModel.currentDescription.replace(replaceLinks, "<a href=\"$1\">$1</a>") : i18n("No Topic")
                         readonly property var replaceLinks: /\(https:\/\/[^ ]*\)/
                         textFormat: TextEdit.MarkdownText
                         wrapMode: Text.WordWrap
@@ -175,7 +175,7 @@ Kirigami.OverlayDrawer {
                     model: KSortFilterProxyModel {
                         id: sortedMessageEventModel
 
-                        sourceModel: RoomService.participants
+                        sourceModel: RoomListModel.participants
 
                         sortRole: "isOnline"
                         filterRole: "displayName"

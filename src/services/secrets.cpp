@@ -17,10 +17,7 @@ const QString Secrets::m_collectionName(QStringLiteral("nextcloudTalk"));
 #include <QGuiApplication>
 #endif
 
-
-Secrets::Secrets()
-{
-}
+Secrets::Secrets() = default;
 
 QByteArray Secrets::get(const QString &key) {
 #ifdef KDE_EDITION

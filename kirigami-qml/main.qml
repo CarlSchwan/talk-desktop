@@ -21,14 +21,14 @@ Kirigami.ApplicationWindow {
         modal: !root.wideScreen || !enabled
         onEnabledChanged: drawerOpen = enabled && !modal
         onModalChanged: drawerOpen = !modal
-        enabled: RoomService.isLoaded && pageStack.layers.depth < 2 && pageStack.depth < 3
+        enabled: RoomListModel.isLoaded && pageStack.layers.depth < 2 && pageStack.depth < 3
         handleVisible: enabled && pageStack.layers.depth < 2 && pageStack.depth < 3
     }
 
     readonly property int defaultPageWidth: Kirigami.Units.gridUnit * 17
     readonly property int minPageWidth: Kirigami.Units.gridUnit * 10
     readonly property int collapsedPageWidth: Kirigami.Units.gridUnit * 3 - Kirigami.Units.smallSpacing * 3
-    readonly property bool shouldUseSidebars: RoomService.hasOpenRoom && (Config.roomListPageWidth > minPageWidth ? root.width >= Kirigami.Units.gridUnit * 35 : root.width > Kirigami.Units.gridUnit * 27)
+    readonly property bool shouldUseSidebars: RoomListModel.hasOpenRoom && (Config.roomListPageWidth > minPageWidth ? root.width >= Kirigami.Units.gridUnit * 35 : root.width > Kirigami.Units.gridUnit * 27)
     readonly property int pageWidth: {
         if (Config.roomListPageWidth === -1) {
             return defaultPageWidth;

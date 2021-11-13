@@ -2,49 +2,51 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "messageeventmodel.h"
-#include <QDateTime>
-#include <QHash>
+
+#include "../nextcloudaccount.h"
+#include "accountmodel.h"
 #include <QDBusConnection>
 #include <QDBusMessage>
-#include <QNetworkReply>
-#include <QJsonDocument>
+#include <QDateTime>
+#include <QHash>
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QNetworkReply>
 #include <QUrlQuery>
-#include "nextcloudaccount.h"
-#include "services/accounts.h"
-#include <QMetaMethod>
 
 MessageEventModel::MessageEventModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
 
-MessageEventModel::~MessageEventModel()
-{
-}
+MessageEventModel::~MessageEventModel() = default;
 
 void MessageEventModel::addMessages(const QJsonObject &obj)
 {
     beginInsertRows(QModelIndex(), m_messages.size(), m_messages.size());
     auto &message = m_messages.emplace_back();
-    message.text = obj["message"].toString().replace("{actor}", obj["actorDisplayName"].toString())
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "gt;")
-        .replace("\n", "<br />");
+    message.text = obj["message"]
+                       .toString()
+                       .replace("{actor}", obj["actorDisplayName"].toString())
+                       .replace("&", "&amp;")
+                       .replace("<", "&lt;")
+                       .replace(">", "gt;")
+                       .replace("\n", "<br />");
 
     const QJsonObject parameters = obj.value("messageParameters").toObject();
 
-    for (const QString &placeholder: parameters.keys()) {
+    for (const QString &placeholder : parameters.keys()) {
         const auto subString = QLatin1Char('{') + placeholder + QLatin1Char('}');
         if (placeholder == "user") {
             message.text = message.text.replace(message.text.indexOf(subString), subString.size(), parameters[placeholder].toObject()["name"].toString());
         } else if (placeholder.startsWith("mention-")) {
-            message.text = message.text.replace(message.text.indexOf(subString), subString.size(), "<a href=''>" + parameters[placeholder].toObject()["name"].toString() + "</a>");
+            message.text = message.text.replace(message.text.indexOf(subString),
+                                                subString.size(),
+                                                "<a href=''>" + parameters[placeholder].toObject()["name"].toString() + "</a>");
         }
 
-        //QString name = parameters.value(placeholder).toObject().value("name").toString();
-        //message.text.replace("{" + placeholder + "}", name, Qt::CaseSensitive);
+        // QString name = parameters.value(placeholder).toObject().value("name").toString();
+        // message.text.replace("{" + placeholder + "}", name, Qt::CaseSensitive);
     }
 
     message.obj = obj;
@@ -83,10 +85,11 @@ QUrl MessageEventModel::getImageUrl(const QJsonObject &messageParameters) const
     for (const QString &key : messageParameters.keys()) {
         const auto &value = messageParameters[key].toObject();
         if (value.contains(QLatin1String("type")) && value["type"].toString() == QLatin1String("file")) {
-            //getUrlForFilePreviewWithFileId();
+            // getUrlForFilePreviewWithFileId();
             /*if(!isVoiceMessage()){
                 return (ApiUtils.getUrlForFilePreviewWithFileId(getActiveUser().getBaseUrl(),
-                                                                individualHashMap.get("id"), NextcloudTalkApplication.Companion.getSharedApplication().getResources().getDimensionPixelSize(R.dimen.maximum_file_preview_size)));
+                                                                individualHashMap.get("id"),
+            NextcloudTalkApplication.Companion.getSharedApplication().getResources().getDimensionPixelSize(R.dimen.maximum_file_preview_size)));
             }*/
         }
     }
@@ -115,51 +118,51 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
     const auto &message = m_messages[index.row()];
 
     switch (role) {
-        case Qt::DisplayRole:
-            return message.text;
-        case ActorDisplayNameRole:
-            return message.obj["actorId"].toString();
-        case DateRole:
-            return QDateTime::fromMSecsSinceEpoch(message.obj["timestamp"].toInt() * 1000);
-        case AvatarRole:
-            return QLatin1String("image://avatar/") + QString::number(m_account->id()) + QLatin1Char('/') + message.obj["actorId"].toString() + QLatin1Char('/');
-        case ShowAuthorRole: {
-            if (index.row() == 0) {
-                return true;
-            }
-            const auto &lastMessage = m_messages[index.row() - 1];
-            return lastMessage.obj["actorId"].toString() != message.obj["actorId"].toString();
+    case Qt::DisplayRole:
+        return message.text;
+    case ActorDisplayNameRole:
+        return message.obj["actorId"].toString();
+    case DateRole:
+        return QDateTime::fromMSecsSinceEpoch(message.obj["timestamp"].toInt() * 1000);
+    case AvatarRole:
+        return QLatin1String("image://avatar/") + QString::number(m_account->id()) + QLatin1Char('/') + message.obj["actorId"].toString() + QLatin1Char('/');
+    case ShowAuthorRole: {
+        if (index.row() == 0) {
+            return true;
         }
-        case IsHiglightedRole:
-            return false; // TODO
-        case IsLocalUserRole:
-            return false; // TODO
-        case EventTypeRole:
-            return message.type;
-        case ContentTypeRole:
-            if (message.type != SingleLinkImageMessage) {
-                return {};
-            }
-            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("mimetype")].toString();
-        case FilePreviewUrlRole: {
-            if (message.type != SingleLinkImageMessage) {
-                return {};
-            }
-            const auto fileId = message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("id")].toString();
-            return QLatin1String("image://preview/") + QString::number(m_account->id()) + QLatin1Char('/') + fileId + QLatin1Char('/');
+        const auto &lastMessage = m_messages[index.row() - 1];
+        return lastMessage.obj["actorId"].toString() != message.obj["actorId"].toString();
+    }
+    case IsHiglightedRole:
+        return false; // TODO
+    case IsLocalUserRole:
+        return false; // TODO
+    case EventTypeRole:
+        return message.type;
+    case ContentTypeRole:
+        if (message.type != SingleLinkImageMessage) {
+            return {};
         }
-        case FileUrlRole: {
-            if (message.type != SingleLinkImageMessage) {
-                return {};
-            }
-            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("path")].toString();
+        return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("mimetype")].toString();
+    case FilePreviewUrlRole: {
+        if (message.type != SingleLinkImageMessage) {
+            return {};
         }
-        case FileNameRole: {
-            if (message.type != SingleLinkImageMessage) {
-                return {};
-            }
-            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("name")].toString();
+        const auto fileId = message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("id")].toString();
+        return QLatin1String("image://preview/") + QString::number(m_account->id()) + QLatin1Char('/') + fileId + QLatin1Char('/');
+    }
+    case FileUrlRole: {
+        if (message.type != SingleLinkImageMessage) {
+            return {};
         }
+        return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("path")].toString();
+    }
+    case FileNameRole: {
+        if (message.type != SingleLinkImageMessage) {
+            return {};
+        }
+        return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("name")].toString();
+    }
     }
 
     return {};
@@ -167,20 +170,18 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
 
 QHash<int, QByteArray> MessageEventModel::roleNames() const
 {
-    return {
-        {Qt::DisplayRole, QByteArrayLiteral("display")},
-        {ActorDisplayNameRole, QByteArrayLiteral("actorDisplayName")},
-        {DateRole, QByteArrayLiteral("time")},
-        {AvatarRole, QByteArrayLiteral("avatar")},
-        {ShowAuthorRole, QByteArrayLiteral("showAuthor")},
-        {IsHiglightedRole, QByteArrayLiteral("isHighlighted")},
-        {IsLocalUserRole, QByteArrayLiteral("isLocalUser")},
-        {FilePreviewUrlRole, QByteArrayLiteral("filePreviewUrl")},
-        {FileUrlRole, QByteArrayLiteral("fileUrl")},
-        {FileNameRole, QByteArrayLiteral("fileName")},
-        {ContentTypeRole, QByteArrayLiteral("contentType")},
-        {EventTypeRole, QByteArrayLiteral("eventType")}
-    };
+    return {{Qt::DisplayRole, QByteArrayLiteral("display")},
+            {ActorDisplayNameRole, QByteArrayLiteral("actorDisplayName")},
+            {DateRole, QByteArrayLiteral("time")},
+            {AvatarRole, QByteArrayLiteral("avatar")},
+            {ShowAuthorRole, QByteArrayLiteral("showAuthor")},
+            {IsHiglightedRole, QByteArrayLiteral("isHighlighted")},
+            {IsLocalUserRole, QByteArrayLiteral("isLocalUser")},
+            {FilePreviewUrlRole, QByteArrayLiteral("filePreviewUrl")},
+            {FileUrlRole, QByteArrayLiteral("fileUrl")},
+            {FileNameRole, QByteArrayLiteral("fileName")},
+            {ContentTypeRole, QByteArrayLiteral("contentType")},
+            {EventTypeRole, QByteArrayLiteral("eventType")}};
 }
 
 void MessageEventModel::setRoom(const QString &token, int lastReadMessage, NextcloudAccount *account)
@@ -196,9 +197,7 @@ void MessageEventModel::setRoom(const QString &token, int lastReadMessage, Nextc
     clear();
 
     // Start polling loop
-    connect(this, &MessageEventModel::pollingDone,
-            this, &MessageEventModel::pollRoom,
-            Qt::QueuedConnection);
+    connect(this, &MessageEventModel::pollingDone, this, &MessageEventModel::pollRoom, Qt::QueuedConnection);
     pollRoom();
 }
 
@@ -226,7 +225,7 @@ void MessageEventModel::pollRoom()
         {QStringLiteral("lastKnownMessageId"), QString::number(m_lastReadMessage)},
     });
     endpoint.setQuery(urlQuery);
-    
+
     qDebug() << endpoint;
 
     const auto token = m_token;
@@ -236,7 +235,8 @@ void MessageEventModel::pollRoom()
     });
 }
 
-void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
+void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token)
+{
     qDebug() << "polling for new messages finished " << reply->error();
     qDebug() << "status code" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
@@ -250,20 +250,18 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
         return;
     }
 
-    if(reply->error() == QNetworkReply::ContentNotFoundError) {
+    if (reply->error() == QNetworkReply::ContentNotFoundError) {
         qDebug() << "Some server error?! check logs! Polling stopped.";
         return;
     }
 
-    if(reply->error() == QNetworkReply::TimeoutError) {
+    if (reply->error() == QNetworkReply::TimeoutError) {
         qDebug() << "timeout…";
         Q_EMIT pollingDone();
         return;
     }
 
-    if(reply->error() != QNetworkReply::NoError
-            || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200)
-    {
+    if (reply->error() != QNetworkReply::NoError || reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() != 200) {
         qDebug() << "issue occured:" << reply->errorString() << "→ Polling stopped!";
         return;
     }
@@ -275,14 +273,14 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
     qDebug() << "JSON" << apiResult;
     const QJsonObject meta = root.find("meta").value().toObject();
     const QJsonValue statuscode = meta.find("statuscode").value();
-    if(statuscode.toInt() != 200) {
+    if (statuscode.toInt() != 200) {
         qDebug() << "unexpected OCS code " << statuscode.toInt() << "→ polling stopped";
         return;
     }
 
     const QJsonArray data = root.find("data").value().toArray();
     int start, end, step;
-    if(m_lookIntoFuture == 0) {
+    if (m_lookIntoFuture == 0) {
         start = data.size() - 1;
         end = -1;
         step = -1;
@@ -294,19 +292,16 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
         step = 1;
     }
 
-    for(auto i = start; i != end; i += step) {
+    for (auto i = start; i != end; i += step) {
         const QJsonValue value = data.at(i);
         const QJsonObject messageData = value.toObject();
         const int msgId = messageData.value("id").toInt();
-        if(msgId > m_lastReadMessage) {
-             m_lastReadMessage = msgId;
+        if (msgId > m_lastReadMessage) {
+            m_lastReadMessage = msgId;
         }
 
         const QString systemMessage = messageData.value("systemMessage").toString();
-        if(systemMessage == "call_left"
-           || systemMessage == "call_started"
-           || systemMessage == "conversation_created"
-        ) {
+        if (systemMessage == "call_left" || systemMessage == "call_started" || systemMessage == "conversation_created") {
             // some system message we simply ignore:
             // - created because maybe it is not so important
             // - calls because they are not supported
@@ -319,22 +314,23 @@ void MessageEventModel::roomPolled(QNetworkReply *reply, const QString &token) {
     Q_EMIT pollingDone();
 }
 
-void MessageEventModel::sendMessage(const QString &messageText, int replyToId) {
+void MessageEventModel::sendMessage(const QString &messageText, int replyToId)
+{
     QUrl endpoint = QUrl(m_account->host());
     endpoint.setPath(endpoint.path() + QLatin1String("/ocs/v2.php/apps/spreed/api/v1/chat/") + m_token);
 
     QUrlQuery urlQuery;
     urlQuery.addQueryItem(QLatin1String("message"), QUrl::toPercentEncoding(messageText));
-    if(replyToId > -1) {
+    if (replyToId > -1) {
         urlQuery.addQueryItem(QLatin1String("replyTo"), QString::number(replyToId));
     }
     m_account->post(endpoint, urlQuery, nullptr);
 }
 
-void MessageEventModel::emitAfterActiveRoomChanged(const QString &token, NextcloudAccount *account) {
-    //QDBusConnection bus = QDBusConnection::sessionBus();
-    //QDBusMessage event = QDBusMessage::createSignal("/conversation", "org.nextcloud.talk", "afterActiveConversationChanged");
-    //event << token << account;
-    //bus.send(event);
+void MessageEventModel::emitAfterActiveRoomChanged(const QString &token, NextcloudAccount *account)
+{
+    // QDBusConnection bus = QDBusConnection::sessionBus();
+    // QDBusMessage event = QDBusMessage::createSignal("/conversation", "org.nextcloud.talk", "afterActiveConversationChanged");
+    // event << token << account;
+    // bus.send(event);
 }
-

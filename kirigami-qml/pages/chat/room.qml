@@ -66,7 +66,7 @@ Kirigami.ScrollablePage {
                     id: fileDialog
                     title: i18n("Please choose a file")
                     folder: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
-                    onAccepted: DownloadService.getFile(hoverActions.event.fileUrl, fileDialog.file, RoomService.messageModel.accountId)
+                    onAccepted: DownloadService.getFile(hoverActions.event.fileUrl, fileDialog.file, RoomListModel.messageModel.accountId)
                     fileMode: FileDialog.SaveFile
                 }
             }
@@ -141,7 +141,7 @@ Kirigami.ScrollablePage {
             }
         }
 
-        model: RoomService.messageModel
+        model: RoomListModel.messageModel
         Component.onCompleted: positionViewAtBeginning()
 
         QQC2.RoundButton {

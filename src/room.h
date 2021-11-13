@@ -1,5 +1,8 @@
-#ifndef ROOM_H
-#define ROOM_H
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <QString>
 #include <QJsonObject>
@@ -69,5 +72,3 @@ private:
     bool m_lastMessageIsSystemMessage;
     QString m_conversationName;
 };
-
-#endif // ROOM_H

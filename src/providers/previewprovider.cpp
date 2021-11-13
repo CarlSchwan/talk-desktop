@@ -1,15 +1,18 @@
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "previewprovider.h"
+#include "nextcloudaccount.h"
 #include <QNetworkRequest>
 #include <QUrlQuery>
-#include "../services/accounts.h"
-#include "../services/requestfactory.h"
 
 PreviewProvider::PreviewProvider()
     : AbstractNextcloudImageProvider()
 {
 }
 
-QNetworkRequest PreviewProvider::getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize)
+QNetworkRequest PreviewProvider::getRequest(const QString &subject, NextcloudAccount *account, const QSize &requestedSize)
 {
     const QUrlQuery urlQuery({
         {QStringLiteral("fileId"), subject},

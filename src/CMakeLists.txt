@@ -10,23 +10,32 @@ add_executable(talk
     kirigami-nextcloud-talk.cpp
     nextcloudaccount.cpp
     room.cpp
-    roomservice.cpp
-    roomlistfilter.cpp
-    messageeventmodel.cpp
+
+    # Models
+    models/roomlistmodel.cpp
+    models/roomlistfilter.cpp
+    models/messageeventmodel.cpp
+    models/accountmodel.cpp
+    models/participantmodel.cpp
+
+    # Desktop specific
     desktop/chatboxhelper.cpp
     desktop/clipboard.cpp
     desktop/emojimodel.cpp
     desktop/windoweffects.cpp
     desktop/download.cpp
-    services/accounts.cpp
+
+    # General utilities
     services/capabilities.cpp
     #services/knotifications.cpp
-    services/participants.cpp
-    services/requestfactory.cpp
     services/secrets.cpp
+
+    # QtQuick image providers
     providers/abstractnextcloudimageprovider.cpp
     providers/avatarprovider.cpp
     providers/previewprovider.cpp
+
+    # Constants
     constants/ConversationTypeClass.cpp
     constants/PresenceStatusClass.cpp
     constants/systemmessagetype.cpp

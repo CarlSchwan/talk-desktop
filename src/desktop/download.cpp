@@ -4,7 +4,7 @@
 
 #include "download.h"
 
-#include "../services/accounts.h"
+#include "../models/accountmodel.h"
 
 #include "QDesktopServices"
 #include "QDebug"

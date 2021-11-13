@@ -30,11 +30,11 @@ Page {
                 roomService.startPolling(token, accountId)
             }
         } else if(status === PageStatus.Deactivating) {
-            if(pageStack.currentPage.pageName !== "Participants") {
+            if(pageStack.currentPage.pageName !== "ParticipantModel") {
                 roomService.stopPolling()
             }
         } else if(status === PageStatus.Inactive) {
-            if(pageStack.currentPage.pageName !== "Participants") {
+            if(pageStack.currentPage.pageName !== "ParticipantModel") {
                 messages.clear();
             }
             pageStack.popAttached()
@@ -434,7 +434,7 @@ Page {
         }
     }
 
-    RoomService {
+    RoomListModel {
         id: roomService
     }
 

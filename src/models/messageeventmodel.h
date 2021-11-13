@@ -3,10 +3,10 @@
 
 #pragma once
 
+#include "db.h"
 #include <QAbstractListModel>
 #include <QJsonObject>
 #include <deque>
-#include "db.h"
 
 class NextcloudAccount;
 class QNetworkReply;
@@ -32,8 +32,7 @@ public:
 
     Q_ENUM(MessageType)
 
-    struct Message
-    {
+    struct Message {
         QString text;
         QJsonObject obj;
         MessageType type = MessageType::RegularTextMessage;

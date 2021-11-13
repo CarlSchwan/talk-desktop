@@ -10,8 +10,8 @@ class DiscoveryRun : public QObject
 {
     Q_OBJECT
 public:
-    explicit DiscoveryRun(QString url, QObject *parent = nullptr);
-    explicit DiscoveryRun(QString url, QString loginName, QString token, QObject *parent = nullptr);
+    explicit DiscoveryRun(const QString &url, QObject *parent = nullptr);
+    explicit DiscoveryRun(const QString &url, const QString &loginName, const QString &token, QObject *parent = nullptr);
     enum DiscoveryResult {
         Available = 0,
         OtherError = 1,

@@ -28,26 +28,26 @@
 
 #include "talk-version.h"
 
-#include "providers/avatarprovider.h"
-#include "providers/previewprovider.h"
-#include "services/accounts.h"
-#include "desktop/download.h"
-#include "services/participants.h"
-#include "discovery.h"
-#include "roomservice.h"
-#include "nextcloudaccount.h"
 #include "constants/ConversationTypeClass.h"
 #include "constants/PresenceStatusClass.h"
-#include "roomlistfilter.h"
-#include "talkconfig.h"
-#include "desktop/emojimodel.h"
-#include "desktop/windoweffects.h"
 #include "desktop/chatboxhelper.h"
 #include "desktop/clipboard.h"
+#include "desktop/download.h"
+#include "desktop/emojimodel.h"
+#include "desktop/windoweffects.h"
+#include "discovery.h"
+#include "models/accountmodel.h"
+#include "models/messageeventmodel.h"
+#include "models/participantmodel.h"
+#include "models/roomlistfilter.h"
+#include "models/roomlistmodel.h"
+#include "nextcloudaccount.h"
+#include "providers/avatarprovider.h"
+#include "providers/previewprovider.h"
+#include "talkconfig.h"
 #ifdef HAVE_COLORSCHEME
 #include "desktop/colorschemer.h"
 #endif
-#include "messageeventmodel.h"
 
 #ifdef Q_OS_ANDROID
 Q_DECL_EXPORT
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomListFilterModel>("harbour.nextcloud.talk", 1, 0, "RoomListFilterModel");
-    qmlRegisterType<Participants>("harbour.nextcloud.talk", 1, 0, "ParticipantService");
+    qmlRegisterType<ParticipantModel>("harbour.nextcloud.talk", 1, 0, "ParticipantModel");
     qmlRegisterType<MessageEventModel>("harbour.nextcloud.talk", 1, 0, "MessageEventModel");
 
     qmlRegisterSingletonType<Download>("harbour.nextcloud.talk", 1, 0, "DownloadService", &Download::qmlInstance);
@@ -125,13 +125,10 @@ int main(int argc, char *argv[])
         return new EmojiModel();
     });
 
-    qmlRegisterSingletonType<RoomService>("harbour.nextcloud.talk", 1, 0, "RoomService",
-        [](QQmlEngine *eng, QJSEngine *js) -> QObject *
-        {
-            Q_UNUSED(js)
-            return new RoomService;
-        }
-    );
+    qmlRegisterSingletonType<RoomListModel>("harbour.nextcloud.talk", 1, 0, "RoomListModel", [](QQmlEngine *eng, QJSEngine *js) -> QObject * {
+        Q_UNUSED(js)
+        return new RoomListModel;
+    });
 
     auto config = TalkConfig::self();
     qmlRegisterSingletonInstance("harbour.nextcloud.talk", 1, 0, "Config", config);

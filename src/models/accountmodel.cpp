@@ -1,9 +1,13 @@
-#include <qdebug.h>
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carl@carlschwan.eu>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "accountmodel.h"
+#include "../services/capabilities.h"
+#include "../services/secrets.h"
 #include <QObject>
 #include <QSettings>
-#include "accounts.h"
-#include "capabilities.h"
-#include "../db.h"
+#include <qdebug.h>
 
 AccountModel::AccountModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -11,9 +15,9 @@ AccountModel::AccountModel(QObject *parent)
     load();
 }
 
-AccountModel* AccountModel::getInstance()
+AccountModel *AccountModel::getInstance()
 {
-    static AccountModel* instance = new AccountModel();
+    static AccountModel *instance = new AccountModel();
     return instance;
 }
 
@@ -49,7 +53,8 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
     if (role == ColorRole && index.isValid()) {
         m_accounts.at(index.row())->setColorOverride(value.value<QColor>());
 
@@ -68,19 +73,19 @@ bool AccountModel::setData(const QModelIndex &index, const QVariant &value, int 
     return false;
 }
 
-QHash<int, QByteArray> AccountModel::roleNames() const {
-    return {
-        {NameRole, QByteArrayLiteral("name")},
-        {AccountRole, QByteArrayLiteral("account")},
-        {LogoRole, QByteArrayLiteral("instanceLogo")},
-        {InstanceNameRole, QByteArrayLiteral("instanceName")},
-        {ColorRole, QByteArrayLiteral("color")},
-        {ColorModeRole, QByteArrayLiteral("colorMode")}
-    };
+QHash<int, QByteArray> AccountModel::roleNames() const
+{
+    return {{NameRole, QByteArrayLiteral("name")},
+            {AccountRole, QByteArrayLiteral("account")},
+            {LogoRole, QByteArrayLiteral("instanceLogo")},
+            {InstanceNameRole, QByteArrayLiteral("instanceName")},
+            {ColorRole, QByteArrayLiteral("color")},
+            {ColorModeRole, QByteArrayLiteral("colorMode")}};
 }
 
-QString getSecretsKey(const NextcloudAccount *account) {
-    return account->name() + " (" + QString::number(account->id()) +")";
+QString getSecretsKey(const NextcloudAccount *account)
+{
+    return account->name() + " (" + QString::number(account->id()) + ")";
 }
 
 void AccountModel::addAccount(const QString &url, const QString &loginName, const QString &token, const QString &userId)
@@ -114,10 +119,7 @@ void AccountModel::deleteAccount(int accountId)
     m_secrets.unset(getSecretsKey(account));
     qDebug() << "account deleted, status " << accountSettings.status();
 
-    Db db;
-    db.deleteAccountEntries(account);
-
-    NextcloudAccount* acc = getAccountById(accountId);
+    NextcloudAccount *acc = getAccountById(accountId);
     if (!acc) {
         qDebug() << "Could not find account in vector for removal" << accountId;
         dataChanged(index(0), index(m_accounts.length() - 1));
@@ -131,7 +133,7 @@ void AccountModel::deleteAccount(int accountId)
     endRemoveRows();
 }
 
-QVector<NextcloudAccount*> AccountModel::getAccounts() const
+QVector<NextcloudAccount *> AccountModel::getAccounts() const
 {
     return m_accounts;
 }
@@ -159,7 +161,7 @@ void AccountModel::load()
             deleteAccount(getAccountId(account));
             continue;
         }
-        if(account->id() > m_maxId) {
+        if (account->id() > m_maxId) {
             m_maxId = account->id();
         }
         endInsertRows();

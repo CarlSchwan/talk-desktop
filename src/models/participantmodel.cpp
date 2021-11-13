@@ -1,22 +1,22 @@
-#include <ctime>
+#include "participantmodel.h"
+#include "../services/capabilities.h"
+#include "nextcloudaccount.h"
 #include <QException>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QMetaMethod>
 #include <QNetworkRequest>
 #include <QUrlQuery>
-#include <QMetaMethod>
-#include "participants.h"
-#include "requestfactory.h"
-#include "capabilities.h"
+#include <ctime>
 
-Participants::Participants(QObject *parent)
+ParticipantModel::ParticipantModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
 
-int Participants::rowCount(const QModelIndex &parent) const
+int ParticipantModel::rowCount(const QModelIndex &parent) const
 {
     // For list models only the root node (an invalid parent) should return the list's size. For all
     // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
@@ -27,7 +27,7 @@ int Participants::rowCount(const QModelIndex &parent) const
     return m_participants.length();
 }
 
-QVariant Participants::data(const QModelIndex &index, int role) const
+QVariant ParticipantModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {
         return {};
@@ -59,7 +59,7 @@ QVariant Participants::data(const QModelIndex &index, int role) const
     }
 }
 
-QHash<int, QByteArray> Participants::roleNames() const
+QHash<int, QByteArray> ParticipantModel::roleNames() const
 {
     return {
         {IdRole, QByteArrayLiteral("userId")},
@@ -74,17 +74,18 @@ QHash<int, QByteArray> Participants::roleNames() const
     };
 }
 
-void Participants::setRoom(const QString &token, NextcloudAccount *account)
+void ParticipantModel::setRoom(const QString &token, NextcloudAccount *account)
 {
     m_token = token;
     m_activeAccount = account;
 }
 
-void Participants::pullParticipants()
+void ParticipantModel::pullParticipantModel()
 {
     QUrl endpoint = QUrl(m_activeAccount->host());
     const QString apiV = QChar('v') + QString::number(m_activeAccount->capabilities()->getConversationApiLevel());
-    endpoint.setPath(endpoint.path() + QStringLiteral("/ocs/v2.php/apps/spreed/api/") + apiV + QStringLiteral("/room/") + m_token + QStringLiteral("/participants"));
+    endpoint.setPath(endpoint.path() + QStringLiteral("/ocs/v2.php/apps/spreed/api/") + apiV + QStringLiteral("/room/") + m_token
+                     + QStringLiteral("/participants"));
     QUrlQuery q(endpoint);
     q.addQueryItem("format", "json");
     q.addQueryItem("includeStatus", "true");
@@ -95,7 +96,7 @@ void Participants::pullParticipants()
     });
 }
 
-void Participants::participantsPulled(QNetworkReply *reply)
+void ParticipantModel::participantsPulled(QNetworkReply *reply)
 {
     const QByteArray payload = reply->readAll();
     const QJsonDocument apiResult = QJsonDocument::fromJson(payload);
@@ -105,9 +106,9 @@ void Participants::participantsPulled(QNetworkReply *reply)
 
     const QJsonObject meta = root.find("meta").value().toObject();
     const QJsonValue statuscode = meta.find("statuscode").value();
-    if(statuscode.toInt() != 200) {
+    if (statuscode.toInt() != 200) {
         qDebug() << "unexpected OCS code " << statuscode.toInt();
-        if(statuscode.toInt() != 200) {
+        if (statuscode.toInt() != 200) {
             qDebug() << "payload was " << payload;
             qDebug() << "url was" << reply->url();
         }
@@ -128,45 +129,40 @@ void Participants::participantsPulled(QNetworkReply *reply)
     bool isDirty = m_participants.empty();
 
     const QJsonArray data = root.find("data").value().toArray();
-    for(const QJsonValue &value : data) {
+    for (const QJsonValue &value : data) {
         const QJsonObject participantData = value.toObject();
 
         int apiLevel = m_activeAccount->capabilities()->getConversationApiLevel();
 
         const QString userId = apiLevel == 4 ? participantData.value("actorId").toString() : participantData.value("userId").toString();
         // it is only used to indicate whether a participant is present in a room, so any string not "0" suffices
-        const QString sessionId = apiLevel < 4
-                ? participantData.value("sessionId").toString()
-                : (participantData.value("sessionIds").toArray().empty()
-                   ? "0"
-                   : "yes");
+        const QString sessionId =
+            apiLevel < 4 ? participantData.value("sessionId").toString() : (participantData.value("sessionIds").toArray().empty() ? "0" : "yes");
 
-        Participant model(
-            userId,
-            participantData.value("displayName").toString(),
-            participantData.value("participantType").toInt(),
-            participantData.value("lastPing").toInt(),
-            sessionId
-        );
+        Participant model(userId,
+                          participantData.value("displayName").toString(),
+                          participantData.value("participantType").toInt(),
+                          participantData.value("lastPing").toInt(),
+                          sessionId);
 
         if (participantData.contains("status")) {
             model.presence = statusMap.value(participantData.value("status").toString(), PresenceStatus::Offline);
         }
-        if(participantData.contains("inCall")) {
+        if (participantData.contains("inCall")) {
             model.inCall = participantData.value("inCall").toInt();
         }
-        if(participantData.contains("statusIcon")) {
+        if (participantData.contains("statusIcon")) {
             model.statusIcon = participantData.value("statusIcon").toString("");
         }
-        if(participantData.contains("statusMessage")) {
+        if (participantData.contains("statusMessage")) {
             model.statusMessage = participantData.value("statusMessage").toString("");
         }
 
         model._checkId = checkId;
 
         int i = findParticipant(model.userId);
-        if(i >= 0) {
-            if(model.diverts(m_participants.at(i))) {
+        if (i >= 0) {
+            if (model.diverts(m_participants.at(i))) {
                 m_participants.replace(i, model);
                 isDirty = true;
             } else {
@@ -179,13 +175,13 @@ void Participants::participantsPulled(QNetworkReply *reply)
         }
     }
 
-    isDirty = removeParticipants(checkId) > 0 || isDirty;
+    isDirty = removeParticipantModel(checkId) > 0 || isDirty;
 
     if (isDirty) {
         // TODO sort should be implemented with QSortFilterProxyModel
-        std::sort(m_participants.begin(), m_participants.end(), [this](const Participant& a, const Participant b) {
+        std::sort(m_participants.begin(), m_participants.end(), [this](const Participant &a, const Participant b) {
             // sort onliners on top
-            if((a.sessionId != "0") != (b.sessionId != "0")) {
+            if ((a.sessionId != "0") != (b.sessionId != "0")) {
                 return a.sessionId != "0";
             }
 
@@ -194,20 +190,20 @@ void Participants::participantsPulled(QNetworkReply *reply)
                 return isModerator(a);
             }
 
-            //return a.displayName < b.displayName;
+            // return a.displayName < b.displayName;
             return a.displayName.compare(b.displayName, Qt::CaseInsensitive) < 0;
         });
         dataChanged(index(0), index(m_participants.length() - 1));
     }
 }
 
-int Participants::removeParticipants(int checkId)
+int ParticipantModel::removeParticipantModel(int checkId)
 {
     int removed = 0;
 
     QVector<Participant>::const_iterator i;
-    for(i = m_participants.begin(); i != m_participants.end(); i++) {
-        if(i->_checkId != checkId) {
+    for (i = m_participants.begin(); i != m_participants.end(); i++) {
+        if (i->_checkId != checkId) {
             m_participants.removeOne(*i);
             removed++;
             // Potential crash when the all participants were removed
@@ -217,18 +213,18 @@ int Participants::removeParticipants(int checkId)
     return removed;
 }
 
-int Participants::findParticipant(const QString &userId)
+int ParticipantModel::findParticipant(const QString &userId)
 {
     QVector<Participant>::iterator i;
-    for(i = m_participants.begin(); i != m_participants.end(); i++) {
-        if(i->userId == userId) {
+    for (i = m_participants.begin(); i != m_participants.end(); i++) {
+        if (i->userId == userId) {
             return m_participants.indexOf(*i);
         }
     }
     return -1;
 }
 
-bool Participants::isModerator(const Participant &participant) const
+bool ParticipantModel::isModerator(const Participant &participant) const
 {
     return participant.type == 1 || participant.type == 2 || participant.type == 6;
 }

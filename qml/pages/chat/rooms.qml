@@ -181,7 +181,7 @@ Page {
             }
         }
 
-        model:  RoomService {
+        model:  RoomListModel {
             id: roomService
             onModelAboutToBeReset: pulley.busy = true
             onModelReset: pulley.busy = false

@@ -2,16 +2,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "roomlistfilter.h"
-#include "roomservice.h"
+#include "roomlistmodel.h"
 #include <QDebug>
 
 RoomListFilterModel::RoomListFilterModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
     setFilterCaseSensitivity(Qt::CaseInsensitive);
-    setFilterRole(RoomService::NameRole);
+    setFilterRole(RoomListModel::NameRole);
     setDynamicSortFilter(true);
-    setSortRole(RoomService::LastMessageTimestampRole);
+    setSortRole(RoomListModel::LastMessageTimestampRole);
     sort(0, Qt::AscendingOrder);
 }
 
@@ -32,6 +32,6 @@ void RoomListFilterModel::setFilterText(const QString &filterText)
 
 bool RoomListFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-    return sourceModel()->data(left, RoomService::LastMessageTimestampRole).toInt() >
-        sourceModel()->data(right, RoomService::LastMessageTimestampRole).toInt();
+    return sourceModel()->data(left, RoomListModel::LastMessageTimestampRole).toInt()
+        > sourceModel()->data(right, RoomListModel::LastMessageTimestampRole).toInt();
 }

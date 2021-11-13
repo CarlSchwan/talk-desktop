@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "capabilities.h"
-#include "requestfactory.h"
 #include "../nextcloudaccount.h"
 
 #include <QMetaMethod>

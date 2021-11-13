@@ -184,7 +184,7 @@ Item {
     }
 
     Connections {
-        target: RoomService.currentNameChanged
+        target: RoomListModel.currentNameChanged
 
         function onCurrentRoomChanged() {
             chatBar.userAutocompleted = {};

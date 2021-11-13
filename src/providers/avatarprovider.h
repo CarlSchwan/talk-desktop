@@ -1,5 +1,7 @@
-#ifndef AVATARPROVIDER_H
-#define AVATARPROVIDER_H
+// SPDX-FileCopyrightText: 2018 Arthur Schiwon <blizzz@arthur-schiwon.de>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include "abstractnextcloudimageprovider.h"
 
@@ -7,7 +9,5 @@ class AvatarProvider : public AbstractNextcloudImageProvider
 {
 public:
     AvatarProvider();
-    QNetworkRequest getRequest(QString subject, NextcloudAccount* account, const QSize &requestedSize);
+    QNetworkRequest getRequest(const QString &subject, NextcloudAccount *account, const QSize &requestedSize);
 };
-
-#endif // AVATARPROVIDER_H
