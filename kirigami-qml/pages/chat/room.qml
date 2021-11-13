@@ -5,7 +5,7 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
-import QtQuick.Dialogs 1.3
+import Qt.labs.platform 1.1
 import Qt.labs.qmlmodels 1.0
 import org.kde.kirigami 2.15 as Kirigami
 import harbour.nextcloud.talk 1.0
@@ -56,6 +56,19 @@ Kirigami.ScrollablePage {
                 QQC2.ToolTip.text: i18n("Download")
                 QQC2.ToolTip.visible: hovered
                 icon.name: "edit-download"
+                visible: hoverActions.event.eventType === MessageEventModel.SingleLinkImageMessage
+                onClicked: {
+                    fileDialog.open()
+                    fileDialog.currentFile = fileDialog.folder + '/' + hoverActions.event.fileName
+                }
+
+                FileDialog {
+                    id: fileDialog
+                    title: i18n("Please choose a file")
+                    folder: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
+                    onAccepted: DownloadService.getFile(hoverActions.event.fileUrl, fileDialog.file, RoomService.messageModel.accountId)
+                    fileMode: FileDialog.SaveFile
+                }
             }
             QQC2.Button {
                 QQC2.ToolTip.text: i18n("Reply")

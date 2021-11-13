@@ -14,6 +14,7 @@ class QNetworkReply;
 class MessageEventModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int accountId READ accountId NOTIFY accountIdChanged)
 public:
     enum MessageType {
         RegularTextMessage,
@@ -52,6 +53,7 @@ public:
         EventTypeRole,
         FilePreviewUrlRole,
         FileUrlRole,
+        FileNameRole,
         ContentTypeRole // minetype
     };
 
@@ -68,6 +70,7 @@ public:
 
     void sendMessage(const QString &messageText, int replyToId);
     void roomPolled(QNetworkReply *reply, const QString &token);
+    int accountId() const;
 
 private Q_SLOTS:
     void pollRoom();
@@ -75,6 +78,7 @@ private Q_SLOTS:
 
 Q_SIGNALS:
     void pollingDone();
+    void accountIdChanged();
 
 private:
     bool hasFileAttachment(const QJsonObject &messageParameters) const;

@@ -31,7 +31,7 @@
 #include "providers/avatarprovider.h"
 #include "providers/previewprovider.h"
 #include "services/accounts.h"
-#include "services/download.h"
+#include "desktop/download.h"
 #include "services/participants.h"
 #include "discovery.h"
 #include "roomservice.h"

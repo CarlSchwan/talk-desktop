@@ -141,12 +141,25 @@ QVariant MessageEventModel::data(const QModelIndex &index, int role) const
                 return {};
             }
             return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("mimetype")].toString();
-        case FilePreviewUrlRole:
+        case FilePreviewUrlRole: {
             if (message.type != SingleLinkImageMessage) {
                 return {};
             }
             const auto fileId = message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("id")].toString();
             return QLatin1String("image://preview/") + QString::number(m_account->id()) + QLatin1Char('/') + fileId + QLatin1Char('/');
+        }
+        case FileUrlRole: {
+            if (message.type != SingleLinkImageMessage) {
+                return {};
+            }
+            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("path")].toString();
+        }
+        case FileNameRole: {
+            if (message.type != SingleLinkImageMessage) {
+                return {};
+            }
+            return message.obj[QLatin1String("messageParameters")].toObject()[QLatin1String("file")].toObject()[QLatin1String("name")].toString();
+        }
     }
 
     return {};
@@ -164,6 +177,7 @@ QHash<int, QByteArray> MessageEventModel::roleNames() const
         {IsLocalUserRole, QByteArrayLiteral("isLocalUser")},
         {FilePreviewUrlRole, QByteArrayLiteral("filePreviewUrl")},
         {FileUrlRole, QByteArrayLiteral("fileUrl")},
+        {FileNameRole, QByteArrayLiteral("fileName")},
         {ContentTypeRole, QByteArrayLiteral("contentType")},
         {EventTypeRole, QByteArrayLiteral("eventType")}
     };
@@ -178,6 +192,7 @@ void MessageEventModel::setRoom(const QString &token, int lastReadMessage, Nextc
     m_token = token;
     m_lastReadMessage = lastReadMessage;
     m_lookIntoFuture = 0;
+    Q_EMIT accountIdChanged();
     clear();
 
     // Start polling loop
@@ -185,6 +200,11 @@ void MessageEventModel::setRoom(const QString &token, int lastReadMessage, Nextc
             this, &MessageEventModel::pollRoom,
             Qt::QueuedConnection);
     pollRoom();
+}
+
+int MessageEventModel::accountId() const
+{
+    return m_account->id();
 }
 
 void MessageEventModel::pollRoom()

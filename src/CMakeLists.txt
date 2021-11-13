@@ -17,9 +17,9 @@ add_executable(talk
     desktop/clipboard.cpp
     desktop/emojimodel.cpp
     desktop/windoweffects.cpp
+    desktop/download.cpp
     services/accounts.cpp
     services/capabilities.cpp
-    services/download.cpp
     #services/knotifications.cpp
     services/participants.cpp
     services/requestfactory.cpp
