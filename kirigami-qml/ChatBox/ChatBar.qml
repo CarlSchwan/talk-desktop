@@ -309,7 +309,7 @@ ToolBar {
                 id: uploadingBusySpinner
                 anchors.fill: parent
                 visible: running
-                running: currentRoom && currentRoom.hasFileUploading
+                running: false //currentRoom && currentRoom.hasFileUploading
             }
         }
 

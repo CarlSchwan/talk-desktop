@@ -46,6 +46,7 @@ class RoomListModel : public QAbstractListModel
 public:
     enum RoomRoles {
         NameRole = Qt::UserRole + 1,
+        RoomRole,
         TokenRole,
         AccountRole,
         UnreadRole,
@@ -76,26 +77,25 @@ public:
     ParticipantModel *participants() const;
     bool hasOpenRoom() const;
 
-public slots:
+public Q_SLOTS:
     void loadRooms();
     void roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account);
     void select(int index);
     void loadRoomFromAccount(NextcloudAccount *account);
 
-signals:
+Q_SIGNALS:
     void newMessage(const QString &message);
     void roomChanged();
     void isLoadedChanged();
     void hasOpenRoomChanged();
 
-private slots:
-    std::vector<Room>::const_iterator findRoomByTokenAndAccount(const QString &token, NextcloudAccount *account) const;
+private Q_SLOTS:
     void onAccountsChanged();
     void onAccountUpdated();
 
 private:
     AccountModel *m_accountModel = AccountModel::getInstance();
-    std::vector<Room> m_rooms;
+    QList<Room *> m_rooms;
     QVector<QNetworkReply *> m_rooms_requests;
     QNetworkAccessManager *m_nam = nullptr;
     int m_pendingRequests = 0;
@@ -104,7 +104,7 @@ private:
     bool m_isLoaded = false;
     int m_lookIntoFuture = 0;
     MessageEventModel *m_messageModel = nullptr;
-    std::optional<Room> m_currentRoom;
+    Room *m_currentRoom = nullptr;
     ParticipantModel *m_participants;
     bool m_hasOpenRoom = false;
 };

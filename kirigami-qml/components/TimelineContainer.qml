@@ -21,7 +21,7 @@ QQC2.ItemDelegate {
 
     readonly property int bubbleMaxWidth: Config.compactLayout && !Config.showAvatarInTimeline ? width : (Config.compactLayout ? width - Kirigami.Units.gridUnit * 2 - Kirigami.Units.largeSpacing * 4 : Math.min(width - Kirigami.Units.gridUnit * 2 - Kirigami.Units.largeSpacing * 6, Kirigami.Units.gridUnit * 20))
 
-    property bool showUserMessageOnRight: Config.showLocalMessagesOnRight && model.author.isLocalUser && !applicationWindow().wideScreen
+    property bool showUserMessageOnRight: Config.showLocalMessagesOnRight && model.isLocalUser && !applicationWindow().wideScreen
 
     signal saveFileAs()
     signal openExternally()

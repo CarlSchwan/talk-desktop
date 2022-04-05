@@ -28,7 +28,6 @@
 
 #include "talk-version.h"
 
-#include "constants/ConversationTypeClass.h"
 #include "constants/PresenceStatusClass.h"
 #include "desktop/chatboxhelper.h"
 #include "desktop/clipboard.h"
@@ -93,10 +92,10 @@ int main(int argc, char *argv[])
     about.addAuthor(i18n("Arthur Schiwon"), i18n("Maintainer"), QStringLiteral("blizzz@arthur-schiwon.de"));
     about.addAuthor(i18n("Carl Schwan"), i18n("Kiriami port developer"), QStringLiteral("carl@carlschwan.eu"));
 
-    qmlRegisterUncreatableType<ConversationTypeClass>("harbour.nextcloud.talk", 1, 0, "ConversationType", "Enum type");
     qmlRegisterUncreatableType<PresenceStatusClass>("harbour.nextcloud.talk", 1, 0, "PresenceStatus", "Enum type");
     qmlRegisterUncreatableType<MessageEventModel>("harbour.nextcloud.talk", 1, 0, "MessageEventModel", "Enum type");
 
+    qmlRegisterUncreatableType<Room>("harbour.nextcloud.talk", 1, 0, "Room", "");
     qmlRegisterType<Discovery>("harbour.nextcloud.talk", 1, 0, "Discovery");
     qmlRegisterType<RoomListFilterModel>("harbour.nextcloud.talk", 1, 0, "RoomListFilterModel");
     qmlRegisterType<ParticipantModel>("harbour.nextcloud.talk", 1, 0, "ParticipantModel");

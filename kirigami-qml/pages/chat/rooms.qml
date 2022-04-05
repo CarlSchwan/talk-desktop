@@ -122,24 +122,24 @@ Kirigami.ScrollablePage {
                 height: ListView.view.width
 
                 contentItem: Kirigami.Avatar {
-                    source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
-                    iconSource: switch (conversationType) {
-                    case ConversationType.Public:
+                    source: model.room.type === Room.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
+                    iconSource: switch (room.type) {
+                    case Room.Public:
                         return 'link';
-                    case ConversationType.Group:
+                    case Room.Group:
                         return 'group';
-                    case ConversationType.Changelog:
+                    case Room.Changelog:
                         return 'documentinfo';
                     }
-                    initialsMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
-                    imageMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
+                    initialsMode: room.type === Room.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
+                    imageMode: Room === Room.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
                     sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                     sourceSize.height: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                 }
 
                 QQC2.ToolTip {
                     enabled: text.length !== 0
-                    text: name ?? ""
+                    text: room.name ?? ""
                 }
             }
         }
@@ -158,39 +158,75 @@ Kirigami.ScrollablePage {
                     onTriggered: {
                         if (applicationWindow().pageStack.depth === 1) {
                             applicationWindow().pageStack.push('qrc:/pages/chat/room.qml', {
-                                title: name,
+                                title: room.name,
                             });
                         } else {
                             const roomPage = applicationWindow().pageStack.get(1);
-                            roomPage.title = name;
+                            roomPage.title = room.name;
                         }
                         RoomListModel.select(filterModel.mapToSource(filterModel.index(index, 0)).row);
                     }
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()
                 Keys.onReturnPressed: enterRoomAction.trigger()
-                bold: unreadCount > 0
-                label: model.name ?? ""
-                subtitle: lastMessageIsSystemMessage ? lastMessageText : `${lastMessageAuthor}: ${lastMessageText}`
+                bold: room.unreadMentionDirect
+                label: room.name ?? ""
+                subtitle: room.lastMessageIsSystemMessage ? room.lastMessageText : `${room.lastMessageAuthor}: ${room.lastMessageText}`
                 subtitleItem.maximumLineCount: 1
 
                 leading: Kirigami.Avatar {
-                    source: conversationType === ConversationType.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
-                    iconSource: switch (conversationType) {
-                    case ConversationType.Public:
+                    source: room.type === Room.OneToOne ? `image://avatar/${accountId}/${conversationName}/` : ''
+                    iconSource: switch (room.type) {
+                    case Room.Public:
                         return 'link';
-                    case ConversationType.Group:
+                    case Room.Group:
                         return 'group';
-                    case ConversationType.Changelog:
+                    case Room.Changelog:
                         return 'documentinfo';
                     }
-                    initialsMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
-                    imageMode: conversationType === ConversationType.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
+                    initialsMode: room.type === Room.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
+                    imageMode: room.type === Room.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
                     name: model.name || i18n("No Name")
                     implicitWidth: visible ? height : 0
                     visible: Config.showAvatarInTimeline
                     sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                     sourceSize.height: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
+                }
+
+                trailing: RowLayout {
+                    QQC2.Label {
+                        text: room.unreadMessages
+                        visible: room.unreadMessages > 0
+                        padding: Kirigami.Units.smallSpacing
+                        color: room.unreadMention || room.unreadMentionDirect ? "white" : Kirigami.Theme.textColor
+                        Layout.minimumWidth: height
+                        horizontalAlignment: Text.AlignHCenter
+                        background: Rectangle {
+                            Kirigami.Theme.colorSet: Kirigami.Theme.Button
+                            color: room.unreadMention || room.unreadMentionDirect ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.backgroundColor
+                            radius: height / 2
+                        }
+                    }
+                    QQC2.Button {
+                        id: configButton
+                        visible: roomListItem.hovered
+                        Accessible.name: i18n("Configure room")
+
+                        action: Kirigami.Action {
+                            id: optionAction
+                            icon.name: "configure"
+                            onTriggered: {
+                                const menu = roomListContextMenu.createObject(page, {"room": currentRoom})
+                                configButton.visible = true
+                                configButton.down = true
+                                menu.closed.connect(function() {
+                                    configButton.down = undefined
+                                    configButton.visible = Qt.binding(function() { return roomListItem.hovered || Kirigami.Settings.isMobile })
+                                })
+                                menu.open()
+                            }
+                        }
+                    }
                 }
             }
         }

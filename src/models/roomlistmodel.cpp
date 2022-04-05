@@ -39,58 +39,68 @@ int RoomListModel::rowCount(const QModelIndex &parent) const
     return m_rooms.size();
 }
 
+const NextcloudAccount *Room::account() const
+{
+    return m_account;
+}
+
 QVariant RoomListModel::data(const QModelIndex &index, int role) const
 {
-    const Room &room = m_rooms[index.row()];
+    auto room = m_rooms[index.row()];
     switch (role) {
+    case RoomRole:
+        return QVariant::fromValue(room);
     case NameRole:
-        return room.name();
+        return room->name();
     case TokenRole:
-        return room.token();
+        return room->token();
     case UserIdRole:
-        return room.account().userId();
+        return room->account()->userId();
     case UnreadRole:
-        return room.unreadMessages();
+        return room->unreadMessages();
     case MentionedRole:
-        return room.unreadMention();
+        return room->unreadMention();
     case ColorRole:
-        if (room.account().colorOverride().isValid()) {
-            return room.account().colorOverride();
+        if (room->account()->colorOverride().isValid()) {
+            return room->account()->colorOverride();
         }
-        return room.account().capabilities()->primaryColor();
+        return room->account()->capabilities()->primaryColor();
     case AccountRole:
-        return room.account().id();
+        return room->account()->id();
     case LastMessageTextRole:
-        return room.lastMessageText();
+        return room->lastMessageText();
     case LastMessageAuthorRole:
-        return room.lastMessageAuthor();
+        return room->lastMessageAuthor();
     case LastMessageTimestampRole:
-        return room.lastMessageTimestamp();
+        return room->lastMessageTimestamp();
     case LastMessageIsSystemMessageRole:
-        return room.lastMessageIsSystemMessage();
+        return room->lastMessageIsSystemMessage();
     case TypeRole:
-        return room.type();
+        return room->type();
     case ConversationNameRole:
-        return room.name();
+        return room->name();
     }
     return {};
 }
 
 QHash<int, QByteArray> RoomListModel::roleNames() const
 {
-    return {{NameRole, QByteArrayLiteral("name")},
-            {TokenRole, QByteArrayLiteral("token")},
-            {AccountRole, QByteArrayLiteral("accountId")},
-            {UserIdRole, QByteArrayLiteral("accountUserId")},
-            {UnreadRole, QByteArrayLiteral("unreadMessages")},
-            {MentionedRole, QByteArrayLiteral("unreadMention")},
-            {ColorRole, QByteArrayLiteral("primaryColor")},
-            {LastMessageTextRole, QByteArrayLiteral("lastMessageText")},
-            {LastMessageAuthorRole, QByteArrayLiteral("lastMessageAuthor")},
-            {LastMessageTimestampRole, QByteArrayLiteral("lastMessageTimestamp")},
-            {LastMessageIsSystemMessageRole, QByteArrayLiteral("lastMessageIsSystemMessage")},
-            {TypeRole, QByteArrayLiteral("conversationType")},
-            {ConversationNameRole, QByteArrayLiteral("conversationName")}};
+    return {
+        {RoomRole, QByteArrayLiteral("room")},
+        {NameRole, QByteArrayLiteral("name")},
+        {TokenRole, QByteArrayLiteral("token")},
+        {AccountRole, QByteArrayLiteral("accountId")},
+        {UserIdRole, QByteArrayLiteral("accountUserId")},
+        {UnreadRole, QByteArrayLiteral("unreadMessages")},
+        {MentionedRole, QByteArrayLiteral("unreadMention")},
+        {ColorRole, QByteArrayLiteral("primaryColor")},
+        {LastMessageTextRole, QByteArrayLiteral("lastMessageText")},
+        {LastMessageAuthorRole, QByteArrayLiteral("lastMessageAuthor")},
+        {LastMessageTimestampRole, QByteArrayLiteral("lastMessageTimestamp")},
+        {LastMessageIsSystemMessageRole, QByteArrayLiteral("lastMessageIsSystemMessage")},
+        {TypeRole, QByteArrayLiteral("conversationType")},
+        {ConversationNameRole, QByteArrayLiteral("conversationName")},
+    };
 }
 
 void RoomListModel::loadRooms()
@@ -130,9 +140,10 @@ void RoomListModel::loadRoomFromAccount(NextcloudAccount *account)
 
 void RoomListModel::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccount *account)
 {
-    const auto apiResult = QJsonDocument::fromJson(reply->readAll()).object()[QLatin1Literal("ocs")].toObject();
+    const auto apiResult = QJsonDocument::fromJson(reply->readAll()).object()[QLatin1String("ocs")].toObject();
+    qDebug() << apiResult;
 
-    int statusCode = apiResult[QLatin1Literal("meta")].toObject()[QLatin1Literal("statuscode")].toInt();
+    int statusCode = apiResult[QLatin1String("meta")].toObject()[QLatin1String("statuscode")].toInt();
     if (statusCode != 200) {
         qDebug() << "unexpected OCS code " << statusCode;
         if (statusCode == 0) {
@@ -141,18 +152,22 @@ void RoomListModel::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccoun
         return;
     }
 
-    const QJsonArray data = apiResult[QLatin1Literal("data")].toArray();
+    const QJsonArray data = apiResult[QLatin1String("data")].toArray();
     for (const QJsonValue &value : data) {
-        QJsonObject room = value.toObject();
-        auto position = findRoomByTokenAndAccount(room[QLatin1Literal("token")].toString(), account);
-        if (position != m_rooms.cend()) {
-            m_rooms.erase(position);
-            m_rooms.emplace(position, account, room);
-            int pos = std::distance(m_rooms.cbegin(), position);
-            dataChanged(index(pos, 0), index(pos, 0), {});
-        } else {
+        QJsonObject roomObject = value.toObject();
+        const auto token = roomObject[QLatin1String("token")].toString();
+        bool updated = false;
+        for (const auto room : qAsConst(m_rooms)) {
+            if (room->token() == token) {
+                room->updateFromJsonObject(roomObject);
+                updated = true;
+                break;
+            }
+        }
+
+        if (!updated) {
             beginInsertRows(QModelIndex(), m_rooms.size(), m_rooms.size());
-            m_rooms.emplace_back(account, room);
+            m_rooms.push_back(new Room(account, roomObject));
             endInsertRows();
         }
     }
@@ -161,20 +176,6 @@ void RoomListModel::roomsLoadedFromAccount(QNetworkReply *reply, NextcloudAccoun
         m_isLoaded = true;
         Q_EMIT isLoadedChanged();
     }
-}
-
-std::vector<Room>::const_iterator RoomListModel::findRoomByTokenAndAccount(const QString &token, NextcloudAccount *account) const
-{
-    auto it = m_rooms.cbegin();
-
-    while (it != m_rooms.cend()) {
-        const auto &room = *it;
-        if (room.token() == token && &room.account() == account) {
-            return it;
-        }
-        it++;
-    }
-    return it;
 }
 
 void RoomListModel::onAccountsChanged()
@@ -217,7 +218,7 @@ QString RoomListModel::currentDescription() const
 QString RoomListModel::currentAvatarUrl() const
 {
     if (m_currentRoom->type() == ConversationType::OneToOne) {
-        return QStringLiteral("image://avatar/") + QString::number(m_currentRoom->account().id()) + QLatin1Char('/') + m_currentRoom->name() + QLatin1Char('/');
+        return QStringLiteral("image://avatar/") + QString::number(m_currentRoom->account()->id()) + QLatin1Char('/') + m_currentRoom->name() + QLatin1Char('/');
     }
     return QString(); // no avatar
 }
@@ -248,9 +249,9 @@ void RoomListModel::select(int index)
         m_hasOpenRoom = true;
         Q_EMIT hasOpenRoomChanged();
     }
-    Room &room = m_rooms[index];
+    auto room = m_rooms[index];
     m_currentRoom = room;
-    auto account = AccountModel::getInstance()->getAccountById(room.account().id());
-    m_messageModel->setRoom(room.token(), room.lastReadMessage(), account);
-    m_participants->setRoom(room.token(), account);
+    auto account = AccountModel::getInstance()->getAccountById(room->account()->id());
+    m_messageModel->setRoom(room->token(), room->lastReadMessage(), account);
+    m_participants->setRoom(room->token(), account);
 }
