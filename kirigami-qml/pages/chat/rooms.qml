@@ -99,14 +99,14 @@ Kirigami.ScrollablePage {
                         if (applicationWindow().pageStack.depth === 1) {
                             applicationWindow().pageStack.push("qrc:/pages/chat/room.qml", {
                                 token: token,
-                                roomName: name,
+                                roomName: room.displayName,
                                 accountId: accountId,
                                 accountUserId: accountUserId,
                             });
                         } else {
                             const roomPage = applicationWindow().pageStack.get(1);
                             roomPage.token = token;
-                            roomPage.roomName = name;
+                            roomPage.roomName = root.displayName;
                             roomPage.accountId = accountId;
                             roomPage.accountUserId = accountUserId;
                         }
@@ -139,7 +139,7 @@ Kirigami.ScrollablePage {
 
                 QQC2.ToolTip {
                     enabled: text.length !== 0
-                    text: room.name ?? ""
+                    text: room.displayName ?? ""
                 }
             }
         }
@@ -169,8 +169,8 @@ Kirigami.ScrollablePage {
                 }
                 Keys.onEnterPressed: enterRoomAction.trigger()
                 Keys.onReturnPressed: enterRoomAction.trigger()
-                bold: room.unreadMentionDirect
-                label: room.name ?? ""
+                bold: room.unreadMention || room.unreadMentionDirect || room.unreadMessages > 0 && room.type === Room.OneToOne
+                label: room.displayName ?? ""
                 subtitle: room.lastMessageIsSystemMessage ? room.lastMessageText : `${room.lastMessageAuthor}: ${room.lastMessageText}`
                 subtitleItem.maximumLineCount: 1
 
@@ -186,7 +186,7 @@ Kirigami.ScrollablePage {
                     }
                     initialsMode: room.type === Room.OneToOne ? Kirigami.Avatar.InitialsMode.UseInitials : Kirigami.Avatar.InitialsMode.UseIcon
                     imageMode: room.type === Room.OneToOne ? Kirigami.Avatar.ImageMode.AdaptiveImageOrInitals : Kirigami.Avatar.ImageMode.AlwaysShowInitials
-                    name: model.name || i18n("No Name")
+                    name: room.displayName || i18n("No Name")
                     implicitWidth: visible ? height : 0
                     visible: Config.showAvatarInTimeline
                     sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
@@ -198,12 +198,12 @@ Kirigami.ScrollablePage {
                         text: room.unreadMessages
                         visible: room.unreadMessages > 0
                         padding: Kirigami.Units.smallSpacing
-                        color: room.unreadMention || room.unreadMentionDirect ? "white" : Kirigami.Theme.textColor
+                        color: room.unreadMention || room.unreadMentionDirect || room.unreadMessages > 0 && room.type === Room.OneToOne? "white" : Kirigami.Theme.textColor
                         Layout.minimumWidth: height
                         horizontalAlignment: Text.AlignHCenter
                         background: Rectangle {
                             Kirigami.Theme.colorSet: Kirigami.Theme.Button
-                            color: room.unreadMention || room.unreadMentionDirect ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.backgroundColor
+                            color: room.unreadMention || room.unreadMentionDirect || room.unreadMessages > 0 && room.type === Room.OneToOne ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.backgroundColor
                             radius: height / 2
                         }
                     }
