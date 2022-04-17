@@ -68,7 +68,7 @@ if(ANDROID)
     )
 else()
     find_package(Qt5 ${QT_MIN_VERSION} COMPONENTS Widgets)
-    find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS QQC2DesktopStyle ConfigWidgets KIO WindowSystem Sonnet)
+    find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS QQC2DesktopStyle ConfigWidgets KIO WindowSystem Sonnet Config)
     set_package_properties(KF5QQC2DesktopStyle PROPERTIES
         TYPE RUNTIME
     )
@@ -89,14 +89,8 @@ set_package_properties(KQuickImageEditor PROPERTIES
     PURPOSE "Add image editing capability to image attachments"
 )
 
-install(FILES org.kde.neochat.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-install(FILES org.kde.neochat.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
-install(FILES org.kde.neochat.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/scalable/apps)
-install(FILES org.kde.neochat-symbolic.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/16x16/apps RENAME org.kde.neochat.svg)
-install(FILES org.kde.neochat-symbolic.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/16x16@2/apps RENAME org.kde.neochat.svg)
-install(FILES org.kde.neochat-symbolic.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/16x16@3/apps RENAME org.kde.neochat.svg)
-install(FILES org.kde.neochat-symbolic.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/symbolic/apps)
-install(FILES neochat.notifyrc DESTINATION ${KNOTIFYRC_INSTALL_DIR})
+install(FILES org.nextcloud.talk.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES org.nextcloud.talk.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 
 # add_definitions(-DQT_NO_FOREACH) TODO cleanup old foreach
 

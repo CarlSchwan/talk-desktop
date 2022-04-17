@@ -17,7 +17,7 @@
 #include <iterator>
 #include <qdebug.h>
 
-https://cloud.nextcloud.com/ocs/v2.php/core/autocomplete/get?search=supp&itemType=call&itemId=new&shareTypes[]=0&shareTypes[]=1&shareTypes[]=7
+// https://cloud.nextcloud.com/ocs/v2.php/core/autocomplete/get?search=supp&itemType=call&itemId=new&shareTypes[]=0&shareTypes[]=1&shareTypes[]=7
 
 RoomListModel::RoomListModel(QObject *parent)
     : QAbstractListModel(parent)

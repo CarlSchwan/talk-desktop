@@ -7,7 +7,7 @@ add_executable(talk
     db.cpp
     discovery.cpp
     discoveryrun.cpp
-    kirigami-nextcloud-talk.cpp
+    main.cpp
     nextcloudaccount.cpp
     room.cpp
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  - SPDX-License-Identifier: CC0-1.0
+  - SPDX-FileCopyrightText: 2022 Tobias Fella <fella@posteo.de>
+ -->
+<component type="desktop">
+  <id>org.nextcloud.talk</id>
+  <provides>
+    <binary>nextcloud-talk</binary>
+  </provides>
+  <name>Nextcloud</name>
+  <summary>A client for Nextcloud Talk, a on-premises chat communication service.</summary>
+  <description>
+    <p>Nextcloud Talk is a fully on-premises audio/video and chat communication service. It features web and mobile apps and is designed to offer the highest degree of security while being easy to use.</p>
+  </description>
+  <url type="homepage">https://apps.kde.org/neochat/</url>
+  <url type="bugtracker">https://invent.kde.org/network/neochat/-/issues</url>
+  <categories>
+    <category>Network</category>
+  </categories>
+  <developer_name>>Carl Schwan</developer_name>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">moderate</content_attribute>
+    <content_attribute id="social-audio">moderate</content_attribute>
+  </content_rating>
+</component>

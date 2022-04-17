@@ -1,8 +1,7 @@
 [Desktop Entry]
 Type=Application
-X-Nemo-Application-Type=silica-qt5
-Icon=harbour-nextcloud-talk
-Exec=harbour-nextcloud-talk
+Icon=Nextcloud
+Exec=nextcloud-talk
 Name=Nextcloud Talk
 # translation example:
 # your app name in German locale (de)
