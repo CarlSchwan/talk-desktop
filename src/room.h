@@ -74,6 +74,8 @@ public:
     void updateFromJsonObject(const QJsonObject &obj);
     bool operator ==(const Room &toCompare) const;
 
+    Q_INVOKABLE void toggleFavorite();
+
     QString actorId() const;
     QString actorType() const;
     int attendeeId() const;
@@ -211,7 +213,7 @@ Q_SIGNALS:
     void unreadMessagesChanged();
 
 private:
-    const NextcloudAccount *m_account = nullptr;
+    NextcloudAccount *m_account = nullptr;
     QString m_actorId;
     QString m_actorType;
     int m_attendeeId;

@@ -12,7 +12,7 @@ class RoomListFilterModel : public QSortFilterProxyModel
 public:
     RoomListFilterModel(QObject *parent = nullptr);
 
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
     QString filterText() const;
     void setFilterText(const QString &filterText);
 

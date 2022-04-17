@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "room.h"
+#include "services/capabilities.h"
+#include <QJsonDocument>
 
 Room::Room(NextcloudAccount *account, const QJsonObject &obj)
     : QObject(account)
@@ -123,6 +125,18 @@ void Room::updateFromJsonObject(const QJsonObject &obj)
         setLastMessageTimestamp(lastMessage.value("timestamp").toVariant().toUInt());
         setLastMessageIsSystemMessage(lastMessage.value("systemMessage").toString() != "");
     }
+}
+
+void Room::toggleFavorite()
+{
+    QUrl endpoint = QUrl(m_account->host());
+    const QString apiV = QChar('v') + QString::number(m_account->capabilities()->getConversationApiLevel());
+    endpoint.setPath(endpoint.path() + QStringLiteral("/ocs/v2.php/apps/spreed/api/") + apiV + QStringLiteral("/room/") + m_token + QStringLiteral("/favorite"));
+    m_account->post(endpoint, QJsonDocument(), [this](QNetworkReply *reply) {
+        if (reply->error() == QNetworkReply::NoError) {
+            setIsFavorite(!m_isFavorite);
+        }
+    });
 }
 
 QString Room::actorId() const

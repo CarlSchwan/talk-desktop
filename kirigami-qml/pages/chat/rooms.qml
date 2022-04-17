@@ -191,6 +191,18 @@ Kirigami.ScrollablePage {
                     visible: Config.showAvatarInTimeline
                     sourceSize.width: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                     sourceSize.height: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
+
+                    Kirigami.Icon {
+                        source: 'starred-symbolic'
+                        visible: room.isFavorite
+                        color: '#f6f623'
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.rightMargin: -8
+                        anchors.topMargin: -8
+                        width: 22
+                        height: 22
+                    }
                 }
 
                 trailing: RowLayout {

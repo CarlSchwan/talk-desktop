@@ -32,6 +32,17 @@ void RoomListFilterModel::setFilterText(const QString &filterText)
 
 bool RoomListFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
+    auto leftRoom = sourceModel()->data(left, RoomListModel::RoomRole).value<Room *>();
+    auto rightRoom = sourceModel()->data(right, RoomListModel::RoomRole).value<Room *>();
+
+    if (leftRoom->isFavorite() && !rightRoom->isFavorite()) {
+        return true;
+    }
+
+    if (rightRoom->isFavorite() && !leftRoom->isFavorite()) {
+        return false;
+    }
+
     return sourceModel()->data(left, RoomListModel::LastMessageTimestampRole).toInt()
         > sourceModel()->data(right, RoomListModel::LastMessageTimestampRole).toInt();
 }
