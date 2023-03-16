@@ -48,7 +48,7 @@ target_sources(talk PRIVATE ${NEOCHAT_ICON})
 
 if(NOT ANDROID)
     target_sources(talk PRIVATE desktop/colorschemer.cpp)
-    target_link_libraries(talk PRIVATE KF5::ConfigWidgets KF5::WindowSystem KF5::SonnetCore)
+    target_link_libraries(talk PRIVATE KF5::ConfigWidgets KF5::WindowSystem )
     target_compile_definitions(talk PRIVATE -DHAVE_COLORSCHEME)
     target_compile_definitions(talk PRIVATE -DHAVE_WINDOWSYSTEM)
 endif()
